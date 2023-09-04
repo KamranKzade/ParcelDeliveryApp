@@ -1,10 +1,10 @@
 ﻿using SharedLibrary.Dtos;
 using AuthServer.API.Mapper;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
 using AuthServer.API.Services.Abstract;
 using AuthServer.API.Repository.Abstract;
 using AuthServer.API.UnitOfWork.Abstract;
-using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.API.Services.Concrete;
 
