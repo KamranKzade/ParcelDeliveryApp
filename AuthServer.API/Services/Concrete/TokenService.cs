@@ -1,14 +1,14 @@
-﻿using AuthServer.API.Configurations;
-using AuthServer.API.Dtos;
+﻿using AuthServer.API.Dtos;
 using AuthServer.API.Models;
-using AuthServer.API.Services.Abstract;
+using System.Security.Claims;
+using SharedLibrary.Services;
+using SharedLibrary.Configuration;
+using System.Security.Cryptography;
+using AuthServer.API.Configurations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using SharedLibrary.Configuration;
-using SharedLibrary.Services;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
+using AuthServer.API.Services.Abstract;
 
 namespace AuthServer.API.Services.Concrete;
 
