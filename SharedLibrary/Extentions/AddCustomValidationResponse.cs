@@ -1,0 +1,29 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using SharedLibrary.Dtos;
+
+namespace SharedLibrary.Extentions;
+
+public static class AddCustomValidationResponse
+{
+	public static void UseCustomValidationResponse(this IServiceCollection services)
+	{
+		services.Configure<ApiBehaviorOptions>(opts =>
+		{
+			opts.InvalidModelStateResponseFactory = context =>
+			{
+				var errors = context.ModelState.Values.Where(x => x.Errors.Count > 0)
+													  .SelectMany(x => x.Errors)
+													  .Select(x => x.ErrorMessage)
+													  .ToList();
+
+
+				ErrorDto errorDto = new ErrorDto(errors, true);
+
+				var response = Response<NoContentResult>.Fail(errorDto, 400);
+
+				return new BadRequestObjectResult(response);
+			};
+		});
+	}
+}

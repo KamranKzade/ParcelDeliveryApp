@@ -1,9 +1,10 @@
 ﻿using AuthServer.API.Models;
 using Microsoft.EntityFrameworkCore;
+using AuthServer.API.UnitOfWork.Abstract;
 
 namespace AuthServer.API.UnitOfWork.Concrete;
 
-public class UnitOfWork
+public class UnitOfWork :IUnitOfWork
 {
 	private readonly DbContext _dbContext;
 

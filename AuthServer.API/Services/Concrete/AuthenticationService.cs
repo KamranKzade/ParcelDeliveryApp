@@ -7,20 +7,22 @@ using Microsoft.AspNetCore.Identity;
 using AuthServer.API.Services.Abstract;
 using AuthServer.API.UnitOfWork.Abstract;
 using AuthServer.API.Repository.Abstract;
+using Microsoft.Extensions.Options;
 
 namespace AuthServer.API.Services.Concrete;
 
 public class AuthenticationService : IAuthenticationService
 {
-	private readonly List<Client> _clients;
+	private readonly List<Client> _client;
 	private readonly ITokenService _tokenService;
 	private readonly UserManager<UserApp> _userManager;
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IGenericRepository<UserRefleshToken> _userRefleshTokenService;
 
-	public AuthenticationService(List<Client> clients, ITokenService tokenService, UserManager<UserApp> userManager, IUnitOfWork unitOfWork, IGenericRepository<UserRefleshToken> userRefleshTokenService)
+	public AuthenticationService(IOptions<List<Client>> client, ITokenService tokenService, UserManager<UserApp> userManager,
+		IUnitOfWork unitOfWork, IGenericRepository<UserRefleshToken> userRefleshTokenService)
 	{
-		_clients = clients;
+		_client = client.Value;
 		_tokenService = tokenService;
 		_userManager = userManager;
 		_unitOfWork = unitOfWork;
@@ -73,7 +75,7 @@ public class AuthenticationService : IAuthenticationService
 
 	public Response<ClientTokenDto> CreateTokenByClientAsync(ClientLogInDto clientLogInDto)
 	{
-		var client = _clients.SingleOrDefault(x => x.Id == clientLogInDto.ClientId && x.Secret == clientLogInDto.ClientSecret);
+		var client = _client.SingleOrDefault(x => x.Id == clientLogInDto.ClientId && x.Secret == clientLogInDto.ClientSecret);
 
 		if (client == null)
 		{

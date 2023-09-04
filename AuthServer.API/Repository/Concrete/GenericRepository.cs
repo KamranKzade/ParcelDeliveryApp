@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using AuthServer.API.Models;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using AuthServer.API.Repository.Abstract;
 
@@ -9,11 +10,12 @@ public class GenericRepository<Tentity> : IGenericRepository<Tentity> where Tent
 	private readonly DbContext _dbContext;
 	private readonly DbSet<Tentity> _dbSet;
 
-	public GenericRepository(DbContext dbContext, DbSet<Tentity> dbSet)
+	public GenericRepository(AppDbContext dbContext)
 	{
 		_dbContext = dbContext;
-		_dbSet = dbSet;
+		_dbSet = _dbContext.Set<Tentity>();
 	}
+
 
 	public async Task AddAsync(Tentity entity)
 	{
@@ -33,7 +35,7 @@ public class GenericRepository<Tentity> : IGenericRepository<Tentity> where Tent
 		{
 			_dbContext.Entry(entity).State = EntityState.Detached;
 		}
-		return entity!;
+		return entity;
 	}
 
 	public void Remove(Tentity entity)
@@ -43,7 +45,7 @@ public class GenericRepository<Tentity> : IGenericRepository<Tentity> where Tent
 
 	public Tentity UpdateAsync(Tentity entity)
 	{
-		_dbContext.Entry(entity).State=EntityState.Modified;
+		_dbContext.Entry(entity).State = EntityState.Modified;
 		return entity;
 	}
 

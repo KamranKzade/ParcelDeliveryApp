@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using AuthServer.API.Services.Abstract;
+using Microsoft.Extensions.Options;
 
 namespace AuthServer.API.Services.Concrete;
 
@@ -17,11 +18,12 @@ public class TokenService : ITokenService
 	private readonly UserManager<UserApp> _userManager;
 	private readonly CustomTokenOption _tokenOption;
 
-	public TokenService(UserManager<UserApp> userManager, CustomTokenOption customTokenOption)
+	public TokenService(UserManager<UserApp> userManager, IOptions<CustomTokenOption> options)
 	{
 		_userManager = userManager;
-		_tokenOption = customTokenOption;
+		_tokenOption = options.Value;
 	}
+
 
 	// Reflesh Token yaradiriq
 	private string CreateRefleshToken()
