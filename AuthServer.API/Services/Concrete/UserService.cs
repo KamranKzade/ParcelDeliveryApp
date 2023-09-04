@@ -25,6 +25,11 @@ public class UserService : IUserService
 		{
 			Email = createUserDto.Email,
 			UserName = createUserDto.UserName,
+			Name = createUserDto.Name,
+			Surname = createUserDto.FirstName,
+			Address = createUserDto.Address,
+			PostalCode = createUserDto.PostalCode,
+			Birhtdate = Convert.ToDateTime(createUserDto.Birhtdate),
 		};
 
 		var result = await _userManager.CreateAsync(user, createUserDto.Password);

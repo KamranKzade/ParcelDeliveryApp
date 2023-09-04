@@ -50,7 +50,7 @@ public class TokenService : ITokenService
 			new Claim(JwtRegisteredClaimNames.Email, userApp.Email),
 			new Claim(ClaimTypes.Name, userApp.UserName),
 			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-			new Claim("Address", userApp.Address!),
+			new Claim("Address", userApp.Address),
 			new Claim("birth-date", userApp.Birhtdate.ToShortDateString()),
 		};
 		userList.AddRange(audiences.Select(x => new Claim(JwtRegisteredClaimNames.Aud, x)));

@@ -34,8 +34,6 @@ namespace SharedLibrary.Extentions
 
 					ClockSkew = TimeSpan.Zero // Tokene bir omur verdikde, elave olaraq 5 deyqe vaxt verir, biz burda elave vaxt vermirik ( 0 edirik )
 				};
-
-
 			});
 
 		}
