@@ -1,6 +1,6 @@
 ﻿using AuthServer.API.Dtos;
 using AuthServer.API.Models;
-using AuthServer.API.Configuration;
+using AuthServer.API.Configurations;
 
 namespace AuthServer.API.Services.Abstract;
 
