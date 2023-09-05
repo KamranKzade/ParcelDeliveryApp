@@ -54,17 +54,17 @@ builder.Services.UseCustomValidationResponse();
 var app = builder.Build();
 
 // // Configure the HTTP request pipeline.
- if (app.Environment.IsDevelopment())
- {
- 	app.UseDeveloperExceptionPage();
- 	app.UseSwagger();
- 	app.UseSwaggerUI();
- }
+// if (app.Environment.IsDevelopment())
+// {
+// 	app.UseDeveloperExceptionPage();
+// 	app.UseSwagger();
+// 	app.UseSwaggerUI();
+// }
+//
 
-
-//// Productionda da gorunmeyin isteyirikse swaggerin bele yazmaliyiq
-// app.UseSwagger();
-// app.UseSwaggerUI();
+// Productionda da gorunmeyin isteyirikse swaggerin bele yazmaliyiq
+ app.UseSwagger();
+ app.UseSwaggerUI();
 
 
 app.UseHttpsRedirection();
