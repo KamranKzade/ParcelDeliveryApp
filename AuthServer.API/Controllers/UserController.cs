@@ -29,9 +29,15 @@ public class UserController : CustomBaseController
 		return ActionResultInstance(await _userService.GetUserByNameAsync(HttpContext.User.Identity!.Name!));
 	}
 
-	[HttpPost("CreateUserRoles/{userName}")]
-	public async Task<IActionResult> CreateUserRoles(string userName)
+	[HttpPost("CreateUserRolesForAdmin/{userName}")]
+	public async Task<IActionResult> CreateUserRolesForAdmin(string userName)
 	{
-		return ActionResultInstance(await _userService.CreateUserRoles(userName));
+		return ActionResultInstance(await _userService.CreateUserRolesForAdminAsync(userName));
+	}
+
+	[HttpPost("CreateUserRolesForUser/{userName}")]
+	public async Task<IActionResult> CreateUserRolesForUser(string userName)
+	{
+		return ActionResultInstance(await _userService.CreateUserRolesForUserAsync(userName));
 	}
 }

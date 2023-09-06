@@ -45,16 +45,31 @@ public class UserService : IUserService
 
 
 	// Usere admin rolunun elave edilmesi
-	public async Task<Response<NoDataDto>> CreateUserRoles(string username)
+	public async Task<Response<NoDataDto>> CreateUserRolesForAdminAsync(string username)
 	{
-		if (!await _roleManager.RoleExistsAsync("admin"))
+		if (!await _roleManager.RoleExistsAsync("Admin"))
 		{
 			await _roleManager.CreateAsync(new IdentityRole { Name = "Admin" });
 		}
 
 		var user = await _userManager.FindByNameAsync(username);
 
-		await _userManager.AddToRoleAsync(user, "admin");
+		await _userManager.AddToRoleAsync(user, "Admin");
+
+		return Response<NoDataDto>.Success(StatusCodes.Status201Created);
+	}
+
+	// Usere user rolunun elave edilmesi
+	public async Task<Response<NoDataDto>> CreateUserRolesForUserAsync(string username)
+	{
+		if (!await _roleManager.RoleExistsAsync("User"))
+		{
+			await _roleManager.CreateAsync(new IdentityRole { Name = "User" });
+		}
+
+		var user = await _userManager.FindByNameAsync(username);
+
+		await _userManager.AddToRoleAsync(user, "User");
 
 		return Response<NoDataDto>.Success(StatusCodes.Status201Created);
 	}
