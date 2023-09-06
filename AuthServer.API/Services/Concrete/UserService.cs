@@ -43,37 +43,6 @@ public class UserService : IUserService
 		return Response<UserAppDto>.Success(ObjectMapper.Mapper.Map<UserAppDto>(user), StatusCodes.Status200OK);
 	}
 
-
-	// Usere admin rolunun elave edilmesi
-	public async Task<Response<NoDataDto>> CreateUserRolesForAdminAsync(string username)
-	{
-		if (!await _roleManager.RoleExistsAsync("Admin"))
-		{
-			await _roleManager.CreateAsync(new IdentityRole { Name = "Admin" });
-		}
-
-		var user = await _userManager.FindByNameAsync(username);
-
-		await _userManager.AddToRoleAsync(user, "Admin");
-
-		return Response<NoDataDto>.Success(StatusCodes.Status201Created);
-	}
-
-	// Usere user rolunun elave edilmesi
-	public async Task<Response<NoDataDto>> CreateUserRolesForUserAsync(string username)
-	{
-		if (!await _roleManager.RoleExistsAsync("User"))
-		{
-			await _roleManager.CreateAsync(new IdentityRole { Name = "User" });
-		}
-
-		var user = await _userManager.FindByNameAsync(username);
-
-		await _userManager.AddToRoleAsync(user, "User");
-
-		return Response<NoDataDto>.Success(StatusCodes.Status201Created);
-	}
-
 	public async Task<Response<UserAppDto>> GetUserByNameAsync(string userName)
 	{
 		var user = await _userManager.FindByNameAsync(userName);
@@ -85,4 +54,24 @@ public class UserService : IUserService
 
 		return Response<UserAppDto>.Success(ObjectMapper.Mapper.Map<UserAppDto>(user), StatusCodes.Status200OK);
 	}
+
+	public async Task<Response<NoDataDto>> CreateUserRoles(CreateUserRoleDto dto)
+	{
+		if (!await _roleManager.RoleExistsAsync(dto.RoleName))
+		{
+			await _roleManager.CreateAsync(new IdentityRole { Name = dto.RoleName });
+		}
+
+		var user = await _userManager.FindByNameAsync(dto.UserName);
+
+		if(user == null)
+		{
+			return Response<NoDataDto>.Fail("UserName not found", StatusCodes.Status404NotFound, true);
+		}
+
+		await _userManager.AddToRoleAsync(user, dto.RoleName);
+
+		return Response<NoDataDto>.Success(StatusCodes.Status201Created);
+	}
+
 }
