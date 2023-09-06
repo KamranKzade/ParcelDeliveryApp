@@ -4,10 +4,10 @@ using AuthServer.API.Models;
 using AuthServer.API.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using AuthServer.API.Services.Abstract;
 using AuthServer.API.UnitOfWork.Abstract;
 using AuthServer.API.Repository.Abstract;
-using Microsoft.Extensions.Options;
 
 namespace AuthServer.API.Services.Concrete;
 
