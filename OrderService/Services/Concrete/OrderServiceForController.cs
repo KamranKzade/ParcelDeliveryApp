@@ -108,22 +108,33 @@ public class OrderServiceForController : IOrderService
 
 	public async Task<Response<OrderDto>> UpdateAddressAsync(string userId, string orderName, string address)
 	{
-		var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.UserId == userId && o.Name == orderName);
-
-		if (order == null)
+		try
 		{
-			return Response<OrderDto>.Fail("Bu username'e uygun order bulunamadı", StatusCodes.Status204NoContent, true);
-		}
+			var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.UserId == userId && o.Name == orderName);
 
-		if (order.Status != OrderStatus.Initial)
+			if (order == null)
+			{
+				return Response<OrderDto>.Fail("Belirtilen sipariş bulunamadı veya kullanıcıya ait değil", StatusCodes.Status404NotFound, true);
+			}
+
+			if (order.Status != OrderStatus.Initial)
+			{
+				return Response<OrderDto>.Fail("Siparişin adresi yalnızca başlangıç ​​durumundayken güncellenebilir", StatusCodes.Status400BadRequest, true);
+			}
+
+			order.DestinationAddress = address;
+
+			var updateEntity = ObjectMapper.Mapper.Map<OrderDto>(order);
+
+			_genericRepository.UpdateAsync(order); 
+			await _unitOfWork.CommitAsync();
+
+			return Response<OrderDto>.Success(updateEntity, StatusCodes.Status200OK);
+		}
+		catch (Exception ex)
 		{
-			return Response<OrderDto>.Fail("Bu username'e uygun order bulunamadı", StatusCodes.Status204NoContent, true);
+			// Hata yakalama ve uygun bir hata mesajı döndürme
+			return Response<OrderDto>.Fail($"Sipariş güncellenirken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
-		order.DestinationAddress = address;
-
-
-		await _unitOfWork.CommitAsync();
-
-		return Response<OrderDto>.Success(ObjectMapper.Mapper.Map<OrderDto>(order), StatusCodes.Status200OK);
 	}
 }

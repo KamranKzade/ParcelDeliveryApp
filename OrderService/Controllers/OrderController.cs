@@ -52,14 +52,15 @@ public class OrderController : CustomBaseController
 
 	[Authorize(Roles = "User")]
 	[HttpPost("UpdateAddress")]
-	public async Task<IActionResult> UpdateAddress(string orderName, string address)
+	// RabbitMq ile elaqe yaratmaq qalibdi
+	public async Task<IActionResult> UpdateAddress(UpdateOrderDto dto)
 	{
 		var userName = HttpContext.User.Identity.Name;
 		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
 		var addressOld = User.Claims.FirstOrDefault(x => x.Type == "Address");
 
 
-        return Ok();
+        return ActionResultInstance(await _orderService.UpdateAddressAsync(userId.Value, dto.orderName, dto.address));
 	}
 
 }

@@ -38,7 +38,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 		return Response<IEnumerable<TDto>>.Success(product, StatusCodes.Status200OK);
 	}
 
-	public async Task<Response<TDto>> GetByIdAsync(int id)
+	public async Task<Response<TDto>> GetByIdAsync(string id)
 	{
 		var product = await _genericRepo.GetByIdAsync(id);
 
@@ -50,7 +50,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 		return Response<TDto>.Success(ObjectMapper.Mapper.Map<TDto>(product), StatusCodes.Status200OK);
 	}
 
-	public async Task<Response<NoDataDto>> RemoveAsync(int id)
+	public async Task<Response<NoDataDto>> RemoveAsync(string id)
 	{
 		var isExistEntity = await _genericRepo.GetByIdAsync(id);
 
@@ -68,7 +68,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 		return Response<NoDataDto>.Success(StatusCodes.Status204NoContent);
 	}
 
-	public async Task<Response<NoDataDto>> UpdateAsync(TDto entity, int id)
+	public async Task<Response<NoDataDto>> UpdateAsync(TDto entity, string id)
 	{
 		var isExistEntity = await _genericRepo.GetByIdAsync(id);
 
