@@ -1,7 +1,7 @@
-﻿using OrderService.Dtos;
+﻿using OrderService.API.Dtos;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
-using OrderService.Services.Abstract;
+using OrderService.API.Services.Abstract;
 using Microsoft.AspNetCore.Authorization;
 
 namespace OrderService.Controllers;

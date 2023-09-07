@@ -1,9 +1,9 @@
-﻿using OrderService.Models;
+﻿using OrderService.API.Models;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using OrderService.Repositories.Abstract;
+using OrderService.API.Repositories.Abstract;
 
-namespace OrderService.Repositories.Concrete;
+namespace OrderService.API.Repositories.Concrete;
 
 public class GenericRepository<Tentity> : IGenericRepository<Tentity> where Tentity : class
 {

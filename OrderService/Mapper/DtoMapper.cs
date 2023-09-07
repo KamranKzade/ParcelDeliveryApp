@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using OrderService.Dtos;
-using OrderService.Models;
+using OrderService.API.Models;
+using OrderService.API.Dtos;
 
-namespace OrderService.Mapper;
+namespace OrderService.API.Mapper;
 
 public class DtoMapper : Profile
 {

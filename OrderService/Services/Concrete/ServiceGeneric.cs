@@ -1,12 +1,12 @@
 ﻿using SharedLibrary.Dtos;
-using OrderService.Mapper;
+using OrderService.API.Mapper;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using OrderService.Services.Abstract;
-using OrderService.UnitOfWork.Abstract;
-using OrderService.Repositories.Abstract;
+using OrderService.API.UnitOfWork.Abstract;
+using OrderService.API.Services.Abstract;
+using OrderService.API.Repositories.Abstract;
 
-namespace OrderService.Services.Concrete;
+namespace OrderService.API.Services.Concrete;
 
 public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> where TDto : class where TEntity : class
 {

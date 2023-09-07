@@ -1,4 +1,4 @@
-﻿namespace OrderService.Dtos;
+﻿namespace OrderService.API.Dtos;
 
 public class CreateOrderDto
 {

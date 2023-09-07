@@ -1,7 +1,7 @@
 ﻿using SharedLibrary.Dtos;
 using System.Linq.Expressions;
 
-namespace OrderService.Services.Abstract;
+namespace OrderService.API.Services.Abstract;
 
 public interface IServiceGeneric<TEntity, TDto> where TEntity : class where TDto : class
 {

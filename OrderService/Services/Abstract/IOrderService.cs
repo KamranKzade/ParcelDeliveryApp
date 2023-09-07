@@ -1,8 +1,8 @@
-﻿using OrderService.Dtos;
-using OrderService.Models;
-using SharedLibrary.Dtos;
+﻿using SharedLibrary.Dtos;
+using OrderService.API.Dtos;
+using OrderService.API.Models;
 
-namespace OrderService.Services.Abstract;
+namespace OrderService.API.Services.Abstract;
 
 public interface IOrderService
 {

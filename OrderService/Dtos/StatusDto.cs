@@ -1,6 +1,6 @@
-﻿using OrderService.Models.Enum;
+﻿using OrderService.API.Models.Enum;
 
-namespace OrderService.Dtos;
+namespace OrderService.API.Dtos;
 
 public class StatusDto
 {

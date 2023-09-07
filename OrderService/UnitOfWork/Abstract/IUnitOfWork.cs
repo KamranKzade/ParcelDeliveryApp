@@ -1,4 +1,4 @@
-﻿namespace OrderService.UnitOfWork.Abstract;
+﻿namespace OrderService.API.UnitOfWork.Abstract;
 
 public interface IUnitOfWork
 {

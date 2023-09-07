@@ -1,12 +1,12 @@
-﻿using OrderService.Dtos;
-using SharedLibrary.Dtos;
-using OrderService.Models;
-using OrderService.Models.Enum;
-using OrderService.Services.Abstract;
-using OrderService.UnitOfWork.Abstract;
-using OrderService.Repositories.Abstract;
+﻿using SharedLibrary.Dtos;
+using OrderService.API.Dtos;
+using OrderService.API.Models;
+using OrderService.API.Models.Enum;
+using OrderService.API.UnitOfWork.Abstract;
+using OrderService.API.Services.Abstract;
+using OrderService.API.Repositories.Abstract;
 
-namespace OrderService.Services.Concrete;
+namespace OrderService.API.Services.Concrete;
 
 public class OrderServiceForController : IOrderService
 {

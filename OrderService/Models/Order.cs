@@ -1,6 +1,6 @@
-﻿using OrderService.Models.Enum;
+﻿using OrderService.API.Models.Enum;
 
-namespace OrderService.Models;
+namespace OrderService.API.Models;
 
 public class Order
 {

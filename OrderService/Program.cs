@@ -1,13 +1,13 @@
-using OrderService.Models;
+using OrderService.API.Models;
 using SharedLibrary.Extentions;
 using SharedLibrary.Configuration;
 using Microsoft.EntityFrameworkCore;
-using OrderService.Services.Abstract;
-using OrderService.Services.Concrete;
-using OrderService.UnitOfWork.Abstract;
-using OrderService.UnitOfWork.Concrete;
-using OrderService.Repositories.Concrete;
-using OrderService.Repositories.Abstract;
+using OrderService.API.Services.Abstract;
+using OrderService.API.Services.Concrete;
+using OrderService.API.UnitOfWork.Abstract;
+using OrderService.API.UnitOfWork.Concrete;
+using OrderService.API.Repositories.Concrete;
+using OrderService.API.Repositories.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 

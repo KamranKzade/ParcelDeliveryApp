@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace OrderService.Models;
+namespace OrderService.API.Models;
 
 public class AppDbContext : DbContext
 {
