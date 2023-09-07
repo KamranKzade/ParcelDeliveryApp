@@ -4,7 +4,6 @@ namespace OrderService.API.Dtos;
 
 public class OrderDto
 {
-
 	public Guid Id { get; set; }
 	public string Name { get; set; }
 
@@ -19,7 +18,6 @@ public class OrderDto
 	public string UserId { get; set; }
 	public string UserName { get; set; }
 
-	public string? CourierId { get; set; } 
-	public string? CourierName { get; set; } 
-
+	public string? CourierId { get; set; }
+	public string? CourierName { get; set; }
 }

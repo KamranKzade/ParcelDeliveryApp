@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using OrderService.API.UnitOfWork.Abstract;
 using OrderService.API.Services.Abstract;
 using OrderService.API.Repositories.Abstract;
+using OrderService.API.Models.Enum;
+using OrderService.API.Models;
 
 namespace OrderService.API.Services.Concrete;
 

@@ -1,27 +1,28 @@
 ﻿using SharedLibrary.Dtos;
 using OrderService.API.Dtos;
 using OrderService.API.Models;
-using OrderService.API.Models.Enum;
-using OrderService.API.UnitOfWork.Abstract;
-using OrderService.API.Services.Abstract;
-using OrderService.API.Repositories.Abstract;
-using Microsoft.EntityFrameworkCore;
-using System.Runtime.Serialization;
 using OrderService.API.Mapper;
+using OrderService.API.Models.Enum;
+using Microsoft.EntityFrameworkCore;
+using OrderService.API.Services.Abstract;
+using OrderService.API.UnitOfWork.Abstract;
+using OrderService.API.Repositories.Abstract;
 
 namespace OrderService.API.Services.Concrete;
 
 public class OrderServiceForController : IOrderService
 {
 	private readonly AppDbContext _dbContext;
+	private readonly IServiceGeneric<Order, OrderDto> _serviceGeneric;
 	private readonly IGenericRepository<Order> _genericRepository;
 	private readonly IUnitOfWork _unitOfWork;
 
-	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<Order> genericRepository, IUnitOfWork unitOfWork)
+	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<Order> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<Order, OrderDto> serviceGeneric)
 	{
 		_dbContext = dbContext;
 		_genericRepository = genericRepository;
 		_unitOfWork = unitOfWork;
+		_serviceGeneric = serviceGeneric;
 	}
 
 	public Task<Response<OrderDto>> ChangeStatusOrder(OrderDto orderDto)
@@ -31,25 +32,36 @@ public class OrderServiceForController : IOrderService
 
 	public async Task<Response<OrderDto>> CreateOrderAsync(CreateOrderDto dto, string userName, string userId, string address)
 	{
-		if (dto == null) throw new ArgumentNullException(nameof(dto));
+		if (dto == null) return Response<OrderDto>.Fail("Geçersiz istek verisi", StatusCodes.Status400BadRequest, true);
 
-		var order = new Order()
+		try
 		{
-			Id = Guid.NewGuid(),
-			Name = dto.Name,
-			CreatedDate = DateTime.Now,
-			TotalAmount = dto.TotalAmount,
-			Status = OrderStatus.Initial,
-			UserId = userId,
-			UserName = userName,
-			DestinationAddress = address
-		};
+			var order = new OrderDto()
+			{
+				Id = Guid.NewGuid(),
+				Name = dto.Name,
+				CreatedDate = DateTime.Now,
+				TotalAmount = dto.TotalAmount,
+				Status = OrderStatus.Initial,
+				UserId = userId,
+				UserName = userName,
+				DestinationAddress = address
+			};
 
+			var result = await _serviceGeneric.AddAsync(order);
 
-		await _dbContext.AddAsync(order);
-		await _unitOfWork.CommitAsync();
+			if (result == null)
+			{
+				return Response<OrderDto>.Fail("Sipariş oluşturulurken bir hata oluştu", StatusCodes.Status500InternalServerError, true);
+			}
+			return Response<OrderDto>.Success(order, StatusCodes.Status201Created);
 
-		return Response<OrderDto>.Success(ObjectMapper.Mapper.Map<OrderDto>(order), StatusCodes.Status201Created);
+		}
+		catch (Exception ex)
+		{
+			return Response<OrderDto>.Fail($"Bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+
+		}
 	}
 
 	public Task<Response<NoDataDto>> DeleteOrderAsync(string orderId)
@@ -70,6 +82,7 @@ public class OrderServiceForController : IOrderService
 		{
 			return Response<IQueryable<OrderDto>>.Fail("Bu username'e uygun veri bulunamadı", StatusCodes.Status204NoContent, true);
 		}
+
 
 		var orderDtos = orders.Select(o => new OrderDto
 		{
@@ -92,8 +105,24 @@ public class OrderServiceForController : IOrderService
 		return Response<IQueryable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
 	}
 
-	public Task<Response<OrderDto>> UpdateAddressAsync(string address)
+	public async Task<Response<OrderDto>> UpdateAddressAsync(string userId, string orderName, string address)
 	{
-		throw new NotImplementedException();
+		var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.UserId == userId && o.Name == orderName);
+
+		if (order == null)
+		{
+			return Response<OrderDto>.Fail("Bu username'e uygun order bulunamadı", StatusCodes.Status204NoContent, true);
+		}
+
+		if (order.Status != OrderStatus.Initial)
+		{
+			return Response<OrderDto>.Fail("Bu username'e uygun order bulunamadı", StatusCodes.Status204NoContent, true);
+		}
+		order.DestinationAddress = address;
+
+
+		await _unitOfWork.CommitAsync();
+
+		return Response<OrderDto>.Success(ObjectMapper.Mapper.Map<OrderDto>(order), StatusCodes.Status200OK);
 	}
 }

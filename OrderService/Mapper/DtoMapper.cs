@@ -9,5 +9,6 @@ public class DtoMapper : Profile
 	public DtoMapper()
 	{
 		CreateMap<OrderDto, Order>().ReverseMap();
+		CreateMap<CreateOrderDto, OrderDto>().ReverseMap();
 	}
 }

@@ -29,7 +29,7 @@ public class OrderController : CustomBaseController
 	// 	return Ok($"Stock islemleri ==> Username: {userName} -- UserId:{userId.Value} -- BirthDate:{birthDate}");
 	// }
 
-	[Authorize(Roles = "user")]
+	[Authorize(Roles = "User")]
 	[HttpPost]
 	public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
 	{
@@ -40,13 +40,26 @@ public class OrderController : CustomBaseController
 		return ActionResultInstance(await _orderService.CreateOrderAsync(dto, userName, userId.Value, address.Value));
 	}
 
-	[Authorize(Roles = "user")]
-	[HttpGet("GetOrderAsyncForUser")]
-	public async Task<IActionResult> GetOrderAsyncForUser()
+	[Authorize(Roles = "User")]
+	[HttpGet("GetOrderForUser")]
+	public async Task<IActionResult> GetOrderForUser()
 	{
 		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
 
 		return ActionResultInstance(await _orderService.GetOrderAsyncForUser(userId.Value));
+	}
+
+
+	[Authorize(Roles = "User")]
+	[HttpPost("UpdateAddress")]
+	public async Task<IActionResult> UpdateAddress(string orderName, string address)
+	{
+		var userName = HttpContext.User.Identity.Name;
+		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+		var addressOld = User.Claims.FirstOrDefault(x => x.Type == "Address");
+
+
+        return Ok();
 	}
 
 }
