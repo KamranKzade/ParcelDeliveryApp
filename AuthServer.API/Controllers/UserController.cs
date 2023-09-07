@@ -22,6 +22,16 @@ public class UserController : CustomBaseController
 		return ActionResultInstance(await _userService.CreateUserAsync(createUserDto));
 	}
 
+
+	[Authorize(Roles ="Admin")]
+	[HttpPost("CreateCourier")]
+	public async Task<IActionResult> CreateCourier(CreateUserDto createUserDto)
+	{
+		return ActionResultInstance(await _userService.CreateCourierAsync(createUserDto));
+	}
+
+
+
 	[HttpGet]
 	[Authorize]
 	public async Task<IActionResult> GetUser()

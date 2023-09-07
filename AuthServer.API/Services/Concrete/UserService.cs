@@ -74,4 +74,35 @@ public class UserService : IUserService
 		return Response<NoDataDto>.Success(StatusCodes.Status201Created);
 	}
 
+	public async Task<Response<UserAppDto>> CreateCourierAsync(CreateUserDto createUserDto)
+	{
+		var user = new UserApp
+		{
+			Email = createUserDto.Email,
+			UserName = createUserDto.UserName,
+			Name = createUserDto.Name,
+			Surname = createUserDto.FirstName,
+			Address = createUserDto.Address,
+			PostalCode = createUserDto.PostalCode,
+			Birhtdate = Convert.ToDateTime(createUserDto.Birhtdate),
+		};
+
+		var result = await _userManager.CreateAsync(user, createUserDto.Password);
+
+		if (!result.Succeeded)
+		{
+			var errors = result.Errors.Select(x => x.Description).ToList();
+
+			return Response<UserAppDto>.Fail(new ErrorDto(errors, true), StatusCodes.Status400BadRequest);
+		}
+
+		if (!await _roleManager.RoleExistsAsync("Courier"))
+		{
+			await _roleManager.CreateAsync(new IdentityRole { Name = "Courier" });
+		}
+
+		await _userManager.AddToRoleAsync(user, "Courier");
+
+		return Response<UserAppDto>.Success(ObjectMapper.Mapper.Map<UserAppDto>(user), StatusCodes.Status200OK);
+	}
 }
