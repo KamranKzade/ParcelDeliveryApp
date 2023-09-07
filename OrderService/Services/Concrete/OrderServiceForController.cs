@@ -74,35 +74,36 @@ public class OrderServiceForController : IOrderService
 		throw new NotImplementedException();
 	}
 
-	public async Task<Response<IQueryable<OrderDto>>> GetOrderAsyncForUser(string userId)
+	public async Task<Response<IEnumerable<OrderDto>>> GetOrderAsyncForUser(string userId)
 	{
-		var orders = await _dbContext.Orders.Where(o => o.UserId == userId).ToListAsync();
-
-		if (orders.Count == 0)
+		try
 		{
-			return Response<IQueryable<OrderDto>>.Fail("Bu username'e uygun veri bulunamadı", StatusCodes.Status204NoContent, true);
+			var orders = await _dbContext.Orders.Where(o => o.UserId == userId).ToListAsync();
+
+			if (orders.Count == 0)
+				return Response<IEnumerable<OrderDto>>.Fail("Bu username'e uygun veri bulunamadı", StatusCodes.Status204NoContent, true);
+
+			var orderDtos = orders.Select(o => new OrderDto
+			{
+				Id = o.Id,
+				Name = o.Name,
+
+				Status = o.Status,
+				CreatedDate = o.CreatedDate,
+				DestinationAddress = o.DestinationAddress,
+				TotalAmount = o.TotalAmount,
+				UserId = o.UserId,
+				UserName = o.UserName,
+				CourierId = o.CourierId,
+				CourierName = o.CourierName
+			}).AsQueryable();
+
+			return Response<IEnumerable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
 		}
-
-
-		var orderDtos = orders.Select(o => new OrderDto
+		catch (Exception ex)
 		{
-			Id = o.Id,
-			Name = o.Name,
-
-			Status = o.Status,
-			CreatedDate = o.CreatedDate,
-			DestinationAddress = o.DestinationAddress,
-			TotalAmount = o.TotalAmount,
-			UserId = o.UserId,
-			UserName = o.UserName,
-			CourierId = o.CourierId,
-			CourierName = o.CourierName
-
-			// ObjectMapper.Mapper.Map<OrderDto>(o)
-
-		}).AsQueryable();
-
-		return Response<IQueryable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
+			return Response<IEnumerable<OrderDto>>.Fail($"Siparişleri alırken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+		}
 	}
 
 	public async Task<Response<OrderDto>> UpdateAddressAsync(string userId, string orderName, string address)
