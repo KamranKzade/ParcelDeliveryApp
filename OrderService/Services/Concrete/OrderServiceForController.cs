@@ -5,6 +5,9 @@ using OrderService.API.Models.Enum;
 using OrderService.API.UnitOfWork.Abstract;
 using OrderService.API.Services.Abstract;
 using OrderService.API.Repositories.Abstract;
+using Microsoft.EntityFrameworkCore;
+using System.Runtime.Serialization;
+using OrderService.API.Mapper;
 
 namespace OrderService.API.Services.Concrete;
 
@@ -26,7 +29,7 @@ public class OrderServiceForController : IOrderService
 		throw new NotImplementedException();
 	}
 
-	public async Task<Response<Order>> CreateOrderAsync(CreateOrderDto dto, string userName, string userId, string address)
+	public async Task<Response<OrderDto>> CreateOrderAsync(CreateOrderDto dto, string userName, string userId, string address)
 	{
 		if (dto == null) throw new ArgumentNullException(nameof(dto));
 
@@ -42,10 +45,11 @@ public class OrderServiceForController : IOrderService
 			DestinationAddress = address
 		};
 
+
 		await _dbContext.AddAsync(order);
 		await _unitOfWork.CommitAsync();
 
-		return Response<Order>.Success(order, StatusCodes.Status201Created);
+		return Response<OrderDto>.Success(ObjectMapper.Mapper.Map<OrderDto>(order), StatusCodes.Status201Created);
 	}
 
 	public Task<Response<NoDataDto>> DeleteOrderAsync(string orderId)
@@ -53,14 +57,39 @@ public class OrderServiceForController : IOrderService
 		throw new NotImplementedException();
 	}
 
-	public Task<Response<OrderDto>> GetOrderAsyncForAdmin()
+	public Task<Response<IQueryable<OrderDto>>> GetOrderAsyncForAdmin()
 	{
 		throw new NotImplementedException();
 	}
 
-	public Task<Response<OrderDto>> GetOrderAsyncForUser()
+	public async Task<Response<IQueryable<OrderDto>>> GetOrderAsyncForUser(string userId)
 	{
-		throw new NotImplementedException();
+		var orders = await _dbContext.Orders.Where(o => o.UserId == userId).ToListAsync();
+
+		if (orders.Count == 0)
+		{
+			return Response<IQueryable<OrderDto>>.Fail("Bu username'e uygun veri bulunamadı", StatusCodes.Status204NoContent, true);
+		}
+
+		var orderDtos = orders.Select(o => new OrderDto
+		{
+			Id = o.Id,
+			Name = o.Name,
+
+			Status = o.Status,
+			CreatedDate = o.CreatedDate,
+			DestinationAddress = o.DestinationAddress,
+			TotalAmount = o.TotalAmount,
+			UserId = o.UserId,
+			UserName = o.UserName,
+			CourierId = o.CourierId,
+			CourierName = o.CourierName
+
+			// ObjectMapper.Mapper.Map<OrderDto>(o)
+
+		}).AsQueryable();
+
+		return Response<IQueryable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
 	}
 
 	public Task<Response<OrderDto>> UpdateAddressAsync(string address)

@@ -5,7 +5,7 @@ namespace OrderService.API.Dtos;
 public class OrderDto
 {
 
-	public int Id { get; set; }
+	public Guid Id { get; set; }
 	public string Name { get; set; }
 
 	// Userin Oldugu address

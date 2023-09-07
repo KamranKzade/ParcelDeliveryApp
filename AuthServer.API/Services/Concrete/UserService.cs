@@ -59,7 +59,7 @@ public class UserService : IUserService
 	{
 		if (!await _roleManager.RoleExistsAsync(dto.RoleName))
 		{
-			await _roleManager.CreateAsync(new IdentityRole { Name = dto.RoleName });
+			await _roleManager.CreateAsync(new IdentityRole { Name = dto.RoleName.ToLower() });
 		}
 
 		var user = await _userManager.FindByNameAsync(dto.UserName);
@@ -69,7 +69,7 @@ public class UserService : IUserService
 			return Response<NoDataDto>.Fail("UserName not found", StatusCodes.Status404NotFound, true);
 		}
 
-		await _userManager.AddToRoleAsync(user, dto.RoleName);
+		await _userManager.AddToRoleAsync(user, dto.RoleName.ToLower());
 
 		return Response<NoDataDto>.Success(StatusCodes.Status201Created);
 	}

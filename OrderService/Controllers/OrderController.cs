@@ -17,17 +17,17 @@ public class OrderController : CustomBaseController
 		_orderService = orderService;
 	}
 
-	[Authorize(Roles = "Admin")]
-	[HttpGet]
-	public IActionResult GetStock()
-	{
-		var userName = HttpContext.User.Identity.Name;
-		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
-		var birthDate = User.Claims.FirstOrDefault(x => x.Type == "birth-date");
-
-		// db-dan userId veya username uzerinden lazimli datalari cek
-		return Ok($"Stock islemleri ==> Username: {userName} -- UserId:{userId.Value} -- BirthDate:{birthDate}");
-	}
+	// [Authorize(Roles = "Admin")]
+	// [HttpGet]
+	// public IActionResult GetStock()
+	// {
+	// 	var userName = HttpContext.User.Identity.Name;
+	// 	var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+	// 	var birthDate = User.Claims.FirstOrDefault(x => x.Type == "birth-date");
+	// 
+	// 	// db-dan userId veya username uzerinden lazimli datalari cek
+	// 	return Ok($"Stock islemleri ==> Username: {userName} -- UserId:{userId.Value} -- BirthDate:{birthDate}");
+	// }
 
 	[Authorize(Roles = "user")]
 	[HttpPost]
@@ -38,6 +38,15 @@ public class OrderController : CustomBaseController
 		var address = User.Claims.FirstOrDefault(x => x.Type == "Address");
 
 		return ActionResultInstance(await _orderService.CreateOrderAsync(dto, userName, userId.Value, address.Value));
+	}
+
+	[Authorize(Roles = "user")]
+	[HttpGet("GetOrderAsyncForUser")]
+	public async Task<IActionResult> GetOrderAsyncForUser()
+	{
+		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+
+		return ActionResultInstance(await _orderService.GetOrderAsyncForUser(userId.Value));
 	}
 
 }
