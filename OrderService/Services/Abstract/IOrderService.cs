@@ -7,9 +7,11 @@ public interface IOrderService
 {
 	// User
 	Task<Response<OrderDto>> CreateOrderAsync(CreateOrderDto dto, string userName, string userId, string address);
-	Task<Response<OrderDto>> UpdateAddressAsync(string userId, string orderName, string address);
-	Task<Response<NoDataDto>> DeleteOrderAsync(string orderId);
 	Task<Response<IEnumerable<OrderDto>>> GetOrderAsyncForUser(string userId);
+	Task<Response<NoDataDto>> UpdateAddressAsync(string userId, string orderName, string address);
+
+
+	Task<Response<NoDataDto>> DeleteOrderAsync(string userId, string orderId);
 
 
 	// Admin

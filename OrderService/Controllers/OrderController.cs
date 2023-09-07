@@ -51,16 +51,25 @@ public class OrderController : CustomBaseController
 
 
 	[Authorize(Roles = "User")]
-	[HttpPost("UpdateAddress")]
+	[HttpPut("UpdateAddress")]
 	// RabbitMq ile elaqe yaratmaq qalibdi
 	public async Task<IActionResult> UpdateAddress(UpdateOrderDto dto)
 	{
-		var userName = HttpContext.User.Identity.Name;
 		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
 		var addressOld = User.Claims.FirstOrDefault(x => x.Type == "Address");
 
 
-        return ActionResultInstance(await _orderService.UpdateAddressAsync(userId.Value, dto.orderName, dto.address));
+		return ActionResultInstance(await _orderService.UpdateAddressAsync(userId!.Value, dto.OrderId, dto.Address));
+	}
+
+
+	[Authorize(Roles = "User")]
+	[HttpDelete("{id}")]
+	public async Task<IActionResult> DeleteOrder(string id)
+	{
+		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+
+		return ActionResultInstance(await _orderService.DeleteOrderAsync(userId!.Value, id));
 	}
 
 }

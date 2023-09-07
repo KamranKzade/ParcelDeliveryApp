@@ -25,10 +25,6 @@ public class OrderServiceForController : IOrderService
 		_serviceGeneric = serviceGeneric;
 	}
 
-	public Task<Response<OrderDto>> ChangeStatusOrder(OrderDto orderDto)
-	{
-		throw new NotImplementedException();
-	}
 
 	public async Task<Response<OrderDto>> CreateOrderAsync(CreateOrderDto dto, string userName, string userId, string address)
 	{
@@ -64,16 +60,6 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
-	public Task<Response<NoDataDto>> DeleteOrderAsync(string orderId)
-	{
-		throw new NotImplementedException();
-	}
-
-	public Task<Response<IQueryable<OrderDto>>> GetOrderAsyncForAdmin()
-	{
-		throw new NotImplementedException();
-	}
-
 	public async Task<Response<IEnumerable<OrderDto>>> GetOrderAsyncForUser(string userId)
 	{
 		try
@@ -106,35 +92,69 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
-	public async Task<Response<OrderDto>> UpdateAddressAsync(string userId, string orderName, string address)
+	public async Task<Response<NoDataDto>> UpdateAddressAsync(string userId, string orderId, string address)
 	{
 		try
 		{
-			var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.UserId == userId && o.Name == orderName);
+			var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.UserId == userId && o.Id.ToString() == orderId);
 
 			if (order == null)
 			{
-				return Response<OrderDto>.Fail("Belirtilen sipariş bulunamadı veya kullanıcıya ait değil", StatusCodes.Status404NotFound, true);
+				return Response<NoDataDto>.Fail("Belirtilen sipariş bulunamadı veya kullanıcıya ait değil", StatusCodes.Status404NotFound, true);
 			}
 
 			if (order.Status != OrderStatus.Initial)
 			{
-				return Response<OrderDto>.Fail("Siparişin adresi yalnızca başlangıç ​​durumundayken güncellenebilir", StatusCodes.Status400BadRequest, true);
+				return Response<NoDataDto>.Fail("Siparişin adresi yalnızca başlangıç ​​durumundayken güncellenebilir", StatusCodes.Status400BadRequest, true);
 			}
 
 			order.DestinationAddress = address;
-
-			var updateEntity = ObjectMapper.Mapper.Map<OrderDto>(order);
-
-			_genericRepository.UpdateAsync(order); 
+			_genericRepository.UpdateAsync(order);
 			await _unitOfWork.CommitAsync();
 
-			return Response<OrderDto>.Success(updateEntity, StatusCodes.Status200OK);
+			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
 			// Hata yakalama ve uygun bir hata mesajı döndürme
-			return Response<OrderDto>.Fail($"Sipariş güncellenirken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+			return Response<NoDataDto>.Fail($"Sipariş güncellenirken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
+	}
+
+	public async Task<Response<NoDataDto>> DeleteOrderAsync(string userId, string orderId)
+	{
+		try
+		{
+			var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.UserId == userId && o.Id.ToString() == orderId);
+
+			if (order == null)
+			{
+				return Response<NoDataDto>.Fail("Belirtilen sipariş bulunamadı veya kullanıcıya ait değil", StatusCodes.Status404NotFound, true);
+			}
+
+			if (order.Status != OrderStatus.Initial)
+			{
+				return Response<NoDataDto>.Fail("Siparişin yalnızca başlangıç durumundayken silinebilir", StatusCodes.Status400BadRequest, true);
+			}
+
+			_genericRepository.Remove(order);
+			await _unitOfWork.CommitAsync();
+
+			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
+		}
+		catch (Exception ex)
+		{
+			return Response<NoDataDto>.Fail($"Sipariş silinirken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+		}
+	}
+
+	public Task<Response<OrderDto>> ChangeStatusOrder(OrderDto orderDto)
+	{
+		throw new NotImplementedException();
+	}
+
+	public Task<Response<IQueryable<OrderDto>>> GetOrderAsyncForAdmin()
+	{
+		throw new NotImplementedException();
 	}
 }
