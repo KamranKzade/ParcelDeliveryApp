@@ -228,4 +228,33 @@ public class OrderServiceForController : IOrderService
 
 		return Response<IEnumerable<CourierWithOrderStatusDto>>.Success(orders, StatusCodes.Status200OK);
 	}
+
+	public async Task<Response<IEnumerable<OrderDetailDto>>> ShowOrderDetailAsync(string courierId)
+	{
+		try
+		{
+			var orders = await _dbContext.Orders.Where(o => o.CourierId == courierId)
+												 .Select(order => new OrderDetailDto
+												 {
+													 CourierName = order.CourierName,
+													 OrderName = order.Name,
+													 OrderStatus = order.Status,
+													 CreatedDate = order.CreatedDate,
+													 DestinationAddress = order.DestinationAddress,
+													 TotalAmount = order.TotalAmount
+
+												 })
+												 .ToListAsync();
+
+			if (orders == null)
+				return Response<IEnumerable<OrderDetailDto>>.Fail("Kuryere uygun order tapilmadi", StatusCodes.Status204NoContent, true);
+
+			return Response<IEnumerable<OrderDetailDto>>.Success(orders, StatusCodes.Status200OK);
+		}
+		catch (Exception ex)
+		{
+			return Response<IEnumerable<OrderDetailDto>>.Fail($"Siparişleri gösterirken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+		}
+	}
+
 }

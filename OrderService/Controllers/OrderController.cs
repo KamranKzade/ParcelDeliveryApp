@@ -100,4 +100,13 @@ public class OrderController : CustomBaseController
 		return ActionResultInstance(_orderService.GetCourierWithOrderStatus());
 	}
 
+	[Authorize(Roles = "Courier")]
+	[HttpGet("ShowOrderDetail")]
+	public async Task<IActionResult> ShowOrderDetail()
+	{
+		//var courierName = HttpContext.User.Identity!.Name;
+		var courierId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)!;
+
+		return ActionResultInstance(await _orderService.ShowOrderDetailAsync(courierId.Value));
+	}
 }

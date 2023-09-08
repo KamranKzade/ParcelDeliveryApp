@@ -17,4 +17,8 @@ public interface IOrderService
 	Task<Response<IEnumerable<OrderDto>>> GetOrderAsyncForAdmin();
 	Response<IEnumerable<CourierWithOrderStatusDto>> GetCourierWithOrderStatus();
 
+
+	// Courier
+	Task<Response<IEnumerable<OrderDetailDto>>> ShowOrderDetailAsync(string courierId);
+
 }
