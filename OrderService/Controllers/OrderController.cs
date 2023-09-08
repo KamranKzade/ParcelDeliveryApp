@@ -85,4 +85,12 @@ public class OrderController : CustomBaseController
 		return ActionResultInstance(await _orderService.ChangeStatusOrder(dto));
 	}
 
+	[Authorize(Roles = "Admin")]
+	[HttpGet("GetOrder")]
+	public async Task <IActionResult> GetOrder()
+	{
+		return ActionResultInstance(await _orderService.GetOrderAsyncForAdmin());
+	}
+
+
 }
