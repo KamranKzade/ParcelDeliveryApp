@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using AuthServer.API.Services.Abstract;
 using AutoMapper.Internal.Mappers;
 using AuthServer.API.Mapper;
+using System.Security.Claims;
+using System.Collections.Generic;
 
 namespace AuthServer.API.Services.Concrete;
 
@@ -55,6 +57,27 @@ public class UserService : IUserService
 		return Response<UserAppDto>.Success(ObjectMapper.Mapper.Map<UserAppDto>(user), StatusCodes.Status200OK);
 	}
 
+	public async Task<Response<IEnumerable<UserAppDto>>> GetCourierList()
+	{
+		var user = await _userManager.GetUsersInRoleAsync("Courier");
+
+		if (user == null)
+		{
+			return Response<IEnumerable<UserAppDto>>.Fail("UserName not found", StatusCodes.Status404NotFound, true);
+		}
+
+		var userdto = user.Select(o => new UserAppDto
+		{
+			Id = o.Id,
+			UserName = o.Name,
+			Email = o.Email
+		}).AsQueryable();
+
+
+		return Response<IEnumerable<UserAppDto>>.Success(userdto, StatusCodes.Status200OK);
+	}
+
+
 	public async Task<Response<NoDataDto>> CreateUserRoles(CreateUserRoleDto dto)
 	{
 		if (!await _roleManager.RoleExistsAsync(dto.RoleName))
@@ -64,7 +87,7 @@ public class UserService : IUserService
 
 		var user = await _userManager.FindByNameAsync(dto.UserName);
 
-		if(user == null)
+		if (user == null)
 		{
 			return Response<NoDataDto>.Fail("UserName not found", StatusCodes.Status404NotFound, true);
 		}

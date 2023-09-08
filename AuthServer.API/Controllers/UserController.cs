@@ -39,6 +39,12 @@ public class UserController : CustomBaseController
 		return ActionResultInstance(await _userService.GetUserByNameAsync(HttpContext.User.Identity!.Name!));
 	}
 
+
+	[HttpGet("GetCourierList")]
+	public async Task<IActionResult> GetCourierList()
+	{
+		return ActionResultInstance(await _userService.GetCourierList());
+	}
 	
 	[Authorize(Roles = "Admin")]
 	[HttpPost("CreateUserRoles")]
