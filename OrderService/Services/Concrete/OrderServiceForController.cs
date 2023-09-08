@@ -212,14 +212,16 @@ public class OrderServiceForController : IOrderService
 
 	}
 
-	public Response<IEnumerable<CourierWithOrderStatusDto>> GetCourierWithOrderStatus()
+	public Response<IEnumerable<CourierWithOrderStatusDto>> GetCourierWithOrderStatus(string courierId)
 	{
-		var orders = _dbContext.Orders.Select(order => new CourierWithOrderStatusDto
-		{
-			CourierName = order.CourierName,
-			OrderName = order.Name,
-			OrderStatus = order.Status
-		});
+		var orders = _dbContext.Orders
+			.Where(o => o.CourierId == courierId)
+			.Select(order => new CourierWithOrderStatusDto
+			{
+				CourierName = order.CourierName,
+				OrderName = order.Name,
+				OrderStatus = order.Status
+			});
 
 		if (orders == null)
 		{
@@ -261,7 +263,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var orders = await _dbContext.Orders.Where(o => o.UserId == userId && o.Id.ToString() == orderId).ToListAsync();
+			var orders = await _dbContext.Orders.Where(o => (o.UserId == userId || o.CourierId == userId) && o.Id.ToString() == orderId).ToListAsync();
 
 			if (orders == null)
 			{

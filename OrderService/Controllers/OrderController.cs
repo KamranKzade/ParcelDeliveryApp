@@ -17,23 +17,6 @@ public class OrderController : CustomBaseController
 		_orderService = orderService;
 	}
 
-	// [Authorize(Roles = "Admin")]
-	// [HttpGet]
-	// public IActionResult GetStock()
-	// {
-	// 	var userName = HttpContext.User.Identity.Name;
-	// 	var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
-	// 	var birthDate = User.Claims.FirstOrDefault(x => x.Type == "birth-date");
-	// 
-
-	// Userin Role-larini almaq
-	// var roles = new List<string>();
-	// List<Claim> roleClaims = HttpContext.User.FindAll(ClaimTypes.Role).ToList();
-	// roleClaims.ForEach(x=> roles.Add(x.Value));
-
-	// 	// db-dan userId veya username uzerinden lazimli datalari cek
-	// 	return Ok($"Stock islemleri ==> Username: {userName} -- UserId:{userId.Value} -- BirthDate:{birthDate}");
-	// }
 
 	#region User
 
@@ -78,15 +61,6 @@ public class OrderController : CustomBaseController
 		return ActionResultInstance(await _orderService.DeleteOrderAsync(userId!.Value, id));
 	}
 
-	[Authorize(Roles = "User")]
-	[HttpGet("ShowDetailDelivery/{orderId}")]
-	public async Task<IActionResult> ShowDetailDelivery(string orderId)
-	{
-		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
-
-		return ActionResultInstance(await _orderService.ShowDetailDelivery(userId!.Value, orderId));
-	}
-
 	#endregion
 
 
@@ -108,10 +82,10 @@ public class OrderController : CustomBaseController
 
 
 	[Authorize(Roles = "Admin")]
-	[HttpGet("GetCourierWithOrderStatus")]
-	public IActionResult GetCourierWithOrderStatus()
+	[HttpGet("GetCourierWithOrderStatus/{courierId}")]
+	public IActionResult GetCourierWithOrderStatus(string courierId)
 	{
-		return ActionResultInstance(_orderService.GetCourierWithOrderStatus());
+		return ActionResultInstance(_orderService.GetCourierWithOrderStatus(courierId));
 	}
 
 	#endregion
@@ -131,4 +105,17 @@ public class OrderController : CustomBaseController
 
 	#endregion
 
+
+	#region UserAndCourier
+
+	[Authorize(Roles = "User,Courier")]
+	[HttpGet("ShowDetailDelivery/{orderId}")]
+	public async Task<IActionResult> ShowDetailDelivery(string orderId)
+	{
+		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+
+		return ActionResultInstance(await _orderService.ShowDetailDelivery(userId!.Value, orderId));
+	}
+
+	#endregion
 }
