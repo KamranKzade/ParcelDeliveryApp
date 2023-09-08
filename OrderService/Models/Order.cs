@@ -11,6 +11,7 @@ public class Order
 	public string DestinationAddress { get; set; }
 	public decimal TotalAmount { get; set; }
 	public DateTime CreatedDate { get; set; }
+	public DateTime? DeliveryDate { get; set; }
 	public OrderStatus Status { get; set; }
 
 

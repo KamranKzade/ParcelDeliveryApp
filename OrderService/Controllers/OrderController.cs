@@ -35,6 +35,8 @@ public class OrderController : CustomBaseController
 	// 	return Ok($"Stock islemleri ==> Username: {userName} -- UserId:{userId.Value} -- BirthDate:{birthDate}");
 	// }
 
+	#region User
+
 	[Authorize(Roles = "User")]
 	[HttpPost]
 	public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
@@ -54,7 +56,6 @@ public class OrderController : CustomBaseController
 
 		return ActionResultInstance(await _orderService.GetOrderAsyncForUser(userId.Value));
 	}
-
 
 	[Authorize(Roles = "User")]
 	[HttpPut("UpdateAddress")]
@@ -77,6 +78,19 @@ public class OrderController : CustomBaseController
 		return ActionResultInstance(await _orderService.DeleteOrderAsync(userId!.Value, id));
 	}
 
+	[Authorize(Roles = "User")]
+	[HttpGet("ShowDetailDelivery/{orderId}")]
+	public async Task<IActionResult> ShowDetailDelivery(string orderId)
+	{
+		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+
+		return ActionResultInstance(await _orderService.ShowDetailDelivery(userId!.Value, orderId));
+	}
+
+	#endregion
+
+
+	#region Admin
 
 	[Authorize(Roles = "Admin")]
 	[HttpPut("UpdateOrderStatus")]
@@ -100,6 +114,11 @@ public class OrderController : CustomBaseController
 		return ActionResultInstance(_orderService.GetCourierWithOrderStatus());
 	}
 
+	#endregion
+
+
+	#region Courier
+
 	[Authorize(Roles = "Courier")]
 	[HttpGet("ShowOrderDetail")]
 	public async Task<IActionResult> ShowOrderDetail()
@@ -109,4 +128,7 @@ public class OrderController : CustomBaseController
 
 		return ActionResultInstance(await _orderService.ShowOrderDetailAsync(courierId.Value));
 	}
+
+	#endregion
+
 }

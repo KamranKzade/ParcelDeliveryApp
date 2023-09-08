@@ -10,7 +10,7 @@ public interface IOrderService
 	Task<Response<IEnumerable<OrderDto>>> GetOrderAsyncForUser(string userId);
 	Task<Response<NoDataDto>> UpdateAddressAsync(string userId, string orderName, string address);
 	Task<Response<NoDataDto>> DeleteOrderAsync(string userId, string orderId);
-
+	Task<Response<IEnumerable<DeliveryDetailDto>>> ShowDetailDelivery(string userId, string orderId);
 
 	// Admin
 	Task<Response<NoDataDto>> ChangeStatusOrder(UpdateStatusDto orderDto);

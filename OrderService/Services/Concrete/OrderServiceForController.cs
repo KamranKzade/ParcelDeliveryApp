@@ -257,4 +257,32 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
+	public async Task<Response<IEnumerable<DeliveryDetailDto>>> ShowDetailDelivery(string userId, string orderId)
+	{
+		try
+		{
+			var orders = await _dbContext.Orders.Where(o => o.UserId == userId && o.Id.ToString() == orderId).ToListAsync();
+
+			if (orders == null)
+			{
+				return Response<IEnumerable<DeliveryDetailDto>>.Fail("Belirtilen sipariş bulunamadı", StatusCodes.Status204NoContent, true);
+			}
+
+			var orderDtos = orders.Select(o => new DeliveryDetailDto
+			{
+				OrderName = o.Name,
+				CreateDate = o.CreatedDate,
+				OrderStatus = o.Status,
+				CourierName = o.CourierName,
+				DeliveryDate = o.DeliveryDate,
+				DestinationAddress = o.DestinationAddress
+			}).AsQueryable();
+
+			return Response<IEnumerable<DeliveryDetailDto>>.Success(orderDtos, StatusCodes.Status200OK);
+		}
+		catch (Exception ex)
+		{
+			return Response<IEnumerable<DeliveryDetailDto>>.Fail($"Siparişleri alırken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+		}
+	}
 }
