@@ -1,7 +1,6 @@
 ﻿using SharedLibrary.Dtos;
 using OrderService.API.Dtos;
 using OrderService.API.Models;
-using OrderService.API.Mapper;
 using OrderService.API.Models.Enum;
 using Microsoft.EntityFrameworkCore;
 using OrderService.API.Services.Abstract;
@@ -13,9 +12,9 @@ namespace OrderService.API.Services.Concrete;
 public class OrderServiceForController : IOrderService
 {
 	private readonly AppDbContext _dbContext;
-	private readonly IServiceGeneric<Order, OrderDto> _serviceGeneric;
-	private readonly IGenericRepository<Order> _genericRepository;
 	private readonly IUnitOfWork _unitOfWork;
+	private readonly IGenericRepository<Order> _genericRepository;
+	private readonly IServiceGeneric<Order, OrderDto> _serviceGeneric;
 
 	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<Order> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<Order, OrderDto> serviceGeneric)
 	{
@@ -132,6 +131,8 @@ public class OrderServiceForController : IOrderService
 				return Response<NoDataDto>.Fail("Belirtilen sipariş bulunamadı veya kullanıcıya ait değil", StatusCodes.Status404NotFound, true);
 			}
 
+			// RabbitMq muraciet
+
 			if (order.Status != OrderStatus.Initial)
 			{
 				return Response<NoDataDto>.Fail("Siparişin yalnızca başlangıç durumundayken silinebilir", StatusCodes.Status400BadRequest, true);
@@ -148,9 +149,31 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
-	public Task<Response<OrderDto>> ChangeStatusOrder(OrderDto orderDto)
+
+	public async Task<Response<NoDataDto>> ChangeStatusOrder(UpdateStatusDto orderDto)
 	{
-		throw new NotImplementedException();
+		try
+		{
+			var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id.ToString() == orderDto.OrderId);
+
+			if (order == null)
+			{
+				return Response<NoDataDto>.Fail("Belirtilen sipariş bulunamadı", StatusCodes.Status404NotFound, true);
+			}
+
+			order.Status = orderDto.OrderStatus;
+
+			_genericRepository.UpdateAsync(order);
+			await _unitOfWork.CommitAsync();
+
+
+			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
+		}
+		catch (Exception ex)
+		{
+			// Hata yakalama ve uygun bir hata mesajı döndürme
+			return Response<NoDataDto>.Fail($"Sipariş güncellenirken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+		}
 	}
 
 	public Task<Response<IQueryable<OrderDto>>> GetOrderAsyncForAdmin()

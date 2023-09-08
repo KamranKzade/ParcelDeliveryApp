@@ -25,6 +25,12 @@ public class OrderController : CustomBaseController
 	// 	var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
 	// 	var birthDate = User.Claims.FirstOrDefault(x => x.Type == "birth-date");
 	// 
+
+	// Userin Role-larini almaq
+	// var roles = new List<string>();
+	// List<Claim> roleClaims = HttpContext.User.FindAll(ClaimTypes.Role).ToList();
+	// roleClaims.ForEach(x=> roles.Add(x.Value));
+
 	// 	// db-dan userId veya username uzerinden lazimli datalari cek
 	// 	return Ok($"Stock islemleri ==> Username: {userName} -- UserId:{userId.Value} -- BirthDate:{birthDate}");
 	// }
@@ -62,7 +68,6 @@ public class OrderController : CustomBaseController
 		return ActionResultInstance(await _orderService.UpdateAddressAsync(userId!.Value, dto.OrderId, dto.Address));
 	}
 
-
 	[Authorize(Roles = "User")]
 	[HttpDelete("{id}")]
 	public async Task<IActionResult> DeleteOrder(string id)
@@ -70,6 +75,14 @@ public class OrderController : CustomBaseController
 		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
 
 		return ActionResultInstance(await _orderService.DeleteOrderAsync(userId!.Value, id));
+	}
+
+
+	[Authorize(Roles = "Admin")]
+	[HttpPut("UpdateOrderStatus")]
+	public async Task<IActionResult> UpdateOrderStatus(UpdateStatusDto dto)
+	{
+		return ActionResultInstance(await _orderService.ChangeStatusOrder(dto));
 	}
 
 }

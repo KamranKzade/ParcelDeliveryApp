@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using OrderService.API.Models;
-using OrderService.API.Dtos;
 using SharedLibrary.Dtos;
+using OrderService.API.Dtos;
+using OrderService.API.Models;
 
 namespace OrderService.API.Mapper;
 
