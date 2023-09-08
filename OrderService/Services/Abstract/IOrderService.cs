@@ -15,4 +15,6 @@ public interface IOrderService
 	// Admin
 	Task<Response<NoDataDto>> ChangeStatusOrder(UpdateStatusDto orderDto);
 	Task<Response<IEnumerable<OrderDto>>> GetOrderAsyncForAdmin();
+	Response<IEnumerable<CourierWithOrderStatusDto>> GetCourierWithOrderStatus();
+
 }

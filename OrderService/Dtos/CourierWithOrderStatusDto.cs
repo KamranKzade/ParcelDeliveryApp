@@ -1,0 +1,11 @@
+﻿using OrderService.API.Models.Enum;
+
+namespace OrderService.API.Dtos;
+
+public class CourierWithOrderStatusDto
+{
+	public string CourierName { get; set; }
+	public string OrderName { get; set; }
+	public OrderStatus OrderStatus { get; set; }
+
+}

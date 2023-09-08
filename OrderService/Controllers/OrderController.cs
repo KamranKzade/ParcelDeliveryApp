@@ -87,10 +87,17 @@ public class OrderController : CustomBaseController
 
 	[Authorize(Roles = "Admin")]
 	[HttpGet("GetOrder")]
-	public async Task <IActionResult> GetOrder()
+	public async Task<IActionResult> GetOrder()
 	{
 		return ActionResultInstance(await _orderService.GetOrderAsyncForAdmin());
 	}
 
+
+	[Authorize(Roles = "Admin")]
+	[HttpGet("GetCourierWithOrderStatus")]
+	public IActionResult GetCourierWithOrderStatus()
+	{
+		return ActionResultInstance(_orderService.GetCourierWithOrderStatus());
+	}
 
 }

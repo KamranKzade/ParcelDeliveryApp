@@ -211,4 +211,21 @@ public class OrderServiceForController : IOrderService
 
 
 	}
+
+	public Response<IEnumerable<CourierWithOrderStatusDto>> GetCourierWithOrderStatus()
+	{
+		var orders = _dbContext.Orders.Select(order => new CourierWithOrderStatusDto
+		{
+			CourierName = order.CourierName,
+			OrderName = order.Name,
+			OrderStatus = order.Status
+		});
+
+		if (orders == null)
+		{
+			return Response<IEnumerable<CourierWithOrderStatusDto>>.Fail("Veritabanında sipariş bilgisi bulunamadı", StatusCodes.Status204NoContent, true);
+		}
+
+		return Response<IEnumerable<CourierWithOrderStatusDto>>.Success(orders, StatusCodes.Status200OK);
+	}
 }
