@@ -1,7 +1,7 @@
 ﻿using OrderService.API.Models;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using OrderService.API.Repositories.Abstract;
+using SharedLibrary.Repositories.Abstract;
 
 namespace OrderService.API.Repositories.Concrete;
 

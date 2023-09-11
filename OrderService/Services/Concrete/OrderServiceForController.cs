@@ -4,9 +4,10 @@ using OrderService.API.Dtos;
 using OrderService.API.Models;
 using OrderService.API.Models.Enum;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Services.Abstract;
+using SharedLibrary.UnitOfWork.Abstract;
 using OrderService.API.Services.Abstract;
-using OrderService.API.UnitOfWork.Abstract;
-using OrderService.API.Repositories.Abstract;
+using SharedLibrary.Repositories.Abstract;
 
 namespace OrderService.API.Services.Concrete;
 

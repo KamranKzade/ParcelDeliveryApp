@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 
-namespace OrderService.API.Repositories.Abstract;
+namespace SharedLibrary.Repositories.Abstract;
+
 
 public interface IGenericRepository<TEntity> where TEntity : class
 {

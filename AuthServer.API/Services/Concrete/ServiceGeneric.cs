@@ -2,9 +2,9 @@
 using AuthServer.API.Mapper;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using AuthServer.API.Services.Abstract;
-using AuthServer.API.Repository.Abstract;
-using AuthServer.API.UnitOfWork.Abstract;
+using SharedLibrary.Services.Abstract;
+using SharedLibrary.UnitOfWork.Abstract;
+using SharedLibrary.Repositories.Abstract;
 
 namespace AuthServer.API.Services.Concrete;
 
@@ -36,7 +36,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 		return Response<IEnumerable<TDto>>.Success(product, StatusCodes.Status200OK);
 	}
 
-	public async Task<Response<TDto>> GetByIdAsync(int id)
+	public async Task<Response<TDto>> GetByIdAsync(string id)
 	{
 		var product = await _genericRepo.GetByIdAsync(id);
 
@@ -48,7 +48,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 		return Response<TDto>.Success(ObjectMapper.Mapper.Map<TDto>(product), StatusCodes.Status200OK);
 	}
 
-	public async Task<Response<NoDataDto>> RemoveAsync(int id)
+	public async Task<Response<NoDataDto>> RemoveAsync(string id)
 	{
 		var isExistEntity = await _genericRepo.GetByIdAsync(id);
 
@@ -66,7 +66,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 		return Response<NoDataDto>.Success(StatusCodes.Status204NoContent);
 	}
 
-	public async Task<Response<NoDataDto>> UpdateAsync(TDto entity, int id)
+	public async Task<Response<NoDataDto>> UpdateAsync(TDto entity, string id)
 	{
 		var isExistEntity = await _genericRepo.GetByIdAsync(id);
 
@@ -92,4 +92,5 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 		return Response<IEnumerable<TDto>>.Success(ObjectMapper.Mapper.Map<IEnumerable<TDto>>(await list.ToListAsync()), StatusCodes.Status200OK);
 
 	}
+
 }

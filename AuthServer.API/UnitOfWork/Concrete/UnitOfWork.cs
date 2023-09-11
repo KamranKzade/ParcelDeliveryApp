@@ -1,6 +1,6 @@
 ﻿using AuthServer.API.Models;
 using Microsoft.EntityFrameworkCore;
-using AuthServer.API.UnitOfWork.Abstract;
+using SharedLibrary.UnitOfWork.Abstract;
 
 namespace AuthServer.API.UnitOfWork.Concrete;
 

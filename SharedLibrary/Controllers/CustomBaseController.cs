@@ -1,7 +1,7 @@
 ﻿using SharedLibrary.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AuthServer.API.Controllers;
+namespace SharedLibrary.Controllers;
 
 public class CustomBaseController : ControllerBase
 {

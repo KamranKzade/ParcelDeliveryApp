@@ -6,8 +6,8 @@ using SharedLibrary.Configuration;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using AuthServer.API.Configurations;
-using AuthServer.API.UnitOfWork.Abstract;
 using AuthServer.API.UnitOfWork.Concrete;
+using SharedLibrary.UnitOfWork.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,5 +1,6 @@
 ﻿using AuthServer.API.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Controllers;
 using AuthServer.API.Services.Abstract;
 using Microsoft.AspNetCore.Authorization;
 
@@ -16,7 +17,7 @@ public class UserController : CustomBaseController
 		_userService = userService;
 	}
 
-	[HttpPost]
+	[HttpPost("CreateUser")]
 	public async Task<IActionResult> CreateUser(CreateUserDto createUserDto)
 	{
 		return ActionResultInstance(await _userService.CreateUserAsync(createUserDto));

@@ -1,6 +1,6 @@
 ﻿using OrderService.API.Models;
 using Microsoft.EntityFrameworkCore;
-using OrderService.API.UnitOfWork.Abstract;
+using SharedLibrary.UnitOfWork.Abstract;
 
 namespace OrderService.API.UnitOfWork.Concrete;
 

@@ -2,11 +2,9 @@
 using OrderService.API.Mapper;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using OrderService.API.UnitOfWork.Abstract;
-using OrderService.API.Services.Abstract;
-using OrderService.API.Repositories.Abstract;
-using OrderService.API.Models.Enum;
-using OrderService.API.Models;
+using SharedLibrary.Services.Abstract;
+using SharedLibrary.UnitOfWork.Abstract;
+using SharedLibrary.Repositories.Abstract;
 
 namespace OrderService.API.Services.Concrete;
 

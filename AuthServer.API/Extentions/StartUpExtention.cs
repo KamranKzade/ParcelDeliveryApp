@@ -1,15 +1,12 @@
 ﻿using AuthServer.API.Models;
 using AuthServer.API.Localizations;
 using Microsoft.AspNetCore.Identity;
+using SharedLibrary.Services.Abstract;
 using AuthServer.API.CustomValidations;
-using AuthServer.API.Repository.Abstract;
-using AuthServer.API.Repository.Concrete;
 using AuthServer.API.Services.Abstract;
 using AuthServer.API.Services.Concrete;
-using AuthServer.API.UnitOfWork.Abstract;
-using AuthServer.API.UnitOfWork.Concrete;
-using AuthServer.API.Configurations;
-using SharedLibrary.Configuration;
+using AuthServer.API.Repository.Concrete;
+using SharedLibrary.Repositories.Abstract;
 
 namespace AuthServer.API.Extentions;
 
