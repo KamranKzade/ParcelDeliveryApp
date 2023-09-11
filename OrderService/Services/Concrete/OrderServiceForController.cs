@@ -30,6 +30,9 @@ public class OrderServiceForController : IOrderService
 	}
 
 
+	#region User
+
+
 	public async Task<Response<OrderDto>> CreateOrderAsync(CreateOrderDto dto, string userName, string userId, string address)
 	{
 		if (dto == null) return Response<OrderDto>.Fail("Geçersiz istek verisi", StatusCodes.Status400BadRequest, true);
@@ -155,6 +158,12 @@ public class OrderServiceForController : IOrderService
 	}
 
 
+	#endregion
+
+
+	#region Admin
+
+
 	public async Task<Response<NoDataDto>> ChangeStatusOrder(UpdateStatusDto orderDto)
 	{
 		try
@@ -236,6 +245,36 @@ public class OrderServiceForController : IOrderService
 		return Response<IEnumerable<CourierWithOrderStatusDto>>.Success(orders, StatusCodes.Status200OK);
 	}
 
+	public async Task<Response<NoDataDto>> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto)
+	{
+		var order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id.ToString() == dto.OrderId);
+
+		if (order == null)
+		{
+			return Response<NoDataDto>.Fail("Order tapilmadi", StatusCodes.Status404NotFound, true);
+		}
+
+		if (!await CheckUserIsCourier(dto.CourierId, dto.CourierName))
+		{
+			return Response<NoDataDto>.Fail("Courirer not founded", StatusCodes.Status404NotFound, true);
+		}
+
+		order.CourierId = dto.CourierId;
+		order.CourierName = dto.CourierName;
+
+		_genericRepository.UpdateAsync(order);
+		await _unitOfWork.CommitAsync();
+
+		return Response<NoDataDto>.Success(StatusCodes.Status201Created);
+	}
+
+
+	#endregion
+
+
+	#region Courier
+
+
 	public async Task<Response<IEnumerable<OrderDetailDto>>> ShowOrderDetailAsync(string courierId)
 	{
 		try
@@ -263,6 +302,13 @@ public class OrderServiceForController : IOrderService
 			return Response<IEnumerable<OrderDetailDto>>.Fail($"Siparişleri gösterirken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
 	}
+
+
+	#endregion
+
+
+	#region UserAndCourier
+
 
 	public async Task<Response<IEnumerable<DeliveryDetailDto>>> ShowDetailDelivery(string userId, string orderId)
 	{
@@ -292,6 +338,11 @@ public class OrderServiceForController : IOrderService
 			return Response<IEnumerable<DeliveryDetailDto>>.Fail($"Siparişleri alırken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
 	}
+
+
+
+	#endregion
+
 
 	public async Task<bool> CheckUserIsCourier(string userId, string userName)
 	{
@@ -328,27 +379,4 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
-
-	public async Task<Response<NoDataDto>> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto)
-	{
-		var order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id.ToString() == dto.OrderId);
-
-		if (order == null)
-		{
-			return Response<NoDataDto>.Fail("Order tapilmadi", StatusCodes.Status404NotFound, true);
-		}
-
-		if (!await CheckUserIsCourier(dto.CourierId, dto.CourierName))
-		{
-			return Response<NoDataDto>.Fail("Courirer not founded", StatusCodes.Status404NotFound, true);
-		}
-
-		order.CourierId = dto.CourierId;
-		order.CourierName = dto.CourierName;
-
-		_genericRepository.UpdateAsync(order);
-		await _unitOfWork.CommitAsync();
-
-		return Response<NoDataDto>.Success(StatusCodes.Status201Created);
-	}
 }
