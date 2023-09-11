@@ -1,4 +1,4 @@
-using OrderService.API.Models;
+﻿using OrderService.API.Models;
 using SharedLibrary.Extentions;
 using SharedLibrary.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -36,7 +36,8 @@ var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<CustomTo
 builder.Services.AddCustomTokenAuth(tokenOptions);
 builder.Services.UseCustomValidationResponse();
 builder.Services.AddAuthorization();
-//builder.Services.AddHttpClient<AuthServer.API.Controllers.AuthController>();
+
+// AuthService -in methoduna müraciet 
 builder.Services.AddHttpClient("AuthServer", client =>
 {
 	client.BaseAddress = new Uri(builder.Configuration["AuthServiceBaseUrl"]);

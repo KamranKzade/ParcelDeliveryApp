@@ -255,6 +255,11 @@ public class OrderServiceForController : IOrderService
 			return Response<NoDataDto>.Fail("Order tapilmadi", StatusCodes.Status404NotFound, true);
 		}
 
+		if (!(order.CourierId == null || order.CourierName == null))
+		{
+			return Response<NoDataDto>.Fail("A courier has already been appointed for the order", StatusCodes.Status404NotFound, true);
+		}
+
 		if (!await CheckUserIsCourier(dto.CourierId, dto.CourierName))
 		{
 			return Response<NoDataDto>.Fail("Courirer not founded", StatusCodes.Status404NotFound, true);
