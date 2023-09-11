@@ -75,7 +75,7 @@ public class OrderServiceForController : IOrderService
 			var orders = await _dbContext.Orders.Where(o => o.UserId == userId).ToListAsync();
 
 			if (orders.Count == 0)
-				return Response<IEnumerable<OrderDto>>.Fail("Bu username'e uygun veri bulunamadı", StatusCodes.Status204NoContent, true);
+				return Response<IEnumerable<OrderDto>>.Fail("Bu username'e uygun veri bulunamadı", StatusCodes.Status404NotFound, true);
 
 			var orderDtos = orders.Select(o => new OrderDto
 			{
@@ -199,7 +199,7 @@ public class OrderServiceForController : IOrderService
 
 			if (orders == null)
 			{
-				return Response<IEnumerable<OrderDto>>.Fail("Veritabanında sipariş bilgisi bulunamadı", StatusCodes.Status204NoContent, true);
+				return Response<IEnumerable<OrderDto>>.Fail("Veritabanında sipariş bilgisi bulunamadı", StatusCodes.Status404NotFound, true);
 			}
 
 			var orderDtos = orders.Select(o => new OrderDto
@@ -240,7 +240,7 @@ public class OrderServiceForController : IOrderService
 
 		if (orders == null)
 		{
-			return Response<IEnumerable<CourierWithOrderStatusDto>>.Fail("Veritabanında sipariş bilgisi bulunamadı", StatusCodes.Status204NoContent, true);
+			return Response<IEnumerable<CourierWithOrderStatusDto>>.Fail("Veritabanında sipariş bilgisi bulunamadı", StatusCodes.Status404NotFound, true);
 		}
 
 		return Response<IEnumerable<CourierWithOrderStatusDto>>.Success(orders, StatusCodes.Status200OK);
@@ -294,7 +294,7 @@ public class OrderServiceForController : IOrderService
 												 .ToListAsync();
 
 			if (orders == null)
-				return Response<IEnumerable<OrderDetailDto>>.Fail("Kuryere uygun order tapilmadi", StatusCodes.Status204NoContent, true);
+				return Response<IEnumerable<OrderDetailDto>>.Fail("Kuryere uygun order tapilmadi", StatusCodes.Status404NotFound, true);
 
 			return Response<IEnumerable<OrderDetailDto>>.Success(orders, StatusCodes.Status200OK);
 		}
@@ -317,9 +317,9 @@ public class OrderServiceForController : IOrderService
 		{
 			var orders = await _dbContext.Orders.Where(o => (o.UserId == userId || o.CourierId == userId) && o.Id.ToString() == orderId).ToListAsync();
 
-			if (orders == null)
+			if (orders.Count == 0)
 			{
-				return Response<IEnumerable<DeliveryDetailDto>>.Fail("Belirtilen sipariş bulunamadı", StatusCodes.Status204NoContent, true);
+				return Response<IEnumerable<DeliveryDetailDto>>.Fail(new ErrorDto("Belirtilen sipariş bulunamadı", true), StatusCodes.Status404NotFound);
 			}
 
 			var orderDtos = orders.Select(o => new DeliveryDetailDto
