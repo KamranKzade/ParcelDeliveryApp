@@ -1,4 +1,5 @@
-﻿using SharedLibrary.Dtos;
+﻿using Newtonsoft.Json;
+using SharedLibrary.Dtos;
 using OrderService.API.Dtos;
 using OrderService.API.Models;
 using OrderService.API.Models.Enum;
@@ -15,13 +16,17 @@ public class OrderServiceForController : IOrderService
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IGenericRepository<Order> _genericRepository;
 	private readonly IServiceGeneric<Order, OrderDto> _serviceGeneric;
+	private readonly IConfiguration _configuration;
+	private readonly IHttpClientFactory _httpClientFactory;
 
-	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<Order> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<Order, OrderDto> serviceGeneric)
+	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<Order> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<Order, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory)
 	{
 		_dbContext = dbContext;
 		_genericRepository = genericRepository;
 		_unitOfWork = unitOfWork;
 		_serviceGeneric = serviceGeneric;
+		_configuration = configuration;
+		_httpClientFactory = httpClientFactory;
 	}
 
 
@@ -286,5 +291,64 @@ public class OrderServiceForController : IOrderService
 		{
 			return Response<IEnumerable<DeliveryDetailDto>>.Fail($"Siparişleri alırken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
+	}
+
+	public async Task<bool> CheckUserIsCourier(string userId, string userName)
+	{
+		string identityServiceBaseUrl = _configuration["AuthServiceBaseUrl"];
+		string checkUserRoleEndpoint = $"{identityServiceBaseUrl}/api/User/GetCourierList";
+
+		// IHttpClientFactory'den HttpClient örneği alın
+		var client = _httpClientFactory.CreateClient();
+
+		// Identity Service ile iletişim kuracak HttpClient oluşturun
+		using (client)
+		{
+			// Identity Service'den kullanıcı bilgilerini alın
+			var response = await client.GetAsync(checkUserRoleEndpoint);
+			if (response.IsSuccessStatusCode)
+			{
+				var responseContent = await response.Content.ReadAsStringAsync();
+
+				var userDto = (JsonConvert.DeserializeObject<Response<IEnumerable<ResponseUserDto>>>(responseContent)!);
+
+				var isCourier = userDto.Data.FirstOrDefault(x => x.id == userId && x.userName == userName);
+
+				if (isCourier == null)
+				{
+					return false;
+				}
+
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+
+
+	public async Task<Response<NoDataDto>> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto)
+	{
+		var order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id.ToString() == dto.OrderId);
+
+		if (order == null)
+		{
+			return Response<NoDataDto>.Fail("Order tapilmadi", StatusCodes.Status404NotFound, true);
+		}
+
+		if (!await CheckUserIsCourier(dto.CourierId, dto.CourierName))
+		{
+			return Response<NoDataDto>.Fail("Courirer not founded", StatusCodes.Status404NotFound, true);
+		}
+
+		order.CourierId = dto.CourierId;
+		order.CourierName = dto.CourierName;
+
+		_genericRepository.UpdateAsync(order);
+		await _unitOfWork.CommitAsync();
+
+		return Response<NoDataDto>.Success(StatusCodes.Status201Created);
 	}
 }

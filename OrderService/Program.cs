@@ -36,6 +36,8 @@ builder.Services.AddCustomTokenAuth(tokenOptions);
 
 builder.Services.UseCustomValidationResponse();
 builder.Services.AddAuthorization();
+builder.Services.AddHttpClient<AuthServer.API.Controllers.AuthController>();
+
 
 var app = builder.Build();
 

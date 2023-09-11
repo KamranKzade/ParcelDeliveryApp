@@ -12,6 +12,7 @@ public class OrderController : CustomBaseController
 {
 	private readonly IOrderService _orderService;
 
+
 	public OrderController(IOrderService orderService)
 	{
 		_orderService = orderService;
@@ -88,6 +89,14 @@ public class OrderController : CustomBaseController
 		return ActionResultInstance(_orderService.GetCourierWithOrderStatus(courierId));
 	}
 
+
+	[Authorize(Roles = "Admin")]
+	[HttpPost("SendTheOrderToTheCourier")]
+	public async Task<IActionResult> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto)
+	{
+		return ActionResultInstance(await _orderService.SendTheOrderToTheCourier(dto));
+	}
+
 	#endregion
 
 
@@ -118,4 +127,5 @@ public class OrderController : CustomBaseController
 	}
 
 	#endregion
+
 }
