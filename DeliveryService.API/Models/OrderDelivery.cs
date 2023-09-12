@@ -4,6 +4,7 @@ namespace DeliveryServer.API.Models;
 
 public class OrderDelivery
 {
+	public Guid Id { get; set; }
 	public string Name { get; set; }
 
 	// Userin Oldugu address
