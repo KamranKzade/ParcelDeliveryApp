@@ -1,5 +1,9 @@
-using SharedLibrary.Configuration;
 using SharedLibrary.Extentions;
+using DeliveryServer.API.Models;
+using SharedLibrary.Configuration;
+using Microsoft.EntityFrameworkCore;
+using DeliveryServer.API.Services.Abstract;
+using DeliveryServer.API.Services.Concrete;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +14,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+builder.Services.AddDbContext<AppDbContext>(opts =>
+{
+	opts.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
+});
+
+builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 
 builder.Services.Configure<CustomTokenOption>(builder.Configuration.GetSection("TokenOptions"));
 var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<CustomTokenOption>();

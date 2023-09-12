@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderService.API", "OrderSe
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{F2550495-D79F-4A87-9825-B9D01C779073}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeliveryService.API", "DeliveryService.API\DeliveryService.API.csproj", "{7424D16B-CD9B-41C5-BC20-2E6F46E30B68}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeliveryServer.API", "DeliveryService.API\DeliveryServer.API.csproj", "{7424D16B-CD9B-41C5-BC20-2E6F46E30B68}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

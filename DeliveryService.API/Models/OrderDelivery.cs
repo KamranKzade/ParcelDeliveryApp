@@ -1,6 +1,6 @@
 ﻿using SharedLibrary.Models.Enum;
 
-namespace DeliveryService.API.Models;
+namespace DeliveryServer.API.Models;
 
 public class OrderDelivery
 {
