@@ -1,4 +1,4 @@
-﻿using OrderService.API.Models.Enum;
+﻿using SharedLibrary.Models.Enum;
 
 namespace OrderService.API.Dtos;
 

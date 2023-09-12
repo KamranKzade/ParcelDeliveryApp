@@ -1,5 +1,4 @@
-﻿using OrderService.API.Models.Enum;
-
+﻿
 namespace OrderService.API.Dtos;
 
 public class CreateOrderDto

@@ -8,7 +8,7 @@ public class AppDbContext : IdentityDbContext<UserApp, IdentityRole, string>
 {
 	public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-        public DbSet<UserRefleshToken> UserRefleshTokens { get; set; }
+	public DbSet<UserRefleshToken> UserRefleshTokens { get; set; }
 
 	// Configurationlari Model olaraq yaradiriq, hamisi 1 yerde
 	protected override void OnModelCreating(ModelBuilder builder)

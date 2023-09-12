@@ -2,7 +2,7 @@
 using SharedLibrary.Dtos;
 using OrderService.API.Dtos;
 using OrderService.API.Models;
-using OrderService.API.Models.Enum;
+using SharedLibrary.Models.Enum;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
