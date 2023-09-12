@@ -20,6 +20,12 @@ public class OrderController : CustomBaseController
 	}
 
 
+	[HttpGet("GetOrder")]
+	public async Task<IActionResult> GetOrder()
+	{
+		return ActionResultInstance(await _orderService.GetOrders());
+	}
+
 	#region User
 
 	[Authorize(Roles = "User")]
@@ -76,8 +82,8 @@ public class OrderController : CustomBaseController
 	}
 
 	[Authorize(Roles = "Admin")]
-	[HttpGet("GetOrder")]
-	public async Task<IActionResult> GetOrder()
+	[HttpGet("GetOrderForAdmin")]
+	public async Task<IActionResult> GetOrderForAdmin()
 	{
 		return ActionResultInstance(await _orderService.GetOrderAsyncForAdmin());
 	}

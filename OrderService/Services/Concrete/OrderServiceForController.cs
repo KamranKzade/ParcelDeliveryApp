@@ -385,4 +385,29 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
+	public async Task<Response<IEnumerable<OrderDto>>> GetOrders()
+	{
+		var orders = await _dbContext.Orders.ToListAsync();
+
+		if (orders.Count == 0)
+			return Response<IEnumerable<OrderDto>>.Fail("DataBase de hal hazirda Order yoxdur", StatusCodes.Status404NotFound, true);
+
+		var orderDtos = orders.Select(o => new OrderDto
+		{
+			Id = o.Id,
+			Name = o.Name,
+
+			Status = o.Status,
+			CreatedDate = o.CreatedDate,
+			DestinationAddress = o.DestinationAddress,
+			TotalAmount = o.TotalAmount,
+			UserId = o.UserId,
+			UserName = o.UserName,
+			CourierId = o.CourierId,
+			CourierName = o.CourierName
+		}).AsQueryable();
+
+
+		return Response<IEnumerable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
+	}
 }

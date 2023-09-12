@@ -23,4 +23,7 @@ public interface IOrderService
 	// Courier
 	Task<Response<IEnumerable<OrderDetailDto>>> ShowOrderDetailAsync(string courierId);
 
+
+	Task<Response<IEnumerable<OrderDto>>> GetOrders();
+
 }
