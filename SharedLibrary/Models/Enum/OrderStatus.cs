@@ -9,6 +9,6 @@ namespace SharedLibrary.Models.Enum;
 public enum OrderStatus
 {
 	Initial = 1,
-	OnTheWat = 2,
+	OnTheWay = 2,
 	Delivered = 3
 }

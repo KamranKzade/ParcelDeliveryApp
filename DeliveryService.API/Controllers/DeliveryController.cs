@@ -11,27 +11,13 @@ namespace DeliveryServer.API.Controllers;
 [ApiController]
 public class DeliveryController : CustomBaseController
 {
+	public IDeliveryService _service { get; set; }
+
 	public DeliveryController(IDeliveryService service)
 	{
 		_service = service;
 	}
 
-	public IDeliveryService _service { get; set; }
-
-
-
-	[Authorize(Roles = "Admin")]
-	[HttpGet]
-	public IActionResult GetStock()
-	{
-		var userName = HttpContext.User.Identity.Name;
-		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
-		var birthDate = User.Claims.FirstOrDefault(x => x.Type == "birth-date");
-
-
-		// db-dan userId veya username uzerinden lazimli datalari cek
-		return Ok($"Stock islemleri ==> Username: {userName} -- UserId:{userId.Value} -- BirthDate:{birthDate}");
-	}
 
 
 	[Authorize(Roles = "Courier")]

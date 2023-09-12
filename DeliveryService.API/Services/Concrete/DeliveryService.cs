@@ -6,6 +6,7 @@ using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using DeliveryServer.API.Services.Abstract;
 using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace DeliveryServer.API.Services.Concrete;
 
@@ -39,15 +40,28 @@ public class DeliveryService : IDeliveryService
 		{
 			if (order.Id.ToString().ToLower() == dto.OrderId.ToLower() && order.CourierId == courierId)
 			{
-				order.Status = dto.OrderStatus;
-				order.DeliveryDate = DateTime.Now;
-				await _genericRepository.AddAsync(order);
-				await _unitOfWork.CommitAsync();
+				var isCheck = await _dbContext.OrderDeliveries.FirstOrDefaultAsync(d => d.CourierId == order.CourierId);
+
+				if (isCheck != null)
+				{
+					isCheck.Status = dto.OrderStatus;
+					isCheck.DeliveryDate = DateTime.Now;
+					_genericRepository.UpdateAsync(isCheck);
+					await _unitOfWork.CommitAsync();
+					return Response<NoDataDto>.Success(StatusCodes.Status200OK);
+				}
+				else
+				{
+					order.Status = dto.OrderStatus;
+					order.DeliveryDate = DateTime.Now;
+					await _genericRepository.AddAsync(order);
+					await _unitOfWork.CommitAsync();
+					return Response<NoDataDto>.Success(StatusCodes.Status200OK);
+				}
 
 
 				// RabbitMq
 
-				return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 			}
 		}
 
