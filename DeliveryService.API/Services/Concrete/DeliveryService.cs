@@ -1,12 +1,12 @@
-﻿using SharedLibrary.Dtos;
+﻿using Newtonsoft.Json;
+using SharedLibrary.Dtos;
 using DeliveryServer.API.Dtos;
 using DeliveryServer.API.Models;
+using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using DeliveryServer.API.Services.Abstract;
-using Newtonsoft.Json;
-using Microsoft.EntityFrameworkCore;
 
 namespace DeliveryServer.API.Services.Concrete;
 

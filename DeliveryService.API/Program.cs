@@ -2,11 +2,11 @@
 using DeliveryServer.API.Models;
 using SharedLibrary.Configuration;
 using Microsoft.EntityFrameworkCore;
-using DeliveryServer.API.Services.Abstract;
-using DeliveryServer.API.Services.Concrete;
-using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
+using SharedLibrary.Repositories.Abstract;
+using DeliveryServer.API.Services.Abstract;
+using DeliveryServer.API.Services.Concrete;
 using DeliveryServer.API.UnitOfWork.Concrete;
 using DeliveryServer.API.Repositories.Concrete;
 
