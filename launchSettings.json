@@ -5,7 +5,8 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "authserver.api": "StartDebugging",
-        "orderservice.api": "StartDebugging"
+        "orderservice.api": "StartDebugging",
+        "deliveryserver.api": "StartDebugging"
       }
     }
   }

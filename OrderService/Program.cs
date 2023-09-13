@@ -60,13 +60,17 @@ builder.Services.AddHttpClient("AuthServer", client =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-	app.UseDeveloperExceptionPage();
-	app.UseSwagger();
-	app.UseSwaggerUI();
-}
+//// Configure the HTTP request pipeline.
+// if (app.Environment.IsDevelopment())
+// {
+// 	app.UseDeveloperExceptionPage();
+// 	app.UseSwagger();
+// 	app.UseSwaggerUI();
+// }
+
+app.UseDeveloperExceptionPage();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

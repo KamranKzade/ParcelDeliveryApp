@@ -17,5 +17,11 @@ services:
       context: .
       dockerfile: AuthServer.API/Dockerfile
 
+  deliveryserver.api:
+    image: ${DOCKER_REGISTRY-}deliveryserverapi
+    build:
+      context: .
+      dockerfile: DeliveryService.API/Dockerfile
+
 volumes:
   sqlserver_volume :

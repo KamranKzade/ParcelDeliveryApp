@@ -11,17 +11,22 @@ services:
       - "1433:1433"
   orderservice.api:
     environment: 
-      - ASPNETCORE_ENVIRONMENT=Development #Production yazanda Docker-de, Development yazanda adi ayaga qaldiririq
-    ports:
-      - "5000:80"
-  authserver.api:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development #Production yazanda Docker-de, Development yazanda adi ayaga qaldiririq
+      - ASPNETCORE_ENVIRONMENT=Production #Production yazanda Docker-de, Development yazanda adi ayaga qaldiririq
     ports:
       - "5010:80"
+  authserver.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production #Production yazanda Docker-de, Development yazanda adi ayaga qaldiririq
+    ports:
+      - "5000:80"
     
 
 
     #volumes:
     #  - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
     #  - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro 
+  deliveryserver.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production #Production yazanda Docker-de, Development yazanda adi ayaga qaldiririq
+    ports:
+      - "5050:80"
