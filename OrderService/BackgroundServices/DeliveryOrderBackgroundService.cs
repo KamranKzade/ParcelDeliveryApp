@@ -3,11 +3,10 @@ using RabbitMQ.Client;
 using System.Text.Json;
 using SharedLibrary.Models;
 using RabbitMQ.Client.Events;
-using SharedLibrary.Services.RabbitMqCustom;
 using OrderService.API.Models;
-using Microsoft.EntityFrameworkCore;
-using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
+using SharedLibrary.Repositories.Abstract;
+using SharedLibrary.Services.RabbitMqCustom;
 
 namespace OrderService.API.BackgroundServices;
 
@@ -29,7 +28,7 @@ public class DeliveryOrderBackgroundService : BackgroundService
 	{
 		_channel = _rabbitMqClientService.Connect();
 
-		_channel.BasicQos(0, 1, false);
+		_channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
 		return base.StartAsync(cancellationToken);
 	}
@@ -68,10 +67,7 @@ public class DeliveryOrderBackgroundService : BackgroundService
 			genericReop.UpdateAsync(order);
 			unitOfWork.Commit();
 
-			// _dbContext.Orders.FirstOrDefault(o => o.Id == orderDelivery.Id);
-
 			_channel.BasicAck(@event.DeliveryTag, false);
-
 		}
 		catch (Exception ex)
 		{
