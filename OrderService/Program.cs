@@ -1,4 +1,5 @@
-﻿using OrderService.API.Models;
+﻿using RabbitMQ.Client;
+using OrderService.API.Models;
 using SharedLibrary.Extentions;
 using SharedLibrary.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +9,9 @@ using OrderService.API.Services.Abstract;
 using OrderService.API.Services.Concrete;
 using SharedLibrary.Repositories.Abstract;
 using OrderService.API.UnitOfWork.Concrete;
+using SharedLibrary.Services.RabbitMqCustom;
 using OrderService.API.Repositories.Concrete;
+using OrderService.API.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,11 +28,22 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
 });
 
-//builder.Services.AddScoped<AppDbContext>();
+// builder.Services.AddScoped<AppDbContext>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IServiceGeneric<,>), typeof(ServiceGeneric<,>));
 builder.Services.AddScoped<IOrderService, OrderServiceForController>();
+
+builder.Services.AddSingleton(sp => new ConnectionFactory
+{
+	Uri = new Uri(builder.Configuration.GetConnectionString("RabbitMQ")),
+	DispatchConsumersAsync = true
+});
+builder.Services.AddSingleton<RabbitMQPublisher>();
+builder.Services.AddSingleton<RabbitMQClientService>();
+
+// BackGroundService elave edirik projecte
+builder.Services.AddHostedService<DeliveryOrderBackgroundService>();
 
 builder.Services.Configure<CustomTokenOption>(builder.Configuration.GetSection("TokenOptions"));
 var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<CustomTokenOption>();
