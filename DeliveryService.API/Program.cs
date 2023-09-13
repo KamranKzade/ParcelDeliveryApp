@@ -1,4 +1,5 @@
-﻿using SharedLibrary.Extentions;
+﻿using RabbitMQ.Client;
+using SharedLibrary.Extentions;
 using DeliveryServer.API.Models;
 using SharedLibrary.Configuration;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,15 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IServiceGeneric<,>), typeof(ServiceGeneric<,>));
 builder.Services.AddScoped<IDeliveryService, DeliveryService>();
+
+builder.Services.AddSingleton(sp => new ConnectionFactory
+{
+	Uri = new Uri(builder.Configuration.GetConnectionString("RabbitMQ")),
+	DispatchConsumersAsync = true
+});
+builder.Services.AddSingleton<RabbitMQPublisher>();
+builder.Services.AddSingleton<RabbitMQClientService>();
+
 
 builder.Services.Configure<CustomTokenOption>(builder.Configuration.GetSection("TokenOptions"));
 var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<CustomTokenOption>();

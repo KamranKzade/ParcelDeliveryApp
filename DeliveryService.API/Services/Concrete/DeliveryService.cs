@@ -14,12 +14,13 @@ public class DeliveryService : IDeliveryService
 {
 	private readonly AppDbContext _dbContext;
 	private readonly IUnitOfWork _unitOfWork;
+	private readonly IConfiguration _configuration;
+	private readonly RabbitMQPublisher _rabbitMQPublisher;
+	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly IGenericRepository<OrderDelivery> _genericRepository;
 	private readonly IServiceGeneric<OrderDelivery, ChangeOrderStatusDto> _serviceGeneric;
-	private readonly IConfiguration _configuration;
-	private readonly IHttpClientFactory _httpClientFactory;
 
-	public DeliveryService(AppDbContext dbContext, IUnitOfWork unitOfWork, IGenericRepository<OrderDelivery> genericRepository, IServiceGeneric<OrderDelivery, ChangeOrderStatusDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory)
+	public DeliveryService(AppDbContext dbContext, IUnitOfWork unitOfWork, IGenericRepository<OrderDelivery> genericRepository, IServiceGeneric<OrderDelivery, ChangeOrderStatusDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, RabbitMQPublisher rabbitMQPublisher)
 	{
 		_dbContext = dbContext;
 		_unitOfWork = unitOfWork;
@@ -27,6 +28,7 @@ public class DeliveryService : IDeliveryService
 		_serviceGeneric = serviceGeneric;
 		_configuration = configuration;
 		_httpClientFactory = httpClientFactory;
+		_rabbitMQPublisher = rabbitMQPublisher;
 	}
 
 	public async Task<Response<NoDataDto>> ChangeOrderStatus(ChangeOrderStatusDto dto, string courierId)
@@ -48,6 +50,9 @@ public class DeliveryService : IDeliveryService
 					isCheck.DeliveryDate = DateTime.Now;
 					_genericRepository.UpdateAsync(isCheck);
 					await _unitOfWork.CommitAsync();
+
+					// RabbitMq ile elaqe
+					_rabbitMQPublisher.Publish(isCheck);
 					return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 				}
 				else
@@ -56,11 +61,11 @@ public class DeliveryService : IDeliveryService
 					order.DeliveryDate = DateTime.Now;
 					await _genericRepository.AddAsync(order);
 					await _unitOfWork.CommitAsync();
+					
+					// RabbitMq ile elaqe
+					_rabbitMQPublisher.Publish(order);
 					return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 				}
-
-
-				// RabbitMq
 
 			}
 		}

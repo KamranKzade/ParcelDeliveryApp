@@ -11,14 +11,12 @@ namespace DeliveryServer.API.Controllers;
 [ApiController]
 public class DeliveryController : CustomBaseController
 {
-	public IDeliveryService _service { get; set; }
+	public readonly IDeliveryService _service ;
 
 	public DeliveryController(IDeliveryService service)
 	{
 		_service = service;
 	}
-
-
 
 	[Authorize(Roles = "Courier")]
 	[HttpPost]
