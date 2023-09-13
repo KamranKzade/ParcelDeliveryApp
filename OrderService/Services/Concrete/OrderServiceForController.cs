@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SharedLibrary.Dtos;
+using SharedLibrary.Models;
 using OrderService.API.Dtos;
 using OrderService.API.Models;
 using SharedLibrary.Models.Enum;
@@ -15,12 +16,12 @@ public class OrderServiceForController : IOrderService
 {
 	private readonly AppDbContext _dbContext;
 	private readonly IUnitOfWork _unitOfWork;
-	private readonly IGenericRepository<Order> _genericRepository;
-	private readonly IServiceGeneric<Order, OrderDto> _serviceGeneric;
+	private readonly IGenericRepository<OrderDelivery> _genericRepository;
+	private readonly IServiceGeneric<OrderDelivery, OrderDto> _serviceGeneric;
 	private readonly IConfiguration _configuration;
 	private readonly IHttpClientFactory _httpClientFactory;
 
-	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<Order> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<Order, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory)
+	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory)
 	{
 		_dbContext = dbContext;
 		_genericRepository = genericRepository;

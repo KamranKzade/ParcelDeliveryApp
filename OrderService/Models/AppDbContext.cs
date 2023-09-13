@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using SharedLibrary.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace OrderService.API.Models;
 
@@ -6,5 +7,5 @@ public class AppDbContext : DbContext
 {
 	public AppDbContext(DbContextOptions<AppDbContext> dbContext) : base(dbContext) { }
 
-	public DbSet<Order> Orders { get; set; }
+	public DbSet<OrderDelivery> Orders { get; set; }
 }
