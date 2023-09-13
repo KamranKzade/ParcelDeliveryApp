@@ -45,9 +45,9 @@ public class DeliveryService : IDeliveryService
 		{
 			if (order.Id.ToString().ToLower() == dto.OrderId.ToLower() && order.CourierId == courierId)
 			{
-				var isCheck = await _dbContext.OrderDeliveries.FirstOrDefaultAsync(d => d.CourierId == order.CourierId);
+				var isCheck = await _dbContext.OrderDeliveries.FirstOrDefaultAsync(d => d.Id == order.Id );
 
-				if (isCheck.Status == OrderStatus.Delivered)
+				if (order.Status == OrderStatus.Delivered)
 					return Response<NoDataDto>.Fail("Bu Order Artiq catdirilib ve siz bunu deyise bilmezsiniz", StatusCodes.Status404NotFound, true);
 
 				if (isCheck != null)
