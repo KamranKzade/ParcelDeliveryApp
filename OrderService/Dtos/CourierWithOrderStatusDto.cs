@@ -1,6 +1,6 @@
 ﻿using SharedLibrary.Models.Enum;
 
-namespace OrderService.API.Dtos;
+namespace OrderServer.API.Dtos;
 
 public class CourierWithOrderStatusDto
 {

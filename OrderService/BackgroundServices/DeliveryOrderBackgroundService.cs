@@ -3,12 +3,12 @@ using RabbitMQ.Client;
 using System.Text.Json;
 using SharedLibrary.Models;
 using RabbitMQ.Client.Events;
-using OrderService.API.Models;
+using OrderServer.API.Models;
 using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
 
-namespace OrderService.API.BackgroundServices;
+namespace OrderServer.API.BackgroundServices;
 
 public class DeliveryOrderBackgroundService : BackgroundService
 {

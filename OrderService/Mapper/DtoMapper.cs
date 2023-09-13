@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using SharedLibrary.Dtos;
 using SharedLibrary.Models;
-using OrderService.API.Dtos;
+using OrderServer.API.Dtos;
 
-namespace OrderService.API.Mapper;
+namespace OrderServer.API.Mapper;
 
 public class DtoMapper : Profile
 {

@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using OrderService.API.Models;
+using OrderServer.API.Models;
 
 #nullable disable
 
-namespace OrderService.Migrations
+namespace OrderServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20230907073205_Init")]

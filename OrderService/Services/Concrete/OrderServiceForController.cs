@@ -1,16 +1,16 @@
 ﻿using Newtonsoft.Json;
 using SharedLibrary.Dtos;
 using SharedLibrary.Models;
-using OrderService.API.Dtos;
-using OrderService.API.Models;
+using OrderServer.API.Dtos;
+using OrderServer.API.Models;
 using SharedLibrary.Models.Enum;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
-using OrderService.API.Services.Abstract;
+using OrderServer.API.Services.Abstract;
 using SharedLibrary.Repositories.Abstract;
 
-namespace OrderService.API.Services.Concrete;
+namespace OrderServer.API.Services.Concrete;
 
 public class OrderServiceForController : IOrderService
 {

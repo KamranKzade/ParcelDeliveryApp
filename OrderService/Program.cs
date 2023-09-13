@@ -1,17 +1,17 @@
 ﻿using RabbitMQ.Client;
-using OrderService.API.Models;
+using OrderServer.API.Models;
 using SharedLibrary.Extentions;
 using SharedLibrary.Configuration;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
-using OrderService.API.Services.Abstract;
-using OrderService.API.Services.Concrete;
+using OrderServer.API.Services.Abstract;
+using OrderServer.API.Services.Concrete;
 using SharedLibrary.Repositories.Abstract;
-using OrderService.API.UnitOfWork.Concrete;
+using OrderServer.API.UnitOfWork.Concrete;
 using SharedLibrary.Services.RabbitMqCustom;
-using OrderService.API.Repositories.Concrete;
-using OrderService.API.BackgroundServices;
+using OrderServer.API.Repositories.Concrete;
+using OrderServer.API.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 

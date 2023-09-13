@@ -1,7 +1,7 @@
 ﻿using SharedLibrary.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace OrderService.API.Models;
+namespace OrderServer.API.Models;
 
 public class AppDbContext : DbContext
 {

@@ -1,8 +1,8 @@
-﻿using OrderService.API.Models;
+﻿using OrderServer.API.Models;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.UnitOfWork.Abstract;
 
-namespace OrderService.API.UnitOfWork.Concrete;
+namespace OrderServer.API.UnitOfWork.Concrete;
 
 public class UnitOfWork : IUnitOfWork
 {

@@ -1,7 +1,7 @@
 ﻿using SharedLibrary.Dtos;
-using OrderService.API.Dtos;
+using OrderServer.API.Dtos;
 
-namespace OrderService.API.Services.Abstract;
+namespace OrderServer.API.Services.Abstract;
 
 public interface IOrderService
 {

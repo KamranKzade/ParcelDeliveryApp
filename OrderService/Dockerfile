@@ -7,17 +7,17 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["OrderService/OrderService.API.csproj", "OrderService/"]
+COPY ["OrderService/OrderServer.API.csproj", "OrderService/"]
 COPY ["SharedLibrary/SharedLibrary.csproj", "SharedLibrary/"]
-RUN dotnet restore "OrderService/OrderService.API.csproj"
+RUN dotnet restore "OrderService/OrderServer.API.csproj"
 COPY . .
 WORKDIR "/src/OrderService"
-RUN dotnet build "OrderService.API.csproj" -c Release -o /app/build
+RUN dotnet build "OrderServer.API.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "OrderService.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "OrderServer.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "OrderService.API.dll"]
+ENTRYPOINT ["dotnet", "OrderServer.API.dll"]

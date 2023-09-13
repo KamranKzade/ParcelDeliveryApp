@@ -1,11 +1,11 @@
-﻿using OrderService.API.Dtos;
+﻿using OrderServer.API.Dtos;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using SharedLibrary.Controllers;
-using OrderService.API.Services.Abstract;
+using OrderServer.API.Services.Abstract;
 using Microsoft.AspNetCore.Authorization;
 
-namespace OrderService.Controllers;
+namespace OrderServer.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

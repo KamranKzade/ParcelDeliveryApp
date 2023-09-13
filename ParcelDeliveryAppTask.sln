@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthServer.API", "AuthServe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedLibrary", "SharedLibrary\SharedLibrary.csproj", "{1A012779-1475-4FC4-A940-CFF4145A266D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderService.API", "OrderService\OrderService.API.csproj", "{30EF686C-2710-42A0-B06E-EB5BD9A6728A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrderServer.API", "OrderService\OrderServer.API.csproj", "{30EF686C-2710-42A0-B06E-EB5BD9A6728A}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{F2550495-D79F-4A87-9825-B9D01C779073}"
 EndProject

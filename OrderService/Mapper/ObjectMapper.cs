@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 
-namespace OrderService.API.Mapper;
+namespace OrderServer.API.Mapper;
 
 public class ObjectMapper
 {

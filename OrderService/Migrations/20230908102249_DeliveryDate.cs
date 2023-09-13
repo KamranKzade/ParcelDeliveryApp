@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace OrderService.Migrations
+namespace OrderServer.Migrations
 {
     public partial class DeliveryDate : Migration
     {
