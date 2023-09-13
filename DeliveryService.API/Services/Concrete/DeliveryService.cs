@@ -9,6 +9,7 @@ using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using DeliveryServer.API.Services.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
+using SharedLibrary.Models.Enum;
 
 namespace DeliveryServer.API.Services.Concrete;
 
@@ -46,6 +47,9 @@ public class DeliveryService : IDeliveryService
 			{
 				var isCheck = await _dbContext.OrderDeliveries.FirstOrDefaultAsync(d => d.CourierId == order.CourierId);
 
+				if (isCheck.Status == OrderStatus.Delivered)
+					return Response<NoDataDto>.Fail("Bu Order Artiq catdirilib ve siz bunu deyise bilmezsiniz", StatusCodes.Status404NotFound, true);
+
 				if (isCheck != null)
 				{
 					isCheck.Status = dto.OrderStatus;
@@ -63,7 +67,7 @@ public class DeliveryService : IDeliveryService
 					order.DeliveryDate = DateTime.Now;
 					await _genericRepository.AddAsync(order);
 					await _unitOfWork.CommitAsync();
-					
+
 					// RabbitMq ile elaqe
 					_rabbitMQPublisher.Publish(order);
 					return Response<NoDataDto>.Success(StatusCodes.Status200OK);
