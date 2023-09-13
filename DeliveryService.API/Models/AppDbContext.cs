@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using SharedLibrary.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DeliveryServer.API.Models;
 

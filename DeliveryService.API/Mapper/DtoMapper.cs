@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
+using SharedLibrary.Models;
 using DeliveryServer.API.Dtos;
-using DeliveryServer.API.Models;
 
 namespace DeliveryServer.API.Mapper;
 

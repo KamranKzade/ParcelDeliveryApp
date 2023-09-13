@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SharedLibrary.Dtos;
+using SharedLibrary.Models;
 using DeliveryServer.API.Dtos;
 using DeliveryServer.API.Models;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using SharedLibrary.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using DeliveryServer.API.Services.Abstract;
+using SharedLibrary.Services.RabbitMqCustom;
 
 namespace DeliveryServer.API.Services.Concrete;
 

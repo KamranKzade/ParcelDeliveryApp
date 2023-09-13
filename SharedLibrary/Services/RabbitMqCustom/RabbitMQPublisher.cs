@@ -1,9 +1,9 @@
 ﻿using System.Text;
 using RabbitMQ.Client;
 using System.Text.Json;
-using DeliveryServer.API.Models;
+using SharedLibrary.Models;
 
-namespace DeliveryServer.API.Services.Concrete;
+namespace SharedLibrary.Services.RabbitMqCustom;
 
 public class RabbitMQPublisher
 {

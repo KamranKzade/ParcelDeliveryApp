@@ -10,6 +10,7 @@ using DeliveryServer.API.Services.Abstract;
 using DeliveryServer.API.Services.Concrete;
 using DeliveryServer.API.UnitOfWork.Concrete;
 using DeliveryServer.API.Repositories.Concrete;
+using SharedLibrary.Services.RabbitMqCustom;
 
 var builder = WebApplication.CreateBuilder(args);
 

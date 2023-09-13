@@ -1,6 +1,7 @@
 ﻿using RabbitMQ.Client;
+using Microsoft.Extensions.Logging;
 
-namespace DeliveryServer.API.Services.Concrete;
+namespace SharedLibrary.Services.RabbitMqCustom;
 
 public class RabbitMQClientService : IDisposable
 {
@@ -61,3 +62,4 @@ public class RabbitMQClientService : IDisposable
 		_logger.LogInformation("RabbitMQ ile baglanti kopdu...");
 	}
 }
+
