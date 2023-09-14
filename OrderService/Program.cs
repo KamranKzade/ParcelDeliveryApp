@@ -10,21 +10,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-
-// Connectioni veririk
 builder.Services.AddDbContextExtentions(builder.Configuration);
-
-// Scope And Singleton LifeCycle
 builder.Services.AddScopeExtention();
 builder.Services.AddSingletonExtention(builder.Configuration);
-
-// CustomToken Elave edirik Sisteme
 builder.Services.AddCustomTokenAuthExtention(builder.Configuration);
-
-// OtherExtention
 builder.Services.OtherAdditions();
-
-// AuthService -in methoduna müraciet 
 builder.Services.AddHttpClientExtention(builder.Configuration);
 
 

@@ -38,6 +38,7 @@ public static class StartUpExtention
 
 	public static void AddCustomTokenAuthExtention(this IServiceCollection services, IConfiguration configuration)
 	{
+		// CustomToken Elave edirik Sisteme
 		services.Configure<CustomTokenOption>(configuration.GetSection("TokenOptions"));
 		var tokenOptions = configuration.GetSection("TokenOptions").Get<CustomTokenOption>();
 		services.AddCustomTokenAuth(tokenOptions);
