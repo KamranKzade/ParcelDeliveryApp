@@ -4,6 +4,7 @@ using System.Text.Json;
 using SharedLibrary.Models;
 using RabbitMQ.Client.Events;
 using OrderServer.API.Models;
+using SharedLibrary.ResourceFile;
 using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
@@ -37,7 +38,7 @@ public class DeliveryOrderBackgroundService : BackgroundService
 	{
 		var consumer = new AsyncEventingBasicConsumer(_channel);
 
-		_channel.BasicConsume(RabbitMQClientService.QueueName, false, consumer);
+		_channel.BasicConsume(RabbitMqClientResource.QueueName, false, consumer);
 
 		consumer.Received += Consumer_Received;
 

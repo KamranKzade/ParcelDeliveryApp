@@ -16,4 +16,19 @@
 		<PackageReference Include="RabbitMQ.Client" Version="6.0.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Compile Update="ResourceFile\RabbitMqClientResource.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>RabbitMqClientResource.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="ResourceFile\RabbitMqClientResource.resx">
+	    <Generator>PublicResXFileCodeGenerator</Generator>
+	    <LastGenOutput>RabbitMqClientResource.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
+	</ItemGroup>
+
 </Project>

@@ -1,4 +1,5 @@
 ﻿using RabbitMQ.Client;
+using SharedLibrary.Models;
 using OrderServer.API.Models;
 using SharedLibrary.Extentions;
 using SharedLibrary.Configuration;
@@ -7,11 +8,11 @@ using SharedLibrary.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
 using OrderServer.API.Services.Abstract;
 using OrderServer.API.Services.Concrete;
+using OrderServer.API.BackgroundServices;
 using SharedLibrary.Repositories.Abstract;
 using OrderServer.API.UnitOfWork.Concrete;
 using SharedLibrary.Services.RabbitMqCustom;
 using OrderServer.API.Repositories.Concrete;
-using OrderServer.API.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +40,8 @@ builder.Services.AddSingleton(sp => new ConnectionFactory
 	Uri = new Uri(builder.Configuration.GetConnectionString("RabbitMQ")),
 	DispatchConsumersAsync = true
 });
-builder.Services.AddSingleton<RabbitMQPublisher>();
+
+builder.Services.AddSingleton(typeof(RabbitMQPublisher<>).MakeGenericType(typeof(OrderDelivery)));
 builder.Services.AddSingleton<RabbitMQClientService>();
 
 // BackGroundService elave edirik projecte

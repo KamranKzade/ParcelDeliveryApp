@@ -1,4 +1,5 @@
 ﻿using RabbitMQ.Client;
+using SharedLibrary.ResourceFile;
 using Microsoft.Extensions.Logging;
 
 namespace SharedLibrary.Services.RabbitMqCustom;
@@ -8,9 +9,6 @@ public class RabbitMQClientService : IDisposable
 	private IModel _channel;
 	private IConnection _connection;
 	private readonly ConnectionFactory _connectionFactory;
-	public static string QueueName = "queue-delivery-order";
-	public static string ExchangeName = "DeliveryDirectExchange";
-	public static string RoutingWaterMark = "delivery-route-order";
 
 
 	private readonly ILogger<RabbitMQClientService> _logger;
@@ -35,13 +33,13 @@ public class RabbitMQClientService : IDisposable
 		_channel = _connection.CreateModel();
 
 		// Exchange-i yaradiriq
-		_channel.ExchangeDeclare(ExchangeName, type: "direct", durable: true, autoDelete: false);
+		_channel.ExchangeDeclare(RabbitMqClientResource.ExchangeName, type: "direct", durable: true, autoDelete: false);
 
 		// Queue -i yaradiriq
-		_channel.QueueDeclare(QueueName, durable: true, false, false, null);
+		_channel.QueueDeclare(RabbitMqClientResource.QueueName, durable: true, false, false, null);
 
 		// Queue-ni bind edirik
-		_channel.QueueBind(exchange: ExchangeName, queue: QueueName, routingKey: RoutingWaterMark);
+		_channel.QueueBind(exchange: RabbitMqClientResource.ExchangeName, queue: RabbitMqClientResource.QueueName, routingKey: RabbitMqClientResource.RoutingWaterMark);
 
 		// Log-a informasiyani yaziriq
 		_logger.LogInformation("RabbitMQ ile elaqe kuruldu...");

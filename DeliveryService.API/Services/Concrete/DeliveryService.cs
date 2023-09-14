@@ -18,12 +18,12 @@ public class DeliveryService : IDeliveryService
 	private readonly AppDbContext _dbContext;
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IConfiguration _configuration;
-	private readonly RabbitMQPublisher _rabbitMQPublisher;
+	private readonly RabbitMQPublisher<OrderDelivery> _rabbitMQPublisher;
 	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly IGenericRepository<OrderDelivery> _genericRepository;
 	private readonly IServiceGeneric<OrderDelivery, ChangeOrderStatusDto> _serviceGeneric;
 
-	public DeliveryService(AppDbContext dbContext, IUnitOfWork unitOfWork, IGenericRepository<OrderDelivery> genericRepository, IServiceGeneric<OrderDelivery, ChangeOrderStatusDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, RabbitMQPublisher rabbitMQPublisher)
+	public DeliveryService(AppDbContext dbContext, IUnitOfWork unitOfWork, IGenericRepository<OrderDelivery> genericRepository, IServiceGeneric<OrderDelivery, ChangeOrderStatusDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher)
 	{
 		_dbContext = dbContext;
 		_unitOfWork = unitOfWork;

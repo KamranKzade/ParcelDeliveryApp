@@ -11,6 +11,7 @@ using DeliveryServer.API.Services.Concrete;
 using DeliveryServer.API.UnitOfWork.Concrete;
 using DeliveryServer.API.Repositories.Concrete;
 using SharedLibrary.Services.RabbitMqCustom;
+using SharedLibrary.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,7 +38,7 @@ builder.Services.AddSingleton(sp => new ConnectionFactory
 	Uri = new Uri(builder.Configuration.GetConnectionString("RabbitMQ")),
 	DispatchConsumersAsync = true
 });
-builder.Services.AddSingleton<RabbitMQPublisher>();
+builder.Services.AddSingleton<RabbitMQPublisher<OrderDelivery>>();
 builder.Services.AddSingleton<RabbitMQClientService>();
 
 
