@@ -1,10 +1,16 @@
-﻿using AuthServer.API.Models;
+﻿using System.Reflection;
+using AuthServer.API.Models;
+using SharedLibrary.Extentions;
+using SharedLibrary.Configuration;
+using FluentValidation.AspNetCore;
 using AuthServer.API.Localizations;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Services.Abstract;
 using AuthServer.API.CustomValidations;
 using AuthServer.API.Services.Abstract;
 using AuthServer.API.Services.Concrete;
+using SharedLibrary.UnitOfWork.Abstract;
 using AuthServer.API.Repository.Concrete;
 using SharedLibrary.Repositories.Abstract;
 
@@ -55,6 +61,33 @@ public static class StartUpExtention
 		services.AddScoped<ITokenService, TokenService>();
 		services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 		services.AddScoped(typeof(IServiceGeneric<,>), typeof(ServiceGeneric<,>));
+		services.AddScoped<IUnitOfWork, UnitOfWork.Concrete.UnitOfWork>();
 	}
 
+
+	public static void AddDbContextExtention(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.AddDbContext<AppDbContext>(options =>
+		{
+			options.UseSqlServer(configuration.GetConnectionString("SqlServer"));
+		});
+	}
+
+	public static void AddCustomTokenAuthExtention(this IServiceCollection services, IConfiguration configuration)
+	{
+		// TokenOption elave edirik Configure-a 
+		// Option pattern --> DI uzerinden appsetting-deki datalari elde etmeye deyilir.
+		services.Configure<CustomTokenOption>(configuration.GetSection("TokenOptions"));
+		var tokenOptions = configuration.GetSection("TokenOptions").Get<CustomTokenOption>();
+		services.AddCustomTokenAuth(tokenOptions);
+	}
+
+	public static void AddControllersExtention(this IServiceCollection services)
+	{
+		services.AddControllers()
+				.AddFluentValidation(opts => // FluentValidationlari sisteme tanidiriq
+				{
+					opts.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+				});
+	}
 }

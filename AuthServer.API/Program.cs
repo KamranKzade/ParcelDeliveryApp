@@ -1,24 +1,11 @@
-using System.Reflection;
-using AuthServer.API.Models;
 using SharedLibrary.Extentions;
 using AuthServer.API.Extentions;
-using SharedLibrary.Configuration;
-using FluentValidation.AspNetCore;
-using Microsoft.EntityFrameworkCore;
 using AuthServer.API.Configurations;
-using AuthServer.API.UnitOfWork.Concrete;
-using SharedLibrary.UnitOfWork.Abstract;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
-builder.Services.AddControllers()
-				.AddFluentValidation(opts => // FluentValidationlari sisteme tanidiriq
-				{
-					opts.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-				});
-
+builder.Services.AddControllersExtention();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -26,27 +13,17 @@ builder.Services.AddSwaggerGen();
 
 // DI lari sisteme tanitmaq
 builder.Services.AddScopeWithExtention();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Connectioni veririk
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-	options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
-});
+builder.Services.AddDbContextExtention(builder.Configuration);
 
 // Identity-ni sisteme tanidiriq
 builder.Services.AddIdentityWithExtention();
 
-
 builder.Services.Configure<List<Client>>(builder.Configuration.GetSection("Clients"));
 
 // TokenOption elave edirik Configure-a 
-// Option pattern --> DI uzerinden appsetting-deki datalari elde etmeye deyilir.
-builder.Services.Configure<CustomTokenOption>(builder.Configuration.GetSection("TokenOptions"));
-var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<CustomTokenOption>();
-
-builder.Services.AddCustomTokenAuth(tokenOptions);
-
+builder.Services.AddCustomTokenAuthExtention(builder.Configuration);
 
 // Validationlari 1 yere yigib qaytaririq
 builder.Services.UseCustomValidationResponse();
