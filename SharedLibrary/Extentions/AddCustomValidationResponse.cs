@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using SharedLibrary.Dtos;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using SharedLibrary.Dtos;
 
 namespace SharedLibrary.Extentions;
 
