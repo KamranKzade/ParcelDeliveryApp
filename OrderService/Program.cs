@@ -1,18 +1,4 @@
-﻿using RabbitMQ.Client;
-using SharedLibrary.Models;
-using OrderServer.API.Models;
-using SharedLibrary.Extentions;
-using SharedLibrary.Configuration;
-using Microsoft.EntityFrameworkCore;
-using SharedLibrary.Services.Abstract;
-using SharedLibrary.UnitOfWork.Abstract;
-using OrderServer.API.Services.Abstract;
-using OrderServer.API.Services.Concrete;
-using OrderServer.API.BackgroundServices;
-using SharedLibrary.Repositories.Abstract;
-using OrderServer.API.UnitOfWork.Concrete;
-using SharedLibrary.Services.RabbitMqCustom;
-using OrderServer.API.Repositories.Concrete;
+﻿using OrderServer.API.Extentions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,41 +9,23 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+
 // Connectioni veririk
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-	options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer"));
-});
+builder.Services.AddDbContextExtentions(builder.Configuration);
 
-// builder.Services.AddScoped<AppDbContext>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped(typeof(IServiceGeneric<,>), typeof(ServiceGeneric<,>));
-builder.Services.AddScoped<IOrderService, OrderServiceForController>();
+// Scope And Singleton LifeCycle
+builder.Services.AddScopeExtention();
+builder.Services.AddSingletonExtention(builder.Configuration);
 
-builder.Services.AddSingleton(sp => new ConnectionFactory
-{
-	Uri = new Uri(builder.Configuration.GetConnectionString("RabbitMQ")),
-	DispatchConsumersAsync = true
-});
+// CustomToken Elave edirik Sisteme
+builder.Services.AddCustomTokenAuthExtention(builder.Configuration);
 
-builder.Services.AddSingleton(typeof(RabbitMQPublisher<>).MakeGenericType(typeof(OrderDelivery)));
-builder.Services.AddSingleton<RabbitMQClientService>();
-
-// BackGroundService elave edirik projecte
-builder.Services.AddHostedService<DeliveryOrderBackgroundService>();
-
-builder.Services.Configure<CustomTokenOption>(builder.Configuration.GetSection("TokenOptions"));
-var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<CustomTokenOption>();
-builder.Services.AddCustomTokenAuth(tokenOptions);
-builder.Services.UseCustomValidationResponse();
-builder.Services.AddAuthorization();
+// OtherExtention
+builder.Services.OtherAdditions();
 
 // AuthService -in methoduna müraciet 
-builder.Services.AddHttpClient("AuthServer", client =>
-{
-	client.BaseAddress = new Uri(builder.Configuration["AuthServiceBaseUrl"]);
-});
+builder.Services.AddHttpClientExtention(builder.Configuration);
 
 
 var app = builder.Build();
