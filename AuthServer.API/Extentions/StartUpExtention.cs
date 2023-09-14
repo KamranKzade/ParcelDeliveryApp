@@ -5,6 +5,7 @@ using SharedLibrary.Configuration;
 using FluentValidation.AspNetCore;
 using AuthServer.API.Localizations;
 using Microsoft.AspNetCore.Identity;
+using AuthServer.API.Configurations;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Services.Abstract;
 using AuthServer.API.CustomValidations;
@@ -19,6 +20,7 @@ namespace AuthServer.API.Extentions;
 
 public static class StartUpExtention
 {
+	// Identity-ni sisteme tanidiriq
 	public static void AddIdentityWithExtention(this IServiceCollection services)
 	{
 		// Token-a omur vermek
@@ -56,6 +58,7 @@ public static class StartUpExtention
 
 	public static void AddScopeWithExtention(this IServiceCollection services)
 	{
+		// DI lari sisteme tanitmaq
 		services.AddScoped<IAuthenticationService, AuthenticationService>();
 		services.AddScoped<IUserService, UserService>();
 		services.AddScoped<ITokenService, TokenService>();
@@ -65,15 +68,16 @@ public static class StartUpExtention
 	}
 
 
-	public static void AddDbContextExtention(this IServiceCollection services, IConfiguration configuration)
+	public static void AddDbContextWithExtention(this IServiceCollection services, IConfiguration configuration)
 	{
+		// Connectioni veririk
 		services.AddDbContext<AppDbContext>(options =>
 		{
 			options.UseSqlServer(configuration.GetConnectionString("SqlServer"));
 		});
 	}
 
-	public static void AddCustomTokenAuthExtention(this IServiceCollection services, IConfiguration configuration)
+	public static void AddCustomTokenAuthWithExtention(this IServiceCollection services, IConfiguration configuration)
 	{
 		// TokenOption elave edirik Configure-a 
 		// Option pattern --> DI uzerinden appsetting-deki datalari elde etmeye deyilir.
@@ -82,12 +86,19 @@ public static class StartUpExtention
 		services.AddCustomTokenAuth(tokenOptions);
 	}
 
-	public static void AddControllersExtention(this IServiceCollection services)
+	public static void AddControllersWithExtention(this IServiceCollection services)
 	{
 		services.AddControllers()
 				.AddFluentValidation(opts => // FluentValidationlari sisteme tanidiriq
 				{
 					opts.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 				});
+	}
+
+	public static void OtherAdditionWithExtention(this IServiceCollection services, IConfiguration configuration)
+	{
+		services.Configure<List<Client>>(configuration.GetSection("Clients"));
+		// Validationlari 1 yere yigib qaytaririq
+		services.UseCustomValidationResponse();
 	}
 }

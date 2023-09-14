@@ -1,6 +1,6 @@
-﻿using AuthServer.API.Dtos;
+﻿using AutoMapper;
+using AuthServer.API.Dtos;
 using AuthServer.API.Models;
-using AutoMapper;
 
 namespace AuthServer.API.Mapper;
 

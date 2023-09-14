@@ -1,12 +1,9 @@
 ﻿using SharedLibrary.Dtos;
 using AuthServer.API.Dtos;
 using AuthServer.API.Models;
+using AuthServer.API.Mapper;
 using Microsoft.AspNetCore.Identity;
 using AuthServer.API.Services.Abstract;
-using AutoMapper.Internal.Mappers;
-using AuthServer.API.Mapper;
-using System.Security.Claims;
-using System.Collections.Generic;
 
 namespace AuthServer.API.Services.Concrete;
 

@@ -3,13 +3,13 @@ using AuthServer.API.Models;
 using System.Security.Claims;
 using SharedLibrary.Services;
 using SharedLibrary.Configuration;
+using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using AuthServer.API.Configurations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using AuthServer.API.Services.Abstract;
-using Microsoft.Extensions.Options;
 
 namespace AuthServer.API.Services.Concrete;
 

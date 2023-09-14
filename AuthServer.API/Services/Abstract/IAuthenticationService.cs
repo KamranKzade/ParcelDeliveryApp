@@ -1,5 +1,5 @@
-﻿using AuthServer.API.Dtos;
-using SharedLibrary.Dtos;
+﻿using SharedLibrary.Dtos;
+using AuthServer.API.Dtos;
 
 namespace AuthServer.API.Services.Abstract;
 
