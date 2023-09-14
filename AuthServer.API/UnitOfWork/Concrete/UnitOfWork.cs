@@ -4,22 +4,44 @@ using SharedLibrary.UnitOfWork.Abstract;
 
 namespace AuthServer.API.UnitOfWork.Concrete;
 
-public class UnitOfWork :IUnitOfWork
+public class UnitOfWork : IUnitOfWork
 {
 	private readonly DbContext _dbContext;
+	private readonly ILogger<UnitOfWork> _logger;
 
-	public UnitOfWork(AppDbContext dbContext)
+	public UnitOfWork(AppDbContext dbContext, ILogger<UnitOfWork> logger)
 	{
 		_dbContext = dbContext;
+		_logger = logger;
 	}
 
 	public void Commit()
 	{
-		_dbContext.SaveChanges();
+		try
+		{
+			_dbContext.SaveChanges();
+			_logger.LogInformation("Changes to the database were successfully saved.");
+		}
+		catch (Exception ex)
+		{
+			// Handle specific DbUpdateException (Entity Framework related)
+			_logger.LogError(ex, "Error while committing changes to the database");
+			throw;
+		}
 	}
 
 	public async Task CommitAsync()
 	{
-		await _dbContext.SaveChangesAsync();
+		try
+		{
+			await _dbContext.SaveChangesAsync();
+			_logger.LogInformation("Changes to the database were successfully saved.");
+		}
+		catch (Exception ex)
+		{
+			// Handle specific DbUpdateException (Entity Framework related)
+			_logger.LogError(ex, "Error while committing changes to the database");
+			throw;
+		}
 	}
 }

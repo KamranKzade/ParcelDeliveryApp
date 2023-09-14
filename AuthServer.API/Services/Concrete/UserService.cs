@@ -11,118 +11,168 @@ public class UserService : IUserService
 {
 	private readonly UserManager<UserApp> _userManager;
 	private readonly RoleManager<IdentityRole> _roleManager;
+	private readonly ILogger<UserService> _logger;
 
-	public UserService(UserManager<UserApp> userManager, RoleManager<IdentityRole> roleManager)
+	public UserService(UserManager<UserApp> userManager, RoleManager<IdentityRole> roleManager, ILogger<UserService> logger)
 	{
 		_userManager = userManager;
 		_roleManager = roleManager;
+		_logger = logger;
 	}
 
 	public async Task<Response<UserAppDto>> CreateUserAsync(CreateUserDto createUserDto)
 	{
-		var user = new UserApp
+		try
 		{
-			Email = createUserDto.Email,
-			UserName = createUserDto.UserName,
-			Name = createUserDto.Name,
-			Surname = createUserDto.FirstName,
-			Address = createUserDto.Address,
-			PostalCode = createUserDto.PostalCode,
-			Birhtdate = Convert.ToDateTime(createUserDto.Birhtdate),
-		};
+			var user = new UserApp
+			{
+				Email = createUserDto.Email,
+				UserName = createUserDto.UserName,
+				Name = createUserDto.Name,
+				Surname = createUserDto.FirstName,
+				Address = createUserDto.Address,
+				PostalCode = createUserDto.PostalCode,
+				Birhtdate = Convert.ToDateTime(createUserDto.Birhtdate),
+			};
 
-		var result = await _userManager.CreateAsync(user, createUserDto.Password);
+			var result = await _userManager.CreateAsync(user, createUserDto.Password);
 
-		if (!result.Succeeded)
-		{
-			var errors = result.Errors.Select(x => x.Description).ToList();
-
-			return Response<UserAppDto>.Fail(new ErrorDto(errors, true), StatusCodes.Status400BadRequest);
+			if (!result.Succeeded)
+			{
+				var errors = result.Errors.Select(x => x.Description).ToList();
+				_logger.LogError($"Failed to create user: {createUserDto.Email}\nErrors: {string.Join(", ", errors)}");
+				return Response<UserAppDto>.Fail(new ErrorDto(errors, true), StatusCodes.Status400BadRequest);
+			}
+			_logger.LogInformation($"User created successfully: {createUserDto.Email}");
+			return Response<UserAppDto>.Success(ObjectMapper.Mapper.Map<UserAppDto>(user), StatusCodes.Status200OK);
 		}
-		return Response<UserAppDto>.Success(ObjectMapper.Mapper.Map<UserAppDto>(user), StatusCodes.Status200OK);
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, $"An error occurred while creating a user: {createUserDto.Email}", createUserDto.Email);
+			throw;
+		}
 	}
 
 	public async Task<Response<UserAppDto>> GetUserByNameAsync(string userName)
 	{
-		var user = await _userManager.FindByNameAsync(userName);
-
-		if (user == null)
+		try
 		{
-			return Response<UserAppDto>.Fail("UserName not found", StatusCodes.Status404NotFound, true);
-		}
+			var user = await _userManager.FindByNameAsync(userName);
 
-		return Response<UserAppDto>.Success(ObjectMapper.Mapper.Map<UserAppDto>(user), StatusCodes.Status200OK);
+			if (user == null)
+			{
+				_logger.LogInformation($"User with UserName '{userName}' not found");
+				return Response<UserAppDto>.Fail("UserName not found", StatusCodes.Status404NotFound, true);
+			}
+			_logger.LogInformation($"User retrieved successfully by UserName: {userName}");
+			return Response<UserAppDto>.Success(ObjectMapper.Mapper.Map<UserAppDto>(user), StatusCodes.Status200OK);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, $"An error occurred while retrieving user by UserName: {userName}", userName);
+			throw;
+		}
 	}
 
 	public async Task<Response<IEnumerable<UserAppDto>>> GetCourierList()
 	{
-		var user = await _userManager.GetUsersInRoleAsync("Courier");
-
-		if (user == null)
+		try
 		{
-			return Response<IEnumerable<UserAppDto>>.Fail("UserName not found", StatusCodes.Status404NotFound, true);
+			var user = await _userManager.GetUsersInRoleAsync("Courier");
+
+			if (user == null)
+			{
+				_logger.LogInformation("No users found in the 'Courier' role");
+				return Response<IEnumerable<UserAppDto>>.Fail("UserName not found", StatusCodes.Status404NotFound, true);
+			}
+
+			var userdto = user.Select(o => new UserAppDto
+			{
+				Id = o.Id,
+				UserName = o.Name,
+				Email = o.Email
+			}).AsQueryable();
+
+			_logger.LogInformation("List of courier users retrieved successfully");
+			return Response<IEnumerable<UserAppDto>>.Success(userdto, StatusCodes.Status200OK);
 		}
-
-		var userdto = user.Select(o => new UserAppDto
+		catch (Exception ex)
 		{
-			Id = o.Id,
-			UserName = o.Name,
-			Email = o.Email
-		}).AsQueryable();
-
-
-		return Response<IEnumerable<UserAppDto>>.Success(userdto, StatusCodes.Status200OK);
+			_logger.LogError(ex, "An error occurred while retrieving the list of couriers");
+			throw;
+		}
 	}
 
 
 	public async Task<Response<NoDataDto>> CreateUserRoles(CreateUserRoleDto dto)
 	{
-		if (!await _roleManager.RoleExistsAsync(dto.RoleName))
+		try
 		{
-			await _roleManager.CreateAsync(new IdentityRole { Name = dto.RoleName.ToLower() });
+			if (!await _roleManager.RoleExistsAsync(dto.RoleName))
+			{
+				await _roleManager.CreateAsync(new IdentityRole { Name = dto.RoleName.ToLower() });
+				_logger.LogInformation($"Role '{dto.RoleName}' created successfully.");
+			}
+
+			var user = await _userManager.FindByNameAsync(dto.UserName);
+
+			if (user == null)
+			{
+				_logger.LogInformation($"User with UserName '{dto.UserName}' not found.");
+				return Response<NoDataDto>.Fail("UserName not found", StatusCodes.Status404NotFound, true);
+			}
+
+			await _userManager.AddToRoleAsync(user, dto.RoleName.ToLower());
+			_logger.LogInformation($"User '{user.UserName}' assigned to role '{dto.RoleName}' successfully.");
+
+			return Response<NoDataDto>.Success(StatusCodes.Status201Created);
 		}
-
-		var user = await _userManager.FindByNameAsync(dto.UserName);
-
-		if (user == null)
+		catch (Exception ex)
 		{
-			return Response<NoDataDto>.Fail("UserName not found", StatusCodes.Status404NotFound, true);
+			_logger.LogError(ex, "An error occurred while creating user roles");
+			throw;
 		}
-
-		await _userManager.AddToRoleAsync(user, dto.RoleName.ToLower());
-
-		return Response<NoDataDto>.Success(StatusCodes.Status201Created);
 	}
 
 	public async Task<Response<UserAppDto>> CreateCourierAsync(CreateUserDto createUserDto)
 	{
-		var user = new UserApp
+		try
 		{
-			Email = createUserDto.Email,
-			UserName = createUserDto.UserName,
-			Name = createUserDto.Name,
-			Surname = createUserDto.FirstName,
-			Address = createUserDto.Address,
-			PostalCode = createUserDto.PostalCode,
-			Birhtdate = Convert.ToDateTime(createUserDto.Birhtdate),
-		};
+			var user = new UserApp
+			{
+				Email = createUserDto.Email,
+				UserName = createUserDto.UserName,
+				Name = createUserDto.Name,
+				Surname = createUserDto.FirstName,
+				Address = createUserDto.Address,
+				PostalCode = createUserDto.PostalCode,
+				Birhtdate = Convert.ToDateTime(createUserDto.Birhtdate),
+			};
 
-		var result = await _userManager.CreateAsync(user, createUserDto.Password);
+			var result = await _userManager.CreateAsync(user, createUserDto.Password);
 
-		if (!result.Succeeded)
-		{
-			var errors = result.Errors.Select(x => x.Description).ToList();
+			if (!result.Succeeded)
+			{
+				var errors = result.Errors.Select(x => x.Description).ToList();
+				_logger.LogError($"Failed to create a courier user: {string.Join(", ", errors)}");
+				return Response<UserAppDto>.Fail(new ErrorDto(errors, true), StatusCodes.Status400BadRequest);
+			}
 
-			return Response<UserAppDto>.Fail(new ErrorDto(errors, true), StatusCodes.Status400BadRequest);
+			if (!await _roleManager.RoleExistsAsync("Courier"))
+			{
+				await _roleManager.CreateAsync(new IdentityRole { Name = "Courier" });
+				_logger.LogInformation("Role 'Courier' created successfully.");
+			}
+
+			await _userManager.AddToRoleAsync(user, "Courier");
+			_logger.LogInformation($"User '{user.UserName}' assigned to role 'Courier' successfully.");
+			return Response<UserAppDto>.Success(ObjectMapper.Mapper.Map<UserAppDto>(user), StatusCodes.Status200OK);
+
 		}
-
-		if (!await _roleManager.RoleExistsAsync("Courier"))
+		catch (Exception ex)
 		{
-			await _roleManager.CreateAsync(new IdentityRole { Name = "Courier" });
+			_logger.LogError(ex, "An error occurred while creating a courier user");
+			throw;
 		}
-
-		await _userManager.AddToRoleAsync(user, "Courier");
-
-		return Response<UserAppDto>.Success(ObjectMapper.Mapper.Map<UserAppDto>(user), StatusCodes.Status200OK);
 	}
 }

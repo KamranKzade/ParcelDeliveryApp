@@ -1,4 +1,6 @@
-﻿using SharedLibrary.Dtos;
+﻿using Serilog;
+using Serilog.Context;
+using SharedLibrary.Dtos;
 using AuthServer.API.Dtos;
 using AuthServer.API.Models;
 using Microsoft.Extensions.Options;
@@ -8,8 +10,6 @@ using Microsoft.AspNetCore.Identity;
 using AuthServer.API.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
-using Serilog.Context;
-using Serilog;
 
 namespace AuthServer.API.Services.Concrete;
 
@@ -21,6 +21,7 @@ public class AuthenticationService : IAuthenticationService
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IGenericRepository<UserRefleshToken> _userRefleshTokenService;
 	private readonly ILogger<AuthenticationService> _logger;
+
 	public AuthenticationService(IOptions<List<Client>> client, ITokenService tokenService, UserManager<UserApp> userManager,
 		IUnitOfWork unitOfWork, IGenericRepository<UserRefleshToken> userRefleshTokenService, ILogger<AuthenticationService> logger)
 	{
@@ -39,104 +40,152 @@ public class AuthenticationService : IAuthenticationService
 			throw new ArgumentNullException(nameof(logIn));
 		}
 
-		var user = await _userManager.FindByEmailAsync(logIn.Email);
-
-		// Userin olub olmadigini yoxlayiriq
-		if (user == null)
+		try
 		{
-			_logger.LogError($"Kullanıcı bulunamadı: {logIn.Email}", logIn.Email);
-			return Response<TokenDto>.Fail("Email or Password is wrong", StatusCodes.Status400BadRequest, isShow: true);
-		}
+			var user = await _userManager.FindByEmailAsync(logIn.Email);
 
-		// Parolu yoxlayiriq
-		if (!await _userManager.CheckPasswordAsync(user, logIn.Password))
-		{
-			_logger.LogError($"Parola yanlış girildi: {logIn.Password}", logIn.Email);
-			return Response<TokenDto>.Fail("Email or Password is wrong", StatusCodes.Status400BadRequest, isShow: true);
-		}
-
-		var token = _tokenService.CreateToken(user);
-		var userRefleshToken = await _userRefleshTokenService.Where(x => x.UserId == user.Id).SingleOrDefaultAsync();
-
-		if (userRefleshToken == null)
-		{
-			await _userRefleshTokenService.AddAsync(new UserRefleshToken
+			// Userin olub olmadigini yoxlayiriq
+			if (user == null)
 			{
-				UserId = user.Id,
-				RefleshToken = token.RefleshToken,
-				Expiration = token.RefleshTokenExpiration
-			});
+				_logger.LogError($"User not found: {logIn.Email}", logIn.Email);
+				return Response<TokenDto>.Fail("Email or Password is wrong", StatusCodes.Status400BadRequest, isShow: true);
+			}
+
+			// Parolu yoxlayiriq
+			if (!await _userManager.CheckPasswordAsync(user, logIn.Password))
+			{
+				_logger.LogError($"The password was entered incorrectly: {logIn.Password}", logIn.Email);
+				return Response<TokenDto>.Fail("Email or Password is wrong", StatusCodes.Status400BadRequest, isShow: true);
+			}
+
+			var token = _tokenService.CreateToken(user);
+			var userRefleshToken = await _userRefleshTokenService.Where(x => x.UserId == user.Id).SingleOrDefaultAsync();
+
+			if (userRefleshToken == null)
+			{
+				await _userRefleshTokenService.AddAsync(new UserRefleshToken
+				{
+					UserId = user.Id,
+					RefleshToken = token.RefleshToken,
+					Expiration = token.RefleshTokenExpiration
+				});
+			}
+			else
+			{
+				userRefleshToken.RefleshToken = token.RefleshToken;
+				userRefleshToken.Expiration = token.RefleshTokenExpiration;
+			}
+
+			await _unitOfWork.CommitAsync();
+
+			Log.Information($"Token created. User: {user.Name}");
+			return Response<TokenDto>.Success(token, StatusCodes.Status200OK);
+
 		}
-		else
+		catch (Exception ex)
 		{
-			userRefleshToken.RefleshToken = token.RefleshToken;
-			userRefleshToken.Expiration = token.RefleshTokenExpiration;
+			using (LogContext.PushProperty("LogEvent", ex.ToString()))
+				Log.Error(ex.ToString(), "An error occurred while creating the token");
+
+			return Response<TokenDto>.Fail("An error occurred while creating the token", StatusCodes.Status500InternalServerError, isShow: true);
 		}
-
-		await _unitOfWork.CommitAsync();
-		
-		Log.Information($"Token oluşturuldu. Kullanıcı: {user.Name}");
-		return Response<TokenDto>.Success(token, StatusCodes.Status200OK);
 	}
-
 
 	public Response<ClientTokenDto> CreateTokenByClientAsync(ClientLogInDto clientLogInDto)
 	{
-		var client = _client.SingleOrDefault(x => x.Id == clientLogInDto.ClientId && x.Secret == clientLogInDto.ClientSecret);
-
-		if (client == null)
+		try
 		{
-			return Response<ClientTokenDto>.Fail("ClientId or ClientSecret not found", StatusCodes.Status404NotFound, true);
-		}
+			var client = _client.SingleOrDefault(x => x.Id == clientLogInDto.ClientId && x.Secret == clientLogInDto.ClientSecret);
 
-		var token = _tokenService.CreateTokenByClient(client);
-		return Response<ClientTokenDto>.Success(token, StatusCodes.Status200OK);
+			if (client == null)
+			{
+				_logger.LogError("ClientId or ClientSecret not found");
+				return Response<ClientTokenDto>.Fail("ClientId or ClientSecret not found", StatusCodes.Status404NotFound, true);
+			}
+
+			var token = _tokenService.CreateTokenByClient(client);
+			_logger.LogInformation("The token was created successfully");
+			return Response<ClientTokenDto>.Success(token, StatusCodes.Status200OK);
+
+		}
+		catch (Exception ex)
+		{
+			using (LogContext.PushProperty("LogEvent", ex.ToString()))
+				Log.Error(ex.ToString(), "An error occurred while creating the token");
+
+			return Response<ClientTokenDto>.Fail("An error occurred while creating the token", StatusCodes.Status500InternalServerError, isShow: true);
+		}
 	}
 
 	public async Task<Response<TokenDto>> CreateTokenByRefleshTokenAsync(string refleshToken)
 	{
-		// Movcud refleshTokeni aliriq
-		var existRefleshToken = await _userRefleshTokenService.Where(x => x.RefleshToken == refleshToken).SingleOrDefaultAsync();
-
-		if (existRefleshToken == null)
+		try
 		{
-			return Response<TokenDto>.Fail("Reflesh token not found", StatusCodes.Status404NotFound, true);
+			// Movcud refleshTokeni aliriq
+			var existRefleshToken = await _userRefleshTokenService.Where(x => x.RefleshToken == refleshToken).SingleOrDefaultAsync();
+
+			if (existRefleshToken == null)
+			{
+				_logger.LogError("Reflesh token not found");
+				return Response<TokenDto>.Fail("Reflesh token not found", StatusCodes.Status404NotFound, true);
+			}
+
+			// Useri tapiram UserId-e gore
+			var user = await _userManager.FindByIdAsync(existRefleshToken.UserId);
+
+			if (user == null)
+			{
+				_logger.LogError("User Id not found");
+				return Response<TokenDto>.Fail("User Id not found", StatusCodes.Status404NotFound, true);
+			}
+
+			// Yeni token yaradib
+			var tokenDto = _tokenService.CreateToken(user);
+
+			// movcud tokenin refleshtokeni ile vaxtini, yeni yaradilan tokene uygun olaraq deyisirik
+			existRefleshToken.RefleshToken = tokenDto.RefleshToken;
+			existRefleshToken.Expiration = tokenDto.RefleshTokenExpiration;
+
+			await _unitOfWork.CommitAsync();
+
+			_logger.LogInformation("The token was successfully created as a refresh token");
+			return Response<TokenDto>.Success(tokenDto, StatusCodes.Status200OK);
+		}
+		catch (Exception ex)
+		{
+			using (LogContext.PushProperty("LogEvent", ex.ToString()))
+				Log.Error(ex.ToString(), "An error occurred while creating the token");
+
+			return Response<TokenDto>.Fail("An error occurred while creating the token", StatusCodes.Status500InternalServerError, isShow: true);
 		}
 
-		// Useri tapiram UserId-e gore
-		var user = await _userManager.FindByIdAsync(existRefleshToken.UserId);
-
-		if (user == null)
-		{
-			return Response<TokenDto>.Fail("User Id not found", StatusCodes.Status404NotFound, true);
-		}
-
-		// Yeni token yaradib
-		var tokenDto = _tokenService.CreateToken(user);
-
-		// movcud tokenin refleshtokeni ile vaxtini, yeni yaradilan tokene uygun olaraq deyisirik
-		existRefleshToken.RefleshToken = tokenDto.RefleshToken;
-		existRefleshToken.Expiration = tokenDto.RefleshTokenExpiration;
-
-		await _unitOfWork.CommitAsync();
-
-		return Response<TokenDto>.Success(tokenDto, StatusCodes.Status200OK);
 	}
 
 	public async Task<Response<NoDataDto>> RevokeRefleshTokenAsync(string refleshToken)
 	{
-		var existRefleshToken = await _userRefleshTokenService.Where(x => x.RefleshToken == refleshToken).SingleOrDefaultAsync();
-
-		if (existRefleshToken == null)
+		try
 		{
-			return Response<NoDataDto>.Fail("Reflesh token not found ", 404, true);
+			var existRefleshToken = await _userRefleshTokenService.Where(x => x.RefleshToken == refleshToken).SingleOrDefaultAsync();
+
+			if (existRefleshToken == null)
+			{
+				_logger.LogError("Reflesh token not found");
+				return Response<NoDataDto>.Fail("Reflesh token not found", StatusCodes.Status404NotFound, true);
+			}
+
+			_userRefleshTokenService.Remove(existRefleshToken);
+
+			await _unitOfWork.CommitAsync();
+
+			_logger.LogInformation("The reflash token was successfully deleted");
+			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 		}
+		catch (Exception ex)
+		{
+			using (LogContext.PushProperty("LogEvent", ex.ToString()))
+				Log.Error(ex.ToString(), "An error occurred while creating the token");
 
-		_userRefleshTokenService.Remove(existRefleshToken);
-
-		await _unitOfWork.CommitAsync();
-
-		return Response<NoDataDto>.Success(StatusCodes.Status200OK);
-
+			return Response<NoDataDto>.Fail("An error occurred while creating the token", StatusCodes.Status500InternalServerError, isShow: true);
+		}
 	}
 }
