@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using AuthServer.API.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
+using Serilog.Context;
+using Serilog;
 
 namespace AuthServer.API.Services.Concrete;
 
@@ -18,15 +20,16 @@ public class AuthenticationService : IAuthenticationService
 	private readonly UserManager<UserApp> _userManager;
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IGenericRepository<UserRefleshToken> _userRefleshTokenService;
-
+	private readonly ILogger<AuthenticationService> _logger;
 	public AuthenticationService(IOptions<List<Client>> client, ITokenService tokenService, UserManager<UserApp> userManager,
-		IUnitOfWork unitOfWork, IGenericRepository<UserRefleshToken> userRefleshTokenService)
+		IUnitOfWork unitOfWork, IGenericRepository<UserRefleshToken> userRefleshTokenService, ILogger<AuthenticationService> logger)
 	{
 		_client = client.Value;
 		_tokenService = tokenService;
 		_userManager = userManager;
 		_unitOfWork = unitOfWork;
 		_userRefleshTokenService = userRefleshTokenService;
+		_logger = logger;
 	}
 
 	public async Task<Response<TokenDto>> CreateTokenAsync(LogInDto logIn)
@@ -41,12 +44,14 @@ public class AuthenticationService : IAuthenticationService
 		// Userin olub olmadigini yoxlayiriq
 		if (user == null)
 		{
+			_logger.LogError($"Kullanıcı bulunamadı: {logIn.Email}", logIn.Email);
 			return Response<TokenDto>.Fail("Email or Password is wrong", StatusCodes.Status400BadRequest, isShow: true);
 		}
 
 		// Parolu yoxlayiriq
 		if (!await _userManager.CheckPasswordAsync(user, logIn.Password))
 		{
+			_logger.LogError($"Parola yanlış girildi: {logIn.Password}", logIn.Email);
 			return Response<TokenDto>.Fail("Email or Password is wrong", StatusCodes.Status400BadRequest, isShow: true);
 		}
 
@@ -69,9 +74,11 @@ public class AuthenticationService : IAuthenticationService
 		}
 
 		await _unitOfWork.CommitAsync();
-
+		
+		Log.Information($"Token oluşturuldu. Kullanıcı: {user.Name}");
 		return Response<TokenDto>.Success(token, StatusCodes.Status200OK);
 	}
+
 
 	public Response<ClientTokenDto> CreateTokenByClientAsync(ClientLogInDto clientLogInDto)
 	{
