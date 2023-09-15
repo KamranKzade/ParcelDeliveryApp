@@ -1,4 +1,6 @@
-﻿using RabbitMQ.Client;
+﻿using Serilog;
+using Serilog.Events;
+using RabbitMQ.Client;
 using SharedLibrary.Models;
 using OrderServer.API.Models;
 using SharedLibrary.Extentions;
@@ -11,6 +13,7 @@ using OrderServer.API.Services.Concrete;
 using OrderServer.API.BackgroundServices;
 using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
+
 
 namespace OrderServer.API.Extentions;
 
@@ -68,6 +71,26 @@ public static class StartUpExtention
 		services.AddHttpClient("AuthServer", client =>
 		{
 			client.BaseAddress = new Uri(configuration["AuthServiceBaseUrl"]);
+		});
+	}
+
+	public static void AddLoggingWithExtention(this IServiceCollection services, IConfiguration config)
+	{
+		Log.Logger = new LoggerConfiguration()
+					.ReadFrom.Configuration(config)
+					.WriteTo.MSSqlServer(
+									connectionString: config.GetConnectionString("SqlServer"),
+									tableName: "LogEntries",
+									autoCreateSqlTable: true,
+									restrictedToMinimumLevel: LogEventLevel.Information
+								)
+						.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
+				   .CreateLogger();
+
+
+		services.AddLogging(loggingBuilder =>
+		{
+			loggingBuilder.AddSerilog(); // Serilog'u kullanarak loglama
 		});
 	}
 }

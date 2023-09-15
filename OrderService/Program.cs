@@ -16,7 +16,7 @@ builder.Services.AddSingletonExtention(builder.Configuration);
 builder.Services.AddCustomTokenAuthExtention(builder.Configuration);
 builder.Services.OtherAdditions();
 builder.Services.AddHttpClientExtention(builder.Configuration);
-
+builder.Services.AddLoggingWithExtention(builder.Configuration);
 
 var app = builder.Build();
 
