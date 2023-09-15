@@ -7,6 +7,7 @@ using DeliveryServer.API.Models;
 using SharedLibrary.Configuration;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Services.Abstract;
+using SharedLibrary.UnitOfWork.Concrete;
 using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using DeliveryServer.API.Services.Abstract;
@@ -21,7 +22,7 @@ public static class StartUpExtention
 	public static void AddScopeWithExtention(this IServiceCollection services)
 	{
 
-		services.AddScoped<IUnitOfWork, UnitOfWork.Concrete.UnitOfWork>();
+		services.AddScoped<IUnitOfWork, UnitOfWork<AppDbContext>>();
 		services.AddScoped(typeof(IGenericRepository<>), typeof(Repositories.Concrete.GenericRepository<>));
 		services.AddScoped(typeof(IServiceGeneric<,>), typeof(ServiceGeneric<,>));
 		services.AddScoped<IDeliveryService, DeliveryService>();

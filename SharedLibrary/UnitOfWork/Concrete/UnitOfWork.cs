@@ -1,14 +1,15 @@
-﻿using OrderServer.API.Models;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.UnitOfWork.Abstract;
 
-namespace OrderServer.API.UnitOfWork.Concrete;
+namespace SharedLibrary.UnitOfWork.Concrete;
 
-public class UnitOfWork : IUnitOfWork
+
+public class UnitOfWork<TContext> : IUnitOfWork where TContext : DbContext
 {
-	private readonly DbContext _dbContext;
-	private readonly ILogger<UnitOfWork> _logger;
-	public UnitOfWork(AppDbContext dbContext, ILogger<UnitOfWork> logger)
+	private readonly TContext _dbContext;
+	private readonly ILogger<TContext> _logger;
+	public UnitOfWork(TContext dbContext, ILogger<TContext> logger)
 	{
 		_dbContext = dbContext;
 		_logger = logger;

@@ -10,10 +10,10 @@ using SharedLibrary.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
 using OrderServer.API.Services.Abstract;
 using OrderServer.API.Services.Concrete;
+using SharedLibrary.UnitOfWork.Concrete;
 using OrderServer.API.BackgroundServices;
 using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
-
 
 namespace OrderServer.API.Extentions;
 
@@ -21,7 +21,7 @@ public static class StartUpExtention
 {
 	public static void AddScopeExtention(this IServiceCollection services)
 	{
-		services.AddScoped<IUnitOfWork, UnitOfWork.Concrete.UnitOfWork>();
+		services.AddScoped<IUnitOfWork, UnitOfWork<AppDbContext>>();
 		services.AddScoped(typeof(IGenericRepository<>), typeof(Repositories.Concrete.GenericRepository<>));
 		services.AddScoped(typeof(IServiceGeneric<,>), typeof(ServiceGeneric<,>));
 		services.AddScoped<IOrderService, OrderServiceForController>();

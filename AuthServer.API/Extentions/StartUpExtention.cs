@@ -13,6 +13,7 @@ using SharedLibrary.Services.Abstract;
 using AuthServer.API.CustomValidations;
 using AuthServer.API.Services.Abstract;
 using AuthServer.API.Services.Concrete;
+using SharedLibrary.UnitOfWork.Concrete;
 using SharedLibrary.UnitOfWork.Abstract;
 using AuthServer.API.Repository.Concrete;
 using SharedLibrary.Repositories.Abstract;
@@ -66,7 +67,7 @@ public static class StartUpExtention
 		services.AddScoped<ITokenService, TokenService>();
 		services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 		services.AddScoped(typeof(IServiceGeneric<,>), typeof(ServiceGeneric<,>));
-		services.AddScoped<IUnitOfWork, UnitOfWork.Concrete.UnitOfWork>();
+		services.AddScoped<IUnitOfWork, UnitOfWork<AppDbContext>>();
 	}
 
 
