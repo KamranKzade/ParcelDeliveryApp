@@ -1,5 +1,4 @@
-﻿using Serilog;
-using Serilog.Context;
+﻿using Serilog.Context;
 using SharedLibrary.Dtos;
 using AuthServer.API.Dtos;
 using AuthServer.API.Models;
@@ -78,14 +77,14 @@ public class AuthenticationService : IAuthenticationService
 
 			await _unitOfWork.CommitAsync();
 
-			Log.Information($"Token created. User: {user.Name}");
+			_logger.LogInformation($"Token created. User: {user.Name}");
 			return Response<TokenDto>.Success(token, StatusCodes.Status200OK);
 
 		}
 		catch (Exception ex)
 		{
 			using (LogContext.PushProperty("LogEvent", ex.ToString()))
-				Log.Error(ex.ToString(), "An error occurred while creating the token");
+				_logger.LogError(ex.ToString(), "An error occurred while creating the token");
 
 			return Response<TokenDto>.Fail("An error occurred while creating the token", StatusCodes.Status500InternalServerError, isShow: true);
 		}
@@ -111,7 +110,7 @@ public class AuthenticationService : IAuthenticationService
 		catch (Exception ex)
 		{
 			using (LogContext.PushProperty("LogEvent", ex.ToString()))
-				Log.Error(ex.ToString(), "An error occurred while creating the token");
+				_logger.LogError(ex.ToString(), "An error occurred while creating the token");
 
 			return Response<ClientTokenDto>.Fail("An error occurred while creating the token", StatusCodes.Status500InternalServerError, isShow: true);
 		}
@@ -154,7 +153,7 @@ public class AuthenticationService : IAuthenticationService
 		catch (Exception ex)
 		{
 			using (LogContext.PushProperty("LogEvent", ex.ToString()))
-				Log.Error(ex.ToString(), "An error occurred while creating the token");
+				_logger.LogError(ex.ToString(), "An error occurred while creating the token");
 
 			return Response<TokenDto>.Fail("An error occurred while creating the token", StatusCodes.Status500InternalServerError, isShow: true);
 		}
@@ -183,7 +182,7 @@ public class AuthenticationService : IAuthenticationService
 		catch (Exception ex)
 		{
 			using (LogContext.PushProperty("LogEvent", ex.ToString()))
-				Log.Error(ex.ToString(), "An error occurred while creating the token");
+				_logger.LogError(ex.ToString(), "An error occurred while creating the token");
 
 			return Response<NoDataDto>.Fail("An error occurred while creating the token", StatusCodes.Status500InternalServerError, isShow: true);
 		}
