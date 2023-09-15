@@ -76,7 +76,7 @@ public class DeliveryOrderBackgroundService : BackgroundService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, $"An error occurred while processing the order update: {ex.Message}",);
+			_logger.LogError(ex, $"An error occurred while processing the order update: {ex.Message}");
 			_logger.LogError(ex.Message);
 		}
 

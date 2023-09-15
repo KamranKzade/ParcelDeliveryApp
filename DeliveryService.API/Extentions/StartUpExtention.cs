@@ -1,4 +1,6 @@
-﻿using RabbitMQ.Client;
+﻿using Serilog;
+using Serilog.Events;
+using RabbitMQ.Client;
 using SharedLibrary.Models;
 using SharedLibrary.Extentions;
 using DeliveryServer.API.Models;
@@ -10,6 +12,7 @@ using SharedLibrary.Repositories.Abstract;
 using DeliveryServer.API.Services.Abstract;
 using DeliveryServer.API.Services.Concrete;
 using SharedLibrary.Services.RabbitMqCustom;
+
 
 namespace DeliveryServer.API.Extentions;
 
@@ -63,5 +66,25 @@ public static class StartUpExtention
 	{
 		services.UseCustomValidationResponse();
 		services.AddAuthorization();
+	}
+
+	public static void AddLoggingWithExtention(this IServiceCollection services, IConfiguration config)
+	{
+		Log.Logger = new LoggerConfiguration()
+					.ReadFrom.Configuration(config)
+					.WriteTo.MSSqlServer(
+									connectionString: config.GetConnectionString("SqlServer"),
+									tableName: "LogEntries",
+									autoCreateSqlTable: true,
+									restrictedToMinimumLevel: LogEventLevel.Information
+								)
+						.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
+				   .CreateLogger();
+
+
+		services.AddLogging(loggingBuilder =>
+		{
+			loggingBuilder.AddSerilog(); // Serilog'u kullanarak loglama
+		});
 	}
 }

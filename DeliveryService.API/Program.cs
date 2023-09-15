@@ -15,7 +15,9 @@ builder.Services.AddScopeWithExtention();
 builder.Services.AddSingletonWithExtention(builder.Configuration);
 builder.Services.AddCustomTokenAuthWithExtention(builder.Configuration);
 builder.Services.OtherAdditionWithExtention();
-builder.Services.AddHttpClientWithExtention(builder.Configuration);
+builder.Services.AddHttpClientWithExtention(builder.Configuration); 
+builder.Services.AddLoggingWithExtention(builder.Configuration);
+
 
 
 
