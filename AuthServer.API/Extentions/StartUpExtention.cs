@@ -15,8 +15,8 @@ using AuthServer.API.Services.Abstract;
 using AuthServer.API.Services.Concrete;
 using SharedLibrary.UnitOfWork.Concrete;
 using SharedLibrary.UnitOfWork.Abstract;
-using AuthServer.API.Repository.Concrete;
 using SharedLibrary.Repositories.Abstract;
+using OrderServer.API.Repositories.Concrete;
 
 namespace AuthServer.API.Extentions;
 
@@ -65,7 +65,7 @@ public static class StartUpExtention
 		services.AddScoped<IAuthenticationService, AuthenticationService>();
 		services.AddScoped<IUserService, UserService>();
 		services.AddScoped<ITokenService, TokenService>();
-		services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+		services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 		services.AddScoped(typeof(IServiceGeneric<,>), typeof(ServiceGeneric<,>));
 		services.AddScoped<IUnitOfWork, UnitOfWork<AppDbContext>>();
 	}

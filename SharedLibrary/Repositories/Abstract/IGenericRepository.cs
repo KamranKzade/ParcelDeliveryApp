@@ -1,9 +1,10 @@
-﻿using System.Linq.Expressions;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace SharedLibrary.Repositories.Abstract;
 
 
-public interface IGenericRepository<TEntity> where TEntity : class
+public interface IGenericRepository<TContext,TEntity> where TEntity : class where TContext : DbContext
 {
 	Task<TEntity> GetByIdAsync(string id);
 	Task<IEnumerable<TEntity>> GetAllAsync();

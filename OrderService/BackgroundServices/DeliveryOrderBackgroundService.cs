@@ -61,7 +61,7 @@ public class DeliveryOrderBackgroundService : BackgroundService
 
 			using var scope = _serviceProvider.CreateScope();
 			var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-			var genericReop = scope.ServiceProvider.GetRequiredService<IGenericRepository<OrderDelivery>>();
+			var genericReop = scope.ServiceProvider.GetRequiredService<IGenericRepository<AppDbContext, OrderDelivery>>();
 			var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
 			var order = dbContext.Orders.FirstOrDefault(o => o.Id == orderDelivery.Id);

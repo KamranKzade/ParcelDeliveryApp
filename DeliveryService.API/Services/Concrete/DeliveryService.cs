@@ -21,9 +21,9 @@ public class DeliveryService : IDeliveryService
 	private readonly ILogger<DeliveryService> _logger;
 	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly RabbitMQPublisher<OrderDelivery> _rabbitMQPublisher;
-	private readonly IGenericRepository<OrderDelivery> _genericRepository;
+	private readonly IGenericRepository<AppDbContext, OrderDelivery> _genericRepository;
 
-	public DeliveryService(AppDbContext dbContext, IUnitOfWork unitOfWork, IGenericRepository<OrderDelivery> genericRepository, IConfiguration configuration, IHttpClientFactory httpClientFactory, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, ILogger<DeliveryService> logger)
+	public DeliveryService(AppDbContext dbContext, IUnitOfWork unitOfWork, IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IConfiguration configuration, IHttpClientFactory httpClientFactory, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, ILogger<DeliveryService> logger)
 	{
 		_dbContext = dbContext;
 		_unitOfWork = unitOfWork;

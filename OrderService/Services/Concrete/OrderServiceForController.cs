@@ -17,13 +17,13 @@ public class OrderServiceForController : IOrderService
 {
 	private readonly AppDbContext _dbContext;
 	private readonly IUnitOfWork _unitOfWork;
-	private readonly IGenericRepository<OrderDelivery> _genericRepository;
+	private readonly IGenericRepository<AppDbContext, OrderDelivery> _genericRepository;
 	private readonly IServiceGeneric<OrderDelivery, OrderDto> _serviceGeneric;
 	private readonly IConfiguration _configuration;
 	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly ILogger<OrderServiceForController> _logger;
 
-	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger)
+	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger)
 	{
 		_dbContext = dbContext;
 		_genericRepository = genericRepository;

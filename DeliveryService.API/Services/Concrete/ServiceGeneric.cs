@@ -1,6 +1,7 @@
 ﻿using SharedLibrary.Dtos;
 using System.Linq.Expressions;
 using DeliveryServer.API.Mapper;
+using DeliveryServer.API.Models;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
@@ -11,10 +12,10 @@ namespace DeliveryServer.API.Services.Concrete;
 public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> where TDto : class where TEntity : class
 {
 	private readonly IUnitOfWork _unitOfWork;
-	private readonly IGenericRepository<TEntity> _genericRepo;
+	private readonly IGenericRepository<AppDbContext, TEntity> _genericRepo;
 	private readonly ILogger<ServiceGeneric<TEntity, TDto>> _logger;
 
-	public ServiceGeneric(IUnitOfWork unitOfWork, IGenericRepository<TEntity> genericRepo, ILogger<ServiceGeneric<TEntity, TDto>> logger)
+	public ServiceGeneric(IUnitOfWork unitOfWork, IGenericRepository<AppDbContext, TEntity> genericRepo, ILogger<ServiceGeneric<TEntity, TDto>> logger)
 	{
 		_unitOfWork = unitOfWork;
 		_genericRepo = genericRepo;

@@ -13,7 +13,7 @@ using SharedLibrary.Repositories.Abstract;
 using DeliveryServer.API.Services.Abstract;
 using DeliveryServer.API.Services.Concrete;
 using SharedLibrary.Services.RabbitMqCustom;
-
+using OrderServer.API.Repositories.Concrete;
 
 namespace DeliveryServer.API.Extentions;
 
@@ -23,7 +23,7 @@ public static class StartUpExtention
 	{
 
 		services.AddScoped<IUnitOfWork, UnitOfWork<AppDbContext>>();
-		services.AddScoped(typeof(IGenericRepository<>), typeof(Repositories.Concrete.GenericRepository<>));
+		services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 		services.AddScoped(typeof(IServiceGeneric<,>), typeof(ServiceGeneric<,>));
 		services.AddScoped<IDeliveryService, DeliveryService>();
 	}

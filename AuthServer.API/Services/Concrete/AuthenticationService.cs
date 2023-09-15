@@ -18,11 +18,11 @@ public class AuthenticationService : IAuthenticationService
 	private readonly ITokenService _tokenService;
 	private readonly UserManager<UserApp> _userManager;
 	private readonly IUnitOfWork _unitOfWork;
-	private readonly IGenericRepository<UserRefleshToken> _userRefleshTokenService;
+	private readonly IGenericRepository<AppDbContext, UserRefleshToken> _userRefleshTokenService;
 	private readonly ILogger<AuthenticationService> _logger;
 
 	public AuthenticationService(IOptions<List<Client>> client, ITokenService tokenService, UserManager<UserApp> userManager,
-		IUnitOfWork unitOfWork, IGenericRepository<UserRefleshToken> userRefleshTokenService, ILogger<AuthenticationService> logger)
+		IUnitOfWork unitOfWork, IGenericRepository<AppDbContext, UserRefleshToken> userRefleshTokenService, ILogger<AuthenticationService> logger)
 	{
 		_client = client.Value;
 		_tokenService = tokenService;

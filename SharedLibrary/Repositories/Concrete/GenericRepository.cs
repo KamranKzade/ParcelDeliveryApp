@@ -1,18 +1,17 @@
 ﻿using System.Linq.Expressions;
-using DeliveryServer.API.Models;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Repositories.Abstract;
+using Microsoft.Extensions.Logging;
 
-namespace DeliveryServer.API.Repositories.Concrete;
+namespace OrderServer.API.Repositories.Concrete;
 
-
-public class GenericRepository<Tentity> : IGenericRepository<Tentity> where Tentity : class
+public class GenericRepository<TContext, Tentity> : IGenericRepository<TContext, Tentity> where Tentity : class where TContext : DbContext
 {
-	private readonly DbContext _dbContext;
+	private readonly TContext _dbContext;
 	private readonly DbSet<Tentity> _dbSet;
-	private readonly ILogger<GenericRepository<Tentity>> _logger;
+	private readonly ILogger<GenericRepository<TContext, Tentity>> _logger;
 
-	public GenericRepository(AppDbContext dbContext, ILogger<GenericRepository<Tentity>> logger)
+	public GenericRepository(TContext dbContext, ILogger<GenericRepository<TContext, Tentity>> logger)
 	{
 		_dbContext = dbContext;
 		_dbSet = _dbContext.Set<Tentity>();
@@ -111,5 +110,4 @@ public class GenericRepository<Tentity> : IGenericRepository<Tentity> where Tent
 			throw;
 		}
 	}
-
 }
