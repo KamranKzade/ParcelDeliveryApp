@@ -40,7 +40,7 @@ public class UserService : IUserService
 			if (!result.Succeeded)
 			{
 				var errors = result.Errors.Select(x => x.Description).ToList();
-				_logger.LogError($"Failed to create user: {createUserDto.Email}\nErrors: {string.Join(", ", errors)}");
+				_logger.LogWarning($"Failed to create user: {createUserDto.Email}\nErrors: {string.Join(", ", errors)}");
 				return Response<UserAppDto>.Fail(new ErrorDto(errors, true), StatusCodes.Status400BadRequest);
 			}
 			_logger.LogInformation($"User created successfully: {createUserDto.Email}");
@@ -154,7 +154,7 @@ public class UserService : IUserService
 			if (!result.Succeeded)
 			{
 				var errors = result.Errors.Select(x => x.Description).ToList();
-				_logger.LogError($"Failed to create a courier user: {string.Join(", ", errors)}");
+				_logger.LogWarning($"Failed to create a courier user: {string.Join(", ", errors)}");
 				return Response<UserAppDto>.Fail(new ErrorDto(errors, true), StatusCodes.Status400BadRequest);
 			}
 

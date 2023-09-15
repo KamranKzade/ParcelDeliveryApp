@@ -47,14 +47,14 @@ public class AuthenticationService : IAuthenticationService
 			// Userin olub olmadigini yoxlayiriq
 			if (user == null)
 			{
-				_logger.LogError($"User not found: {logIn.Email}", logIn.Email);
+				_logger.LogWarning($"User not found: {logIn.Email}", logIn.Email);
 				return Response<TokenDto>.Fail("Email or Password is wrong", StatusCodes.Status400BadRequest, isShow: true);
 			}
 
 			// Parolu yoxlayiriq
 			if (!await _userManager.CheckPasswordAsync(user, logIn.Password))
 			{
-				_logger.LogError($"The password was entered incorrectly: {logIn.Password}", logIn.Email);
+				_logger.LogWarning($"The password was entered incorrectly: {logIn.Password}", logIn.Email);
 				return Response<TokenDto>.Fail("Email or Password is wrong", StatusCodes.Status400BadRequest, isShow: true);
 			}
 
@@ -99,7 +99,7 @@ public class AuthenticationService : IAuthenticationService
 
 			if (client == null)
 			{
-				_logger.LogError("ClientId or ClientSecret not found");
+				_logger.LogWarning("ClientId or ClientSecret not found");
 				return Response<ClientTokenDto>.Fail("ClientId or ClientSecret not found", StatusCodes.Status404NotFound, true);
 			}
 
@@ -126,7 +126,7 @@ public class AuthenticationService : IAuthenticationService
 
 			if (existRefleshToken == null)
 			{
-				_logger.LogError("Reflesh token not found");
+				_logger.LogWarning("Reflesh token not found");
 				return Response<TokenDto>.Fail("Reflesh token not found", StatusCodes.Status404NotFound, true);
 			}
 
@@ -135,7 +135,7 @@ public class AuthenticationService : IAuthenticationService
 
 			if (user == null)
 			{
-				_logger.LogError("User Id not found");
+				_logger.LogWarning("User Id not found");
 				return Response<TokenDto>.Fail("User Id not found", StatusCodes.Status404NotFound, true);
 			}
 
@@ -169,7 +169,7 @@ public class AuthenticationService : IAuthenticationService
 
 			if (existRefleshToken == null)
 			{
-				_logger.LogError("Reflesh token not found");
+				_logger.LogWarning("Reflesh token not found");
 				return Response<NoDataDto>.Fail("Reflesh token not found", StatusCodes.Status404NotFound, true);
 			}
 

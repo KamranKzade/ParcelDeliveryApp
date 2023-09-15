@@ -68,7 +68,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 
 			if (product == null)
 			{
-				_logger.LogError($"Entity with ID {id} not found");
+				_logger.LogWarning($"Entity with ID {id} not found");
 				return Response<TDto>.Fail("Id not found", StatusCodes.Status404NotFound, true);
 			}
 
@@ -92,7 +92,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 
 			if (isExistEntity == null)
 			{
-				_logger.LogError($"Entity with ID {id} not found for removal");
+				_logger.LogWarning($"Entity with ID {id} not found for removal");
 				return Response<NoDataDto>.Fail("Id not found", StatusCodes.Status404NotFound, true);
 			}
 
@@ -119,7 +119,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 
 			if (isExistEntity == null)
 			{
-				_logger.LogError($"Entity with ID {id} not found for update");
+				_logger.LogWarning($"Entity with ID {id} not found for update");
 				return Response<NoDataDto>.Fail("Id not found", StatusCodes.Status404NotFound, true);
 			}
 
