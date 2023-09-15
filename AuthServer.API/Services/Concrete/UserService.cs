@@ -48,7 +48,7 @@ public class UserService : IUserService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, $"An error occurred while creating a user: {createUserDto.Email}", createUserDto.Email);
+			_logger.LogError(ex, $"An error occurred while creating a user: {createUserDto.Email}");
 			throw;
 		}
 	}
@@ -69,7 +69,7 @@ public class UserService : IUserService
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, $"An error occurred while retrieving user by UserName: {userName}", userName);
+			_logger.LogError(ex, $"An error occurred while retrieving user by UserName: {userName}");
 			throw;
 		}
 	}

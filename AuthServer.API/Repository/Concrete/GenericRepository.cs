@@ -72,7 +72,7 @@ public class GenericRepository<Tentity> : IGenericRepository<Tentity> where Tent
 	{
 		try
 		{
-			_logger.LogInformation("Removing entity of type {EntityType} with ID {EntityId}", entity.GetType().Name, entity);
+			_logger.LogInformation($"Removing entity of type {entity.GetType().Name} with ID {entity}");
 			_dbSet.Remove(entity);
 		}
 		catch (Exception ex)
@@ -86,7 +86,7 @@ public class GenericRepository<Tentity> : IGenericRepository<Tentity> where Tent
 	{
 		try
 		{
-			_logger.LogInformation("Updating entity of type {EntityType} with ID {EntityId}", entity.GetType().Name, entity);
+			_logger.LogInformation($"Updating entity of type {entity.GetType().Name} with ID {entity}");
 			_dbContext.Entry(entity).State = EntityState.Modified;
 			return entity;
 		}
@@ -101,7 +101,7 @@ public class GenericRepository<Tentity> : IGenericRepository<Tentity> where Tent
 	{
 		try
 		{
-			_logger.LogInformation($"Constructing a LINQ query with predicate: {predicate.ToString()}", predicate.ToString());
+			_logger.LogInformation($"Constructing a LINQ query with predicate: {predicate}");
 			return _dbSet.Where(predicate);
 		}
 		catch (Exception ex)

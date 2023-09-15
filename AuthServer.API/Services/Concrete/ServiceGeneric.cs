@@ -37,7 +37,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occurred while adding the entity: {Entity}", entity);
+			_logger.LogError(ex, "An error occurred while adding the entity: {Entity}");
 			var error = new ErrorDto("An error occurred while adding the entity", true);
 			// You can customize the error message and status code as needed.
 			return Response<TDto>.Fail(error, StatusCodes.Status500InternalServerError);
@@ -68,16 +68,16 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 
 			if (product == null)
 			{
-				_logger.LogError($"Entity with ID {id} not found", id);
+				_logger.LogError($"Entity with ID {id} not found");
 				return Response<TDto>.Fail("Id not found", StatusCodes.Status404NotFound, true);
 			}
 
-			_logger.LogInformation("Entity with ID {Id} retrieved successfully", id);
+			_logger.LogInformation($"Entity with ID {id} retrieved successfully");;
 			return Response<TDto>.Success(ObjectMapper.Mapper.Map<TDto>(product), StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occurred while retrieving entity by ID: {Id}", id);
+			_logger.LogError(ex, $"An error occurred while retrieving entity by ID: {id}");
 			var error = new ErrorDto("An error occurred while retrieving the entity", true);
 
 			return Response<TDto>.Fail(error, StatusCodes.Status500InternalServerError);
@@ -92,19 +92,19 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 
 			if (isExistEntity == null)
 			{
-				_logger.LogError($"Entity with ID {id} not found for removal", id);
+				_logger.LogError($"Entity with ID {id} not found for removal");
 				return Response<NoDataDto>.Fail("Id not found", StatusCodes.Status404NotFound, true);
 			}
 
 			_genericRepo.Remove(isExistEntity);
 			await _unitOfWork.CommitAsync();
 
-			_logger.LogInformation($"Entity with ID {id} removed successfully", id);
+			_logger.LogInformation($"Entity with ID {id} removed successfully");
 			return Response<NoDataDto>.Success(StatusCodes.Status204NoContent);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occurred while removing entity by ID: {Id}", id);
+			_logger.LogError(ex, $"An error occurred while removing entity by ID: {id}");
 			var error = new ErrorDto("An error occurred while removing the entity", true);
 
 			return Response<NoDataDto>.Fail(error, StatusCodes.Status500InternalServerError);
@@ -119,7 +119,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 
 			if (isExistEntity == null)
 			{
-				_logger.LogError($"Entity with ID {id} not found for update", id);
+				_logger.LogError($"Entity with ID {id} not found for update");
 				return Response<NoDataDto>.Fail("Id not found", StatusCodes.Status404NotFound, true);
 			}
 
@@ -128,12 +128,12 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 			_genericRepo.UpdateAsync(updateEntity);
 			await _unitOfWork.CommitAsync();
 
-			_logger.LogInformation($"Entity with ID {id} updated successfully", id);
+			_logger.LogInformation($"Entity with ID {id} updated successfully");
 			return Response<NoDataDto>.Success(StatusCodes.Status204NoContent);
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occurred while updating entity by ID: {Id}", id);
+			_logger.LogError(ex, $"An error occurred while updating entity by ID: {id}");
 			var error = new ErrorDto("An error occurred while updating the entity", true);
 
 			return Response<NoDataDto>.Fail(error, StatusCodes.Status500InternalServerError);

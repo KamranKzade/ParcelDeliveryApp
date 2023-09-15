@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using Serilog;
+using Serilog.Events;
+using System.Reflection;
 using AuthServer.API.Models;
 using SharedLibrary.Extentions;
 using SharedLibrary.Configuration;
@@ -100,5 +102,25 @@ public static class StartUpExtention
 		services.Configure<List<Client>>(configuration.GetSection("Clients"));
 		// Validationlari 1 yere yigib qaytaririq
 		services.UseCustomValidationResponse();
+	}
+
+	public static void AddLoggingWithExtention(this IServiceCollection services, IConfiguration config)
+	{
+		Log.Logger = new LoggerConfiguration()
+					.ReadFrom.Configuration(config)
+					.WriteTo.MSSqlServer(
+									connectionString: config.GetConnectionString("SqlServer"),
+									tableName: "LogEntries",
+									autoCreateSqlTable: true,
+									restrictedToMinimumLevel: LogEventLevel.Information
+								)
+						.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
+				   .CreateLogger();
+
+
+		services.AddLogging(loggingBuilder =>
+		{
+			loggingBuilder.AddSerilog(); // Serilog'u kullanarak loglama
+		});
 	}
 }

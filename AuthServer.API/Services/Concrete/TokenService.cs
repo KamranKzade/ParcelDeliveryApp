@@ -41,7 +41,7 @@ public class TokenService : ITokenService
 
 			var refreshToken = Convert.ToBase64String(numberByte);
 
-			_logger.LogInformation("Refresh token created successfully: {RefreshToken}", refreshToken);
+			_logger.LogInformation($"Refresh token created successfully: {refreshToken}");
 			return refreshToken;
 		}
 		catch (Exception ex)
@@ -71,12 +71,12 @@ public class TokenService : ITokenService
 			userList.AddRange(audiences.Select(x => new Claim(JwtRegisteredClaimNames.Aud, x)));
 			userList.AddRange(userRoles.Select(x => new Claim(ClaimTypes.Role, x)));
 
-			_logger.LogInformation($"Claims generated successfully for user: {userApp.Id}", userApp.Id);
+			_logger.LogInformation($"Claims generated successfully for user: {userApp.Id}");
 			return userList;
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occurred while generating claims for user: {UserId}", userApp.Id);
+			_logger.LogError(ex, $"An error occurred while generating claims for user: {userApp.Id}");
 			throw;
 		}
 	}
@@ -90,12 +90,12 @@ public class TokenService : ITokenService
 			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString());
 			new Claim(JwtRegisteredClaimNames.Sub, client.Id.ToString());
 
-			_logger.LogInformation($"Generated claims for client: {client.Id}", client.Id);
+			_logger.LogInformation($"Generated claims for client: {client.Id}");
 			return claims;
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occurred while generating claims for client: {ClientId}", client.Id);
+			_logger.LogError(ex, $"An error occurred while generating claims for client: {client.Id}");
 			throw;
 		}
 	}
@@ -137,12 +137,12 @@ public class TokenService : ITokenService
 				RefleshTokenExpiration = refleshTokenExpiration,
 			};
 
-			_logger.LogInformation($"Generated a token for user: {userApp.Id}", userApp.Id);
+			_logger.LogInformation($"Generated a token for user: {userApp.Id}");
 			return tokenDto;
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occurred while generating a token for user: {UserId}", userApp.Id);
+			_logger.LogError(ex, $"An error occurred while generating a token for user: {userApp.Id}");
 			throw;
 		}
 	}
@@ -180,11 +180,12 @@ public class TokenService : ITokenService
 				AccessTokenExpiration = accessTokenExpiration,
 			};
 
+			_logger.LogInformation($"Token generated successfully for client: {client.Id}");
 			return clientTokenDto;
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occurred while generating a token for the client: {ClientId}", client.Id);
+			_logger.LogError(ex, $"An error occurred while generating a token for the client: {client.Id}");
 			throw;
 		}
 	}
