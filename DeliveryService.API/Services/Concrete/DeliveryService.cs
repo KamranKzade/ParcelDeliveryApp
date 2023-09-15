@@ -38,6 +38,7 @@ public class DeliveryService : IDeliveryService
 	{
 		try
 		{
+			// OrderService-de olan datalarimizdi
 			var orders = await GetOrders();
 
 			if (orders.Count == 0)
@@ -50,7 +51,8 @@ public class DeliveryService : IDeliveryService
 			{
 				if (order.Id.ToString().ToLower() == dto.OrderId.ToLower() && order.CourierId == courierId)
 				{
-					var isCheck = await _dbContext.OrderDeliveries.FirstOrDefaultAsync(d => d.Id == order.Id);
+					// DeliveryService-e yazilib ona baxiriq
+					var isLocalDb = await _dbContext.OrderDeliveries.FirstOrDefaultAsync(d => d.Id == order.Id);
 
 					if (order.Status == OrderStatus.Delivered)
 					{
@@ -58,27 +60,40 @@ public class DeliveryService : IDeliveryService
 						return Response<NoDataDto>.Fail("Bu Order Artiq catdirilib ve siz bunu deyise bilmezsiniz", StatusCodes.Status404NotFound, true);
 					}
 
-					if (isCheck != null)
+					if (order.Status >= dto.OrderStatus)
 					{
-						isCheck.Status = dto.OrderStatus;
-						isCheck.DeliveryDate = DateTime.Now;
-						_genericRepository.UpdateAsync(isCheck);
+						_logger.LogWarning("Bu Order Artiq yola cixib ve siz bunu initial vezyete bilmezsiniz");
+						return Response<NoDataDto>.Fail("Bu Order Artiq yola cixib ve siz bunu initial vezyete bilmezsiniz", StatusCodes.Status404NotFound, true);
+					}
+
+					if (isLocalDb != null)
+					{
+						isLocalDb.Status = dto.OrderStatus;
+						if (dto.OrderStatus == OrderStatus.Delivered)
+						{
+							isLocalDb.DeliveryDate = DateTime.Now;
+						}
+						_genericRepository.UpdateAsync(isLocalDb);
 						await _unitOfWork.CommitAsync();
 
 						// RabbitMq ile elaqe
-						_rabbitMQPublisher.Publish(isCheck);
+						_rabbitMQPublisher.Publish(isLocalDb);
 						_logger.LogInformation("Order statusu deyisdirildi.");
 						return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 					}
 					else
 					{
 						order.Status = dto.OrderStatus;
-						order.DeliveryDate = DateTime.Now;
+						if (dto.OrderStatus == OrderStatus.Delivered)
+						{
+							order.DeliveryDate = DateTime.Now;
+						}
 						await _genericRepository.AddAsync(order);
 						await _unitOfWork.CommitAsync();
 
 						// RabbitMq ile elaqe
 						_rabbitMQPublisher.Publish(order);
+						_logger.LogInformation("Order statusu deyisdirildi.");
 						return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 					}
 				}
