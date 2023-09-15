@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Serilog;
+using Newtonsoft.Json;
 using SharedLibrary.Dtos;
 using SharedLibrary.Models;
 using OrderServer.API.Dtos;
@@ -20,8 +21,9 @@ public class OrderServiceForController : IOrderService
 	private readonly IServiceGeneric<OrderDelivery, OrderDto> _serviceGeneric;
 	private readonly IConfiguration _configuration;
 	private readonly IHttpClientFactory _httpClientFactory;
+	private readonly ILogger<OrderServiceForController> _logger;
 
-	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory)
+	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger)
 	{
 		_dbContext = dbContext;
 		_genericRepository = genericRepository;
@@ -29,6 +31,7 @@ public class OrderServiceForController : IOrderService
 		_serviceGeneric = serviceGeneric;
 		_configuration = configuration;
 		_httpClientFactory = httpClientFactory;
+		_logger = logger;
 	}
 
 
@@ -37,8 +40,11 @@ public class OrderServiceForController : IOrderService
 
 	public async Task<Response<OrderDto>> CreateOrderAsync(CreateOrderDto dto, string userName, string userId, string address)
 	{
-		if (dto == null) return Response<OrderDto>.Fail("Geçersiz istek verisi", StatusCodes.Status400BadRequest, true);
-
+		if (dto == null)
+		{
+			_logger.LogWarning("Invalid request data");
+			return Response<OrderDto>.Fail("Invalid request data", StatusCodes.Status400BadRequest, true);
+		}
 		try
 		{
 			var order = new OrderDto()
@@ -57,15 +63,17 @@ public class OrderServiceForController : IOrderService
 
 			if (result == null)
 			{
-				return Response<OrderDto>.Fail("Sipariş oluşturulurken bir hata oluştu", StatusCodes.Status500InternalServerError, true);
+				_logger.LogWarning("An error occurred while creating the order");
+				return Response<OrderDto>.Fail("An error occurred while creating the order", StatusCodes.Status500InternalServerError, true);
 			}
-			return Response<OrderDto>.Success(order, StatusCodes.Status201Created);
 
+			_logger.LogInformation($"Order created successfully. Order ID: {order.Id}");
+			return Response<OrderDto>.Success(order, StatusCodes.Status201Created);
 		}
 		catch (Exception ex)
 		{
-			return Response<OrderDto>.Fail($"Bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
-
+			_logger.LogError(ex, $"An error occurred: {ex.Message}"); // Log the error condition
+			return Response<OrderDto>.Fail($"An error occurred: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
 	}
 
@@ -76,7 +84,10 @@ public class OrderServiceForController : IOrderService
 			var orders = await _dbContext.Orders.Where(o => o.UserId == userId).ToListAsync();
 
 			if (orders.Count == 0)
-				return Response<IEnumerable<OrderDto>>.Fail("Bu username'e uygun veri bulunamadı", StatusCodes.Status404NotFound, true);
+			{
+				_logger.LogWarning($"No data found for the provided username: {userId}");
+				return Response<IEnumerable<OrderDto>>.Fail("No data found for the provided username", StatusCodes.Status404NotFound, true);
+			}
 
 			var orderDtos = orders.Select(o => new OrderDto
 			{
@@ -93,11 +104,13 @@ public class OrderServiceForController : IOrderService
 				CourierName = o.CourierName
 			}).AsQueryable();
 
+			_logger.LogInformation($"Successfully retrieved orders for user: {userId}");
 			return Response<IEnumerable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
-			return Response<IEnumerable<OrderDto>>.Fail($"Siparişleri alırken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+			_logger.LogError(ex, $"An error occurred while fetching orders: {ex.Message}");
+			return Response<IEnumerable<OrderDto>>.Fail($"An error occurred while fetching orders: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
 	}
 
@@ -109,24 +122,29 @@ public class OrderServiceForController : IOrderService
 
 			if (order == null)
 			{
-				return Response<NoDataDto>.Fail("Belirtilen sipariş bulunamadı veya kullanıcıya ait değil", StatusCodes.Status404NotFound, true);
+				_logger.LogWarning($"Order not found or does not belong to the user. UserId: {userId}, OrderId: {orderId}");
+				return Response<NoDataDto>.Fail("The specified order was not found or does not belong to the user", StatusCodes.Status404NotFound, true);
 			}
+
+			// rabbitMq ile yoxlama
 
 			if (order.Status != OrderStatus.Initial)
 			{
-				return Response<NoDataDto>.Fail("Siparişin adresi yalnızca başlangıç ​​durumundayken güncellenebilir", StatusCodes.Status400BadRequest, true);
+				_logger.LogWarning($"Order address can only be updated in the initial status. OrderId: {orderId}, CurrentStatus: {order.Status}");
+				return Response<NoDataDto>.Fail("The order's address can only be updated in the initial status", StatusCodes.Status400BadRequest, true);
 			}
 
 			order.DestinationAddress = address;
 			_genericRepository.UpdateAsync(order);
 			await _unitOfWork.CommitAsync();
 
+			_logger.LogInformation($"Order address updated successfully. OrderId: {orderId}");
 			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
-			// Hata yakalama ve uygun bir hata mesajı döndürme
-			return Response<NoDataDto>.Fail($"Sipariş güncellenirken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+			_logger.LogError(ex, $"An error occurred while updating the order: {ex.Message}");
+			return Response<NoDataDto>.Fail($"An error occurred while updating the order: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
 	}
 
@@ -138,24 +156,28 @@ public class OrderServiceForController : IOrderService
 
 			if (order == null)
 			{
-				return Response<NoDataDto>.Fail("Belirtilen sipariş bulunamadı veya kullanıcıya ait değil", StatusCodes.Status404NotFound, true);
+				_logger.LogWarning($"Order not found or does not belong to the user. UserId: {userId}, OrderId: {orderId}");
+				return Response<NoDataDto>.Fail("Order not found or does not belong to the user", StatusCodes.Status404NotFound, true);
 			}
 
 			// RabbitMq muraciet
 
 			if (order.Status != OrderStatus.Initial)
 			{
-				return Response<NoDataDto>.Fail("Siparişin yalnızca başlangıç durumundayken silinebilir", StatusCodes.Status400BadRequest, true);
+				_logger.LogWarning($"Order can only be deleted in the initial status. OrderId: {orderId}, CurrentStatus: {order.Status}");
+				return Response<NoDataDto>.Fail("The order can only be deleted in the initial status", StatusCodes.Status400BadRequest, true);
 			}
 
 			_genericRepository.Remove(order);
 			await _unitOfWork.CommitAsync();
 
+			_logger.LogWarning($"Order deleted successfully. OrderId: {orderId}");
 			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
-			return Response<NoDataDto>.Fail($"Sipariş silinirken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+			_logger.LogWarning(ex, $"An error occurred while deleting the order: {ex.Message}");
+			return Response<NoDataDto>.Fail($"An error occurred while deleting the order: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
 	}
 
@@ -174,7 +196,8 @@ public class OrderServiceForController : IOrderService
 
 			if (order == null)
 			{
-				return Response<NoDataDto>.Fail("Belirtilen sipariş bulunamadı", StatusCodes.Status404NotFound, true);
+				_logger.LogWarning($"Order not found. OrderId: {orderDto.OrderId}");
+				return Response<NoDataDto>.Fail("The specified order was not found", StatusCodes.Status404NotFound, true);
 			}
 
 			order.Status = orderDto.OrderStatus;
@@ -183,12 +206,13 @@ public class OrderServiceForController : IOrderService
 			await _unitOfWork.CommitAsync();
 
 
+			_logger.LogInformation($"Order status updated successfully. OrderId: {orderDto.OrderId}, NewStatus: {orderDto.OrderStatus}");
 			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
-			// Hata yakalama ve uygun bir hata mesajı döndürme
-			return Response<NoDataDto>.Fail($"Sipariş güncellenirken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+			_logger.LogError(ex, $"An error occurred while updating the order: {ex.Message}");
+			return Response<NoDataDto>.Fail($"An error occurred while updating the order: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
 	}
 
@@ -200,7 +224,8 @@ public class OrderServiceForController : IOrderService
 
 			if (orders == null)
 			{
-				return Response<IEnumerable<OrderDto>>.Fail("Veritabanında sipariş bilgisi bulunamadı", StatusCodes.Status404NotFound, true);
+				_logger.LogWarning("No order information found in the database");
+				return Response<IEnumerable<OrderDto>>.Fail("No order information found in the database", StatusCodes.Status404NotFound, true);
 			}
 
 			var orderDtos = orders.Select(o => new OrderDto
@@ -218,61 +243,83 @@ public class OrderServiceForController : IOrderService
 				CourierName = o.CourierName
 			}).AsQueryable();
 
+			_logger.LogInformation("Successfully retrieved orders from the database");
 			return Response<IEnumerable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
-			return Response<IEnumerable<OrderDto>>.Fail($"Sipariş güncellenirken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+			_logger.LogError(ex, $"An error occurred while retrieving orders: {ex.Message}");
+			return Response<IEnumerable<OrderDto>>.Fail($"An error occurred while retrieving orders: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
-
-
 	}
 
 	public Response<IEnumerable<CourierWithOrderStatusDto>> GetCourierWithOrderStatus(string courierId)
 	{
-		var orders = _dbContext.Orders
-			.Where(o => o.CourierId == courierId)
-			.Select(order => new CourierWithOrderStatusDto
-			{
-				CourierName = order.CourierName,
-				OrderName = order.Name,
-				OrderStatus = order.Status
-			});
-
-		if (orders == null)
+		try
 		{
-			return Response<IEnumerable<CourierWithOrderStatusDto>>.Fail("Veritabanında sipariş bilgisi bulunamadı", StatusCodes.Status404NotFound, true);
-		}
+			var orders = _dbContext.Orders
+				.Where(o => o.CourierId == courierId)
+				.Select(order => new CourierWithOrderStatusDto
+				{
+					CourierName = order.CourierName,
+					OrderName = order.Name,
+					OrderStatus = order.Status
+				});
 
-		return Response<IEnumerable<CourierWithOrderStatusDto>>.Success(orders, StatusCodes.Status200OK);
+			if (orders == null)
+			{
+				_logger.LogWarning($"No order information found for courier: {courierId}");
+				return Response<IEnumerable<CourierWithOrderStatusDto>>.Fail("No order information found for the specified courier", StatusCodes.Status404NotFound, true);
+			}
+
+			_logger.LogInformation($"Successfully retrieved orders for courier: {courierId}");
+			return Response<IEnumerable<CourierWithOrderStatusDto>>.Success(orders, StatusCodes.Status200OK);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, $"An error occurred while retrieving orders for courier: {courierId}, Error: {ex.Message}");
+			return Response<IEnumerable<CourierWithOrderStatusDto>>.Fail($"An error occurred while retrieving orders for courier: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+		}
 	}
 
 	public async Task<Response<NoDataDto>> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto)
 	{
-		var order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id.ToString() == dto.OrderId);
-
-		if (order == null)
+		try
 		{
-			return Response<NoDataDto>.Fail("Order tapilmadi", StatusCodes.Status404NotFound, true);
-		}
+			var order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id.ToString() == dto.OrderId);
 
-		if (!(order.CourierId == null || order.CourierName == null))
+			if (order == null)
+			{
+				_logger.LogWarning($"Order not found. OrderId: {dto.OrderId}");
+				return Response<NoDataDto>.Fail("Order not found", StatusCodes.Status404NotFound, true);
+			}
+
+			if (!(order.CourierId == null || order.CourierName == null))
+			{
+				_logger.LogWarning($"A courier has already been appointed for the order. OrderId: {dto.OrderId}");
+				return Response<NoDataDto>.Fail("A courier has already been appointed for the order", StatusCodes.Status400BadRequest, true);
+			}
+
+			if (!await CheckUserIsCourier(dto.CourierId, dto.CourierName))
+			{
+				_logger.LogWarning($"Courier not found. CourierId: {dto.CourierId}, CourierName: {dto.CourierName}");
+				return Response<NoDataDto>.Fail("Courier not found", StatusCodes.Status404NotFound, true);
+			}
+
+			order.CourierId = dto.CourierId;
+			order.CourierName = dto.CourierName;
+
+			_genericRepository.UpdateAsync(order);
+			await _unitOfWork.CommitAsync();
+
+			_logger.LogInformation($"Courier assigned to the order successfully. OrderId: {dto.OrderId}, CourierId: {dto.CourierId}, CourierName: {dto.CourierName}");
+			return Response<NoDataDto>.Success(StatusCodes.Status201Created);
+		}
+		catch (Exception ex)
 		{
-			return Response<NoDataDto>.Fail("A courier has already been appointed for the order", StatusCodes.Status404NotFound, true);
+			_logger.LogError(ex, $"An error occurred while assigning a courier to the order: {ex.Message}");
+			return Response<NoDataDto>.Fail($"An error occurred while assigning a courier to the order: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
-
-		if (!await CheckUserIsCourier(dto.CourierId, dto.CourierName))
-		{
-			return Response<NoDataDto>.Fail("Courirer not founded", StatusCodes.Status404NotFound, true);
-		}
-
-		order.CourierId = dto.CourierId;
-		order.CourierName = dto.CourierName;
-
-		_genericRepository.UpdateAsync(order);
-		await _unitOfWork.CommitAsync();
-
-		return Response<NoDataDto>.Success(StatusCodes.Status201Created);
 	}
 
 
@@ -300,12 +347,17 @@ public class OrderServiceForController : IOrderService
 												 .ToListAsync();
 
 			if (orders == null)
-				return Response<IEnumerable<OrderDetailDto>>.Fail("Kuryere uygun order tapilmadi", StatusCodes.Status404NotFound, true);
+			{
+				_logger.LogWarning($"No orders found for courier: {courierId}");
+				return Response<IEnumerable<OrderDetailDto>>.Fail("No orders found for the specified courier", StatusCodes.Status404NotFound, true);
+			}
 
+			_logger.BeginScope($"Successfully retrieved orders for courier: {courierId}");
 			return Response<IEnumerable<OrderDetailDto>>.Success(orders, StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
+			_logger.LogError(ex, $"An error occurred while retrieving orders for courier: {courierId}, Error: {ex.Message}");
 			return Response<IEnumerable<OrderDetailDto>>.Fail($"Siparişleri gösterirken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
 	}
@@ -325,6 +377,7 @@ public class OrderServiceForController : IOrderService
 
 			if (orders.Count == 0)
 			{
+				_logger.LogWarning($"No orders found for orderId: {orderId} and userId/courierId: {userId}");
 				return Response<IEnumerable<DeliveryDetailDto>>.Fail(new ErrorDto("Belirtilen sipariş bulunamadı", true), StatusCodes.Status404NotFound);
 			}
 
@@ -338,10 +391,12 @@ public class OrderServiceForController : IOrderService
 				DestinationAddress = o.DestinationAddress
 			}).AsQueryable();
 
+			_logger.LogInformation($"Successfully retrieved orders for orderId: {orderId} and userId/courierId: {userId}");
 			return Response<IEnumerable<DeliveryDetailDto>>.Success(orderDtos, StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
+			_logger.LogError(ex, $"An error occurred while retrieving orders: {ex.Message}");
 			return Response<IEnumerable<DeliveryDetailDto>>.Fail($"Siparişleri alırken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
 		}
 	}
@@ -353,15 +408,16 @@ public class OrderServiceForController : IOrderService
 
 	public async Task<bool> CheckUserIsCourier(string userId, string userName)
 	{
-		string identityServiceBaseUrl = _configuration["AuthServiceBaseUrl"];
-		string checkUserRoleEndpoint = $"{identityServiceBaseUrl}/api/User/GetCourierList";
-
-		// IHttpClientFactory'den HttpClient örneği alın
-		var client = _httpClientFactory.CreateClient();
-
-		// Identity Service ile iletişim kuracak HttpClient oluşturun
-		using (client)
+		try
 		{
+			string identityServiceBaseUrl = _configuration["AuthServiceBaseUrl"];
+			string checkUserRoleEndpoint = $"{identityServiceBaseUrl}/api/User/GetCourierList";
+
+			// IHttpClientFactory'den HttpClient örneği alın
+			var client = _httpClientFactory.CreateClient();
+
+			// Identity Service ile iletişim kuracak HttpClient oluşturun
+
 			// Identity Service'den kullanıcı bilgilerini alın
 			var response = await client.GetAsync(checkUserRoleEndpoint);
 			if (response.IsSuccessStatusCode)
@@ -374,41 +430,61 @@ public class OrderServiceForController : IOrderService
 
 				if (isCourier == null)
 				{
+					_logger.LogWarning($"User is not a courier. UserId: {userId}, UserName: {userName}");
 					return false;
 				}
 
+				_logger.LogInformation($"User is a courier. UserId: {userId}, UserName: {userName}");
 				return true;
 			}
 			else
 			{
+				_logger.LogWarning($"Failed to fetch user data from Identity Service. StatusCode: {response.StatusCode}");
 				return false;
 			}
 		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, $"An error occurred while checking user role: {ex.Message}");
+			return false;
+		}
+
 	}
 
 	public async Task<Response<IEnumerable<OrderDto>>> GetOrders()
 	{
-		var orders = await _dbContext.Orders.ToListAsync();
-
-		if (orders.Count == 0)
-			return Response<IEnumerable<OrderDto>>.Fail("DataBase de hal hazirda Order yoxdur", StatusCodes.Status404NotFound, true);
-
-		var orderDtos = orders.Select(o => new OrderDto
+		try
 		{
-			Id = o.Id,
-			Name = o.Name,
+			var orders = await _dbContext.Orders.ToListAsync();
 
-			Status = o.Status,
-			CreatedDate = o.CreatedDate,
-			DestinationAddress = o.DestinationAddress,
-			TotalAmount = o.TotalAmount,
-			UserId = o.UserId,
-			UserName = o.UserName,
-			CourierId = o.CourierId,
-			CourierName = o.CourierName
-		}).AsQueryable();
+			if (orders.Count == 0)
+			{
+				_logger.LogWarning("No orders found in the database.");
+				return Response<IEnumerable<OrderDto>>.Fail("There are no orders in the database", StatusCodes.Status404NotFound, true);
+			}
 
+			var orderDtos = orders.Select(o => new OrderDto
+			{
+				Id = o.Id,
+				Name = o.Name,
 
-		return Response<IEnumerable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
+				Status = o.Status,
+				CreatedDate = o.CreatedDate,
+				DestinationAddress = o.DestinationAddress,
+				TotalAmount = o.TotalAmount,
+				UserId = o.UserId,
+				UserName = o.UserName,
+				CourierId = o.CourierId,
+				CourierName = o.CourierName
+			}).AsQueryable();
+
+			_logger.LogInformation("Successfully retrieved orders from the database.");
+			return Response<IEnumerable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, $"An error occurred while retrieving orders from the database: {ex.Message}");
+			return Response<IEnumerable<OrderDto>>.Fail($"An error occurred while retrieving orders from the database: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+		}
 	}
 }

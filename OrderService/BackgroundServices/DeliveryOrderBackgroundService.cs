@@ -31,6 +31,7 @@ public class DeliveryOrderBackgroundService : BackgroundService
 
 		_channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
+		_logger.LogInformation("DeliveryOrderBackgroundService started.");
 		return base.StartAsync(cancellationToken);
 	}
 
@@ -42,11 +43,13 @@ public class DeliveryOrderBackgroundService : BackgroundService
 
 		consumer.Received += Consumer_Received;
 
+		_logger.LogInformation("Message consumption has started.");
 		return Task.CompletedTask;
 	}
 
 	public override Task StopAsync(CancellationToken cancellationToken)
 	{
+		_logger.LogInformation("Stopping DeliveryOrderBackgroundService...");
 		return base.StopAsync(cancellationToken);
 	}
 
@@ -68,10 +71,12 @@ public class DeliveryOrderBackgroundService : BackgroundService
 			genericReop.UpdateAsync(order);
 			unitOfWork.Commit();
 
+			_logger.LogInformation($"Order updated successfully. OrderId: {order.Id}");
 			_channel.BasicAck(@event.DeliveryTag, false);
 		}
 		catch (Exception ex)
 		{
+			_logger.LogError(ex, $"An error occurred while processing the order update: {ex.Message}",);
 			_logger.LogError(ex.Message);
 		}
 
