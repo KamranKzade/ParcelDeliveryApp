@@ -62,7 +62,7 @@ public static class StartUpExtention
 		// Connectioni veririk
 		services.AddDbContext<AppDbContext>(options =>
 		{
-			options.UseSqlServer(configuration.GetConnectionString("SqlServer"));
+			options.UseSqlServer(configuration.GetConnectionString("SqlServer"), opt => opt.EnableRetryOnFailure());
 		});
 	}
 

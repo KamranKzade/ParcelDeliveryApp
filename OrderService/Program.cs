@@ -1,4 +1,6 @@
-﻿using OrderServer.API.Extentions;
+﻿using OrderServer.API.Models;
+using OrderServer.API.Extentions;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,23 @@ builder.Services.AddHttpClientExtention(builder.Configuration);
 builder.Services.AddLoggingWithExtention(builder.Configuration);
 
 var app = builder.Build();
+
+
+try
+{
+	using (var scope = app.Services.CreateScope())
+	{
+		var someService = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+		// someService.Database.EnsureCreated();
+		 await someService.Database.MigrateAsync();
+	}
+
+}
+catch (Exception e)
+{
+
+}
 
 //// Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())

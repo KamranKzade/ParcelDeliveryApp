@@ -17,7 +17,7 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 	public AppDbContext CreateDbContext(string[] args)
 	{
 		var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-		optionsBuilder.UseSqlServer("SqlServer");
+		optionsBuilder.UseSqlServer("SqlServer", opt => opt.EnableRetryOnFailure());
 
 		return new AppDbContext(optionsBuilder.Options);
 	}
