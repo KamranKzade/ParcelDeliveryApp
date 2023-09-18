@@ -29,7 +29,7 @@ public class OrderController : CustomBaseController
 	#region User
 
 	[Authorize(Roles = "User")]
-	[HttpPost]
+	[HttpPost("CreateOrder")]
 	public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
 	{
 		var userName = HttpContext.User.Identity.Name;
