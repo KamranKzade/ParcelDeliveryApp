@@ -6,7 +6,8 @@
       "serviceActions": {
         "authserver.api": "StartDebugging",
         "orderservice.api": "StartDebugging",
-        "deliveryserver.api": "StartDebugging"
+        "deliveryserver.api": "StartDebugging",
+        "orderserver.api": "StartDebugging"
       }
     }
   }

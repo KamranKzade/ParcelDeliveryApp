@@ -76,7 +76,7 @@ public static class StartUpExtention
 		// Connectioni veririk
 		services.AddDbContext<AppDbContext>(options =>
 		{
-			options.UseSqlServer(configuration.GetConnectionString("SqlServer"));
+			options.UseSqlServer(configuration.GetConnectionString("SqlServer"), opt => opt.EnableRetryOnFailure());
 		});
 	}
 
@@ -115,7 +115,7 @@ public static class StartUpExtention
 									autoCreateSqlTable: true,
 									restrictedToMinimumLevel: LogEventLevel.Information
 								)
-						.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
+						//.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
 				   .CreateLogger();
 
 

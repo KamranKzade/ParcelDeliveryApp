@@ -1,27 +1,43 @@
 version: '3.4'
 
-services:
+services:  
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest  
-  orderservice.api:
-    image: ${DOCKER_REGISTRY-}orderserviceapi
-    container_name: microservice-orderservice
-    build:
-      context: .
-      dockerfile: OrderService/Dockerfile
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql-server
+    networks:
+      - parceldelivery
 
   authserver.api:
     image: ${DOCKER_REGISTRY-}authserverapi
-    container_name: microservice-authserver
+    container_name: authserverapi-container
     build:
       context: .
       dockerfile: AuthServer.API/Dockerfile
+    networks:
+      - parceldelivery
 
   deliveryserver.api:
     image: ${DOCKER_REGISTRY-}deliveryserverapi
+    container_name: deliveryserverapi-container
     build:
       context: .
       dockerfile: DeliveryService.API/Dockerfile
+    networks:
+      - parceldelivery
+
+
+  orderserver.api:
+    image: ${DOCKER_REGISTRY-}orderserverapi
+    container_name: orderserverapi-container
+    build:
+      context: .
+      dockerfile: OrderService/Dockerfile
+    networks:
+      - parceldelivery
+        
 
 volumes:
   sqlserver_volume :
+  
+networks:
+  parceldelivery:

@@ -1,4 +1,6 @@
 ﻿using AuthServer.API.Extentions;
+using AuthServer.API.Models;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,20 @@ builder.Services.AddLoggingWithExtention(builder.Configuration);
 
 var app = builder.Build();
 
+
+try
+{
+	using (var scope = app.Services.CreateScope())
+	{
+		var someService = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+	 	await someService.Database.MigrateAsync();
+	}
+
+}
+catch (Exception e)
+{
+
+}
 // // Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())
 // {
