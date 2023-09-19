@@ -115,7 +115,7 @@ public static class StartUpExtention
 									autoCreateSqlTable: true,
 									restrictedToMinimumLevel: LogEventLevel.Information
 								)
-						//.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
+				   //.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
 				   .CreateLogger();
 
 
@@ -123,5 +123,22 @@ public static class StartUpExtention
 		{
 			loggingBuilder.AddSerilog(); // Serilog'u kullanarak loglama
 		});
+	}
+
+	public static async void AddMigrationWithExtention(this IServiceProvider provider)
+	{
+		try
+		{
+			using (var scope = provider.CreateScope())
+			{
+				var someService = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+				await someService.Database.MigrateAsync();
+			}
+
+		}
+		catch (Exception ex)
+		{
+			Log.Error($"Error: {ex.Message}");
+		}
 	}
 }

@@ -21,20 +21,8 @@ builder.Services.AddLoggingWithExtention(builder.Configuration);
 
 var app = builder.Build();
 
+app.Services.AddMigrationWithExtention();
 
-try
-{
-	using (var scope = app.Services.CreateScope())
-	{
-		var someService = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-	 	await someService.Database.MigrateAsync();
-	}
-
-}
-catch (Exception e)
-{
-
-}
 // // Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())
 // {

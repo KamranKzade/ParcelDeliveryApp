@@ -88,4 +88,21 @@ public static class StartUpExtention
 			loggingBuilder.AddSerilog(); // Serilog'u kullanarak loglama
 		});
 	}
+
+	public static async void AddMigrationWithExtention(this IServiceProvider provider)
+	{
+		try
+		{
+			using (var scope = provider.CreateScope())
+			{
+				var someService = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+				await someService.Database.MigrateAsync();
+			}
+
+		}
+		catch (Exception ex)
+		{
+			Log.Error($"Error: {ex.Message}");
+		}
+	}
 }

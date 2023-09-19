@@ -23,6 +23,8 @@ builder.Services.AddLoggingWithExtention(builder.Configuration);
 
 var app = builder.Build();
 
+app.Services.AddMigrationWithExtention();
+
 // // Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())
 // {
