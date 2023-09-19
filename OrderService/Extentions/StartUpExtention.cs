@@ -71,7 +71,7 @@ public static class StartUpExtention
 		// AuthService -in methoduna müraciet 
 		services.AddHttpClient("AuthServer", client =>
 		{
-			client.BaseAddress = new Uri(configuration["AuthServiceBaseUrl"]);
+			client.BaseAddress = new Uri(configuration["Microservices:AuthServiceBaseUrl"]);
 		});
 	}
 

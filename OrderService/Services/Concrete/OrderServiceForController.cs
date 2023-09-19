@@ -1,5 +1,4 @@
-﻿using Serilog;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SharedLibrary.Dtos;
 using SharedLibrary.Models;
 using OrderServer.API.Dtos;
@@ -128,6 +127,15 @@ public class OrderServiceForController : IOrderService
 
 			// rabbitMq ile yoxlama
 
+			var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer();
+
+			var updatedOrder = ordersOnTheDeliveryServer.FirstOrDefault(item => item.Id.ToString() == orderId && item.Status != order.Status);
+
+			if (updatedOrder != null)
+			{
+				order.Status = updatedOrder.Status;
+			}
+
 			if (order.Status != OrderStatus.Initial)
 			{
 				_logger.LogWarning($"Order address can only be updated in the initial status. OrderId: {orderId}, CurrentStatus: {order.Status}");
@@ -160,7 +168,13 @@ public class OrderServiceForController : IOrderService
 				return Response<NoDataDto>.Fail("Order not found or does not belong to the user", StatusCodes.Status404NotFound, true);
 			}
 
-			// RabbitMq muraciet
+			var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer();
+			var updatedOrder = ordersOnTheDeliveryServer.FirstOrDefault(item => item.Id.ToString() == orderId && item.Status != order.Status);
+
+			if (updatedOrder != null)
+			{
+				order = updatedOrder;
+			}
 
 			if (order.Status != OrderStatus.Initial)
 			{
@@ -199,6 +213,15 @@ public class OrderServiceForController : IOrderService
 				_logger.LogWarning($"Order not found. OrderId: {orderDto.OrderId}");
 				return Response<NoDataDto>.Fail("The specified order was not found", StatusCodes.Status404NotFound, true);
 			}
+
+
+			//  var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer();
+			// var updatedOrder = ordersOnTheDeliveryServer.FirstOrDefault(item => item.Id.ToString() == orderDto.OrderId && item.Status != order.Status);
+			// 
+			// if (updatedOrder != null)
+			// {
+			// 	order = updatedOrder;
+			// }
 
 			order.Status = orderDto.OrderStatus;
 
@@ -406,11 +429,49 @@ public class OrderServiceForController : IOrderService
 	#endregion
 
 
+	public async Task<Response<IEnumerable<OrderDto>>> GetOrders()
+	{
+		try
+		{
+			var orders = await _dbContext.Orders.ToListAsync();
+
+			if (orders.Count == 0)
+			{
+				_logger.LogWarning("No orders found in the database.");
+				return Response<IEnumerable<OrderDto>>.Fail("There are no orders in the database", StatusCodes.Status404NotFound, true);
+			}
+
+			var orderDtos = orders.Select(o => new OrderDto
+			{
+				Id = o.Id,
+				Name = o.Name,
+
+				Status = o.Status,
+				CreatedDate = o.CreatedDate,
+				DestinationAddress = o.DestinationAddress,
+				TotalAmount = o.TotalAmount,
+				UserId = o.UserId,
+				UserName = o.UserName,
+				CourierId = o.CourierId,
+				CourierName = o.CourierName
+			}).AsQueryable();
+
+			_logger.LogInformation("Successfully retrieved orders from the database.");
+			return Response<IEnumerable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, $"An error occurred while retrieving orders from the database: {ex.Message}");
+			return Response<IEnumerable<OrderDto>>.Fail($"An error occurred while retrieving orders from the database: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+		}
+	}
+
+
 	public async Task<bool> CheckUserIsCourier(string userId, string userName)
 	{
 		try
 		{
-			string identityServiceBaseUrl = _configuration["AuthServiceBaseUrl"];
+			string identityServiceBaseUrl = _configuration["Microservices:AuthServiceBaseUrl"];
 			string checkUserRoleEndpoint = $"{identityServiceBaseUrl}/api/User/GetCourierList";
 
 			// IHttpClientFactory'den HttpClient örneği alın
@@ -451,40 +512,44 @@ public class OrderServiceForController : IOrderService
 
 	}
 
-	public async Task<Response<IEnumerable<OrderDto>>> GetOrders()
+
+	public async Task<IEnumerable<OrderDelivery>> GetOrdersOnTheDeliveryServer()
 	{
 		try
 		{
-			var orders = await _dbContext.Orders.ToListAsync();
+			string deliveryServiceBaseUrl = _configuration["Microservices:DeliveryServiceBaseUrl"];
+			string getDeliveryOrderEndPoint = $"{deliveryServiceBaseUrl}/api/Delivery/GetDeliveryOrder";
 
-			if (orders.Count == 0)
+			// IHttpClientFactory'den HttpClient örneği alın
+			var client = _httpClientFactory.CreateClient();
+			var response = await client.GetAsync(getDeliveryOrderEndPoint);
+
+			if (response.IsSuccessStatusCode)
 			{
-				_logger.LogWarning("No orders found in the database.");
-				return Response<IEnumerable<OrderDto>>.Fail("There are no orders in the database", StatusCodes.Status404NotFound, true);
+				var responseContent = await response.Content.ReadAsStringAsync();
+
+				var orderDeliveryDto = (JsonConvert.DeserializeObject<Response<IEnumerable<OrderDelivery>>>(responseContent)!);
+
+				if (orderDeliveryDto.Data.ToList().Count == 0)
+				{
+					_logger.LogWarning($"No orders found in the database.");
+					return null;
+				}
+
+				_logger.LogInformation($"Successfully retrieved orders from the database.");
+				return orderDeliveryDto.Data.ToList();
 			}
-
-			var orderDtos = orders.Select(o => new OrderDto
+			else
 			{
-				Id = o.Id,
-				Name = o.Name,
-
-				Status = o.Status,
-				CreatedDate = o.CreatedDate,
-				DestinationAddress = o.DestinationAddress,
-				TotalAmount = o.TotalAmount,
-				UserId = o.UserId,
-				UserName = o.UserName,
-				CourierId = o.CourierId,
-				CourierName = o.CourierName
-			}).AsQueryable();
-
-			_logger.LogInformation("Successfully retrieved orders from the database.");
-			return Response<IEnumerable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
+				_logger.LogWarning($"Failed to fetch user data from Identity Service. StatusCode: {response.StatusCode}");
+				return null;
+			}
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, $"An error occurred while retrieving orders from the database: {ex.Message}");
-			return Response<IEnumerable<OrderDto>>.Fail($"An error occurred while retrieving orders from the database: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+			_logger.LogError(ex, $"An error occurred while checking user role: {ex.Message}");
+			return null;
 		}
 	}
+
 }

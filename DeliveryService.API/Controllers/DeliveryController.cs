@@ -19,7 +19,7 @@ public class DeliveryController : CustomBaseController
 	}
 
 	[Authorize(Roles = "Courier")]
-	[HttpPost]
+	[HttpPost("ChangeOrderStatus")]
 	public async Task<IActionResult> ChangeOrderStatus(ChangeOrderStatusDto dto)
 	{
 		var courierId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
@@ -27,4 +27,10 @@ public class DeliveryController : CustomBaseController
 		return ActionResultInstance(await _service.ChangeOrderStatus(dto, courierId!.Value));
 	}
 
+
+	[HttpGet("GetDeliveryOrder")]
+	public async Task<IActionResult> GetDeliveryOrder()
+	{
+		return ActionResultInstance(await _service.GetDeliveryOrder());
+	}
 }

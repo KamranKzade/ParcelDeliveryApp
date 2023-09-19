@@ -18,6 +18,17 @@ builder.Services.OtherAdditionWithExtention(builder.Configuration);
 builder.Services.AddCustomTokenAuthWithExtention(builder.Configuration);
 builder.Services.AddLoggingWithExtention(builder.Configuration);
 
+builder.Services.AddCors(opts =>
+{
+	opts.AddPolicy("corsapp",
+		builder =>
+		{
+			builder.WithOrigins("*")
+			.AllowAnyHeader()
+			.AllowAnyHeader();
+		});
+});
+
 
 var app = builder.Build();
 
@@ -40,6 +51,7 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+app.UseCors("corsapp");
 app.UseAuthorization();
 
 app.MapControllers();

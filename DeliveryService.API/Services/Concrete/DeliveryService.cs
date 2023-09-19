@@ -110,6 +110,35 @@ public class DeliveryService : IDeliveryService
 	}
 
 
+	public async Task<Response<IEnumerable<OrderDelivery>>> GetDeliveryOrder()
+	{
+		var deliveyOrder = await _dbContext.OrderDeliveries.ToListAsync();
+
+		if (deliveyOrder.Count == 0)
+		{
+			_logger.LogWarning("No orders found in the database.");
+			return Response<IEnumerable<OrderDelivery>>.Fail("There are no orders in the database", StatusCodes.Status404NotFound, true);
+		}
+
+		var orderDtos = deliveyOrder.Select(o => new OrderDelivery
+		{
+			Id = o.Id,
+			Name = o.Name,
+
+			Status = o.Status,
+			CreatedDate = o.CreatedDate,
+			DestinationAddress = o.DestinationAddress,
+			TotalAmount = o.TotalAmount,
+			UserId = o.UserId,
+			UserName = o.UserName,
+			CourierId = o.CourierId,
+			CourierName = o.CourierName
+		}).AsQueryable();
+
+		_logger.LogInformation("Successfully retrieved orders from the database.");
+		return Response<IEnumerable<OrderDelivery>>.Success(orderDtos, StatusCodes.Status200OK);
+	}
+
 	public async Task<List<OrderDelivery>> GetOrders()
 	{
 		try
@@ -153,5 +182,4 @@ public class DeliveryService : IDeliveryService
 			return null;
 		}
 	}
-
 }
