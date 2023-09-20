@@ -127,6 +127,7 @@ public class OrderServiceForController : IOrderService
 
 			// rabbitMq ile yoxlama
 
+
 			var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer();
 
 			var updatedOrder = ordersOnTheDeliveryServer.FirstOrDefault(item => item.Id.ToString() == orderId && item.Status != order.Status);
