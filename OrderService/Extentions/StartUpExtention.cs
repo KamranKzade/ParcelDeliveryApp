@@ -79,19 +79,18 @@ public static class StartUpExtention
 	{
 		Log.Logger = new LoggerConfiguration()
 					.ReadFrom.Configuration(config)
-					.WriteTo.MSSqlServer(
-									connectionString: config.GetConnectionString("SqlServer"),
-									tableName: "LogEntries",
-									autoCreateSqlTable: true,
-									restrictedToMinimumLevel: LogEventLevel.Information
-								)
-						.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
-				   .CreateLogger();
-
+					//.WriteTo.MSSqlServer(
+					//			connectionString: config.GetConnectionString("SqlServer"),
+					//			tableName: "LogEntries",
+					//			autoCreateSqlTable: true,
+					//			restrictedToMinimumLevel: LogEventLevel.Information
+					//	)
+					.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
+					.CreateLogger();
 
 		services.AddLogging(loggingBuilder =>
 		{
-			loggingBuilder.AddSerilog(); // Serilog'u kullanarak loglama
+			loggingBuilder.AddSerilog();
 		});
 	}
 
