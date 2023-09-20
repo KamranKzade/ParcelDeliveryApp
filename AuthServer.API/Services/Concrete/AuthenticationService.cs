@@ -79,23 +79,8 @@ public class AuthenticationService : IAuthenticationService
 				userRefleshToken.Expiration = token.RefleshTokenExpiration;
 			}
 
-
 			_logger.LogInformation($"Token created. User: {user.Name}");
-
-			// var log = new LogEntry
-			// {
-			// 	Level = LogLevel.Information.ToString(),
-			// 	MessageTemplate = $"Token created. User: {user.Name}",
-			// 	Exception = null,
-			// 	Timestamp = DateTime.UtcNow,
-			// 	Properties = $"Token created. User: {user.Name}"
-			// };
-			// 
-			// _logs.AddAsync(log);
-			// await _unitOfWork.CommitAsync();
-
 			return Response<TokenDto>.Success(token, StatusCodes.Status200OK);
-
 		}
 		catch (Exception ex)
 		{

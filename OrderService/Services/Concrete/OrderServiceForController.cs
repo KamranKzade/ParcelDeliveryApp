@@ -216,13 +216,13 @@ public class OrderServiceForController : IOrderService
 			}
 
 
-			//  var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer();
-			// var updatedOrder = ordersOnTheDeliveryServer.FirstOrDefault(item => item.Id.ToString() == orderDto.OrderId && item.Status != order.Status);
-			// 
-			// if (updatedOrder != null)
-			// {
-			// 	order = updatedOrder;
-			// }
+			var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer();
+			var updatedOrder = ordersOnTheDeliveryServer.FirstOrDefault(item => item.Id.ToString() == orderDto.OrderId && item.Status != order.Status);
+
+			if (updatedOrder != null)
+			{
+				order = updatedOrder;
+			}
 
 			order.Status = orderDto.OrderStatus;
 
@@ -510,7 +510,6 @@ public class OrderServiceForController : IOrderService
 			_logger.LogError(ex, $"An error occurred while checking user role: {ex.Message}");
 			return false;
 		}
-
 	}
 
 

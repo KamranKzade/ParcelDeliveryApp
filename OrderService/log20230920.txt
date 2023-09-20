@@ -56,3 +56,13 @@
 2023-09-20 13:34:09.361 +00:00 [INF] Updating entity of type OrderDelivery with ID SharedLibrary.Models.OrderDelivery
 2023-09-20 13:34:09.442 +00:00 [INF] Changes to the database were successfully saved.
 2023-09-20 13:34:09.445 +00:00 [INF] Order address updated successfully. OrderId: 9EB3AAE5-B658-47B1-869E-E602A1331197
+2023-09-20 13:49:56.217 +00:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'OrderDelivery'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2023-09-20 13:49:56.986 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-20 13:49:59.139 +00:00 [INF] RabbitMQ ile elaqe kuruldu...
+2023-09-20 13:49:59.313 +00:00 [INF] DeliveryOrderBackgroundService started.
+2023-09-20 13:49:59.488 +00:00 [INF] Message consumption has started.
+2023-09-20 13:50:47.314 +00:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'OrderDelivery'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2023-09-20 13:50:48.128 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-20 13:50:55.394 +00:00 [INF] RabbitMQ ile elaqe kuruldu...
+2023-09-20 13:50:56.103 +00:00 [INF] DeliveryOrderBackgroundService started.
+2023-09-20 13:50:56.685 +00:00 [INF] Message consumption has started.

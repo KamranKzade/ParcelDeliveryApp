@@ -140,3 +140,23 @@
 2023-09-20 13:33:12.537 +00:00 [INF] It was successfully added: AuthServer.API.Models.UserRefleshToken
 2023-09-20 13:33:12.538 +00:00 [INF] Token created. User: john
 2023-09-20 13:33:12.539 +00:00 [INF] Token created. User: john
+2023-09-20 13:49:57.167 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-20 13:49:57.218 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-20 13:50:48.387 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-20 13:50:48.447 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-20 13:50:48.473 +00:00 [WRN] No XML encryptor configured. Key {861a4178-b3a0-40f0-b570-7895d3fed7f4} may be persisted to storage in unencrypted form.
+2023-09-20 13:50:48.474 +00:00 [WRN] No XML encryptor configured. Key {861a4178-b3a0-40f0-b570-7895d3fed7f4} may be persisted to storage in unencrypted form.
+2023-09-20 13:50:52.951 +00:00 [WRN] Failed to determine the https port for redirect.
+2023-09-20 13:50:52.953 +00:00 [WRN] Failed to determine the https port for redirect.
+2023-09-20 13:50:53.918 +00:00 [INF] Claims generated successfully for user: 90b7fca6-9f35-4fa6-84ab-fa9a95fd83c6
+2023-09-20 13:50:53.918 +00:00 [INF] Claims generated successfully for user: 90b7fca6-9f35-4fa6-84ab-fa9a95fd83c6
+2023-09-20 13:50:54.091 +00:00 [INF] Refresh token created successfully: NgFBCI9yX8g5Z9AAKULkZ4aqRGaC3BM0MpAeYtTX39c=
+2023-09-20 13:50:54.091 +00:00 [INF] Refresh token created successfully: NgFBCI9yX8g5Z9AAKULkZ4aqRGaC3BM0MpAeYtTX39c=
+2023-09-20 13:50:54.093 +00:00 [INF] Generated a token for user: 90b7fca6-9f35-4fa6-84ab-fa9a95fd83c6
+2023-09-20 13:50:54.094 +00:00 [INF] Generated a token for user: 90b7fca6-9f35-4fa6-84ab-fa9a95fd83c6
+2023-09-20 13:50:54.098 +00:00 [INF] Constructing a LINQ query with predicate: x => (x.UserId == value(AuthServer.API.Services.Concrete.AuthenticationService+<>c__DisplayClass8_0).user.Id)
+2023-09-20 13:50:54.098 +00:00 [INF] Constructing a LINQ query with predicate: x => (x.UserId == value(AuthServer.API.Services.Concrete.AuthenticationService+<>c__DisplayClass8_0).user.Id)
+2023-09-20 13:50:54.114 +00:00 [INF] It was successfully added: AuthServer.API.Models.UserRefleshToken
+2023-09-20 13:50:54.114 +00:00 [INF] It was successfully added: AuthServer.API.Models.UserRefleshToken
+2023-09-20 13:50:54.159 +00:00 [INF] Token created. User: john
+2023-09-20 13:50:54.160 +00:00 [INF] Token created. User: john

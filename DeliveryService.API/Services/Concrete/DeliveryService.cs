@@ -108,7 +108,6 @@ public class DeliveryService : IDeliveryService
 		}
 	}
 
-
 	public async Task<Response<IEnumerable<OrderDelivery>>> GetDeliveryOrder()
 	{
 		var deliveyOrder = await _dbContext.OrderDeliveries.ToListAsync();

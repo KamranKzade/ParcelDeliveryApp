@@ -40,7 +40,6 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 		{
 			_logger.LogError(ex, "An error occurred while adding the entity: {Entity}");
 			var error = new ErrorDto("An error occurred while adding the entity", true);
-			// You can customize the error message and status code as needed.
 			return Response<TDto>.Fail(error, StatusCodes.Status500InternalServerError);
 		}
 	}
@@ -158,5 +157,4 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 			return Response<IEnumerable<TDto>>.Fail(error, StatusCodes.Status500InternalServerError);
 		}
 	}
-
 }
