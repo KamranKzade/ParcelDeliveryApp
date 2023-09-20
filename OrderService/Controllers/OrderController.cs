@@ -21,10 +21,8 @@ public class OrderController : CustomBaseController
 
 
 	[HttpGet("GetOrder")]
-	public async Task<IActionResult> GetOrder()
-	{
-		return ActionResultInstance(await _orderService.GetOrders());
-	}
+	public async Task<IActionResult> GetOrder() => ActionResultInstance(await _orderService.GetOrders());
+
 
 	#region User
 
@@ -76,33 +74,23 @@ public class OrderController : CustomBaseController
 
 	[Authorize(Roles = "Admin")]
 	[HttpPut("UpdateOrderStatus")]
-	public async Task<IActionResult> UpdateOrderStatus(UpdateStatusDto dto)
-	{
-		return ActionResultInstance(await _orderService.ChangeStatusOrder(dto));
-	}
+	public async Task<IActionResult> UpdateOrderStatus(UpdateStatusDto dto) => ActionResultInstance(await _orderService.ChangeStatusOrder(dto));
 
 	[Authorize(Roles = "Admin")]
 	[HttpGet("GetOrderForAdmin")]
-	public async Task<IActionResult> GetOrderForAdmin()
-	{
-		return ActionResultInstance(await _orderService.GetOrderAsyncForAdmin());
-	}
+	public async Task<IActionResult> GetOrderForAdmin() => ActionResultInstance(await _orderService.GetOrderAsyncForAdmin());
 
 
 	[Authorize(Roles = "Admin")]
 	[HttpGet("GetCourierWithOrderStatus/{courierId}")]
-	public IActionResult GetCourierWithOrderStatus(string courierId)
-	{
-		return ActionResultInstance(_orderService.GetCourierWithOrderStatus(courierId));
-	}
+	public IActionResult GetCourierWithOrderStatus(string courierId) => ActionResultInstance(_orderService.GetCourierWithOrderStatus(courierId));
+
 
 
 	[Authorize(Roles = "Admin")]
 	[HttpPost("SendTheOrderToTheCourier")]
-	public async Task<IActionResult> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto)
-	{
-		return ActionResultInstance(await _orderService.SendTheOrderToTheCourier(dto));
-	}
+	public async Task<IActionResult> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto) => ActionResultInstance(await _orderService.SendTheOrderToTheCourier(dto));
+
 
 	#endregion
 
