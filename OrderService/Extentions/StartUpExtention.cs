@@ -111,4 +111,18 @@ public static class StartUpExtention
 			Log.Error($"Error: {ex.Message}");
 		}
 	}
+
+	public static void AddCorsWithExtention(this IServiceCollection services)
+	{
+		services.AddCors(opts =>
+		{
+			opts.AddPolicy("corsapp",
+				builder =>
+				{
+					builder.WithOrigins("*")
+					.AllowAnyHeader()
+					.AllowAnyHeader();
+				});
+		});
+	}
 }

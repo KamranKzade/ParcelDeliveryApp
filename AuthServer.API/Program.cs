@@ -1,6 +1,4 @@
 ﻿using AuthServer.API.Extentions;
-using AuthServer.API.Models;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,17 +15,7 @@ builder.Services.AddIdentityWithExtention();
 builder.Services.OtherAdditionWithExtention(builder.Configuration);
 builder.Services.AddCustomTokenAuthWithExtention(builder.Configuration);
 builder.Services.AddLoggingWithExtention(builder.Configuration);
-
-builder.Services.AddCors(opts =>
-{
-	opts.AddPolicy("corsapp",
-		builder =>
-		{
-			builder.WithOrigins("*")
-			.AllowAnyHeader()
-			.AllowAnyHeader();
-		});
-});
+builder.Services.AddCorsWithExtention();
 
 
 var app = builder.Build();

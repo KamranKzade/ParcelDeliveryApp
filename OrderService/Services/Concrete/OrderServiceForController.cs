@@ -522,32 +522,36 @@ public class OrderServiceForController : IOrderService
 
 			// IHttpClientFactory'den HttpClient örneği alın
 			var client = _httpClientFactory.CreateClient();
-			var response = await client.GetAsync(getDeliveryOrderEndPoint);
-
-			if (response.IsSuccessStatusCode)
+			using (client)
 			{
-				var responseContent = await response.Content.ReadAsStringAsync();
+				var response = await client.GetAsync(getDeliveryOrderEndPoint);
 
-				var orderDeliveryDto = (JsonConvert.DeserializeObject<Response<IEnumerable<OrderDelivery>>>(responseContent)!);
-
-				if (orderDeliveryDto.Data.ToList().Count == 0)
+				if (response.IsSuccessStatusCode)
 				{
-					_logger.LogWarning($"No orders found in the database.");
+					var responseContent = await response.Content.ReadAsStringAsync();
+
+					var orderDeliveryDto = (JsonConvert.DeserializeObject<Response<IEnumerable<OrderDelivery>>>(responseContent)!);
+
+					if (orderDeliveryDto.Data.ToList().Count == 0)
+					{
+						_logger.LogWarning($"No orders found in the database.");
+						return null;
+					}
+
+					_logger.LogInformation($"Successfully retrieved orders from the database.");
+					return orderDeliveryDto.Data.ToList();
+				}
+				else
+				{
+					_logger.LogWarning($"Failed to fetch user data from Identity Service. StatusCode: {response.StatusCode}");
 					return null;
 				}
+			}
 
-				_logger.LogInformation($"Successfully retrieved orders from the database.");
-				return orderDeliveryDto.Data.ToList();
-			}
-			else
-			{
-				_logger.LogWarning($"Failed to fetch user data from Identity Service. StatusCode: {response.StatusCode}");
-				return null;
-			}
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, $"An error occurred while checking user role: {ex.Message}");
+			_logger.LogError(ex, $"Error: {ex.Message}");
 			return null;
 		}
 	}

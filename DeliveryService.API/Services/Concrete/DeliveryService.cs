@@ -1,5 +1,4 @@
-﻿using Serilog;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using SharedLibrary.Dtos;
 using SharedLibrary.Models;
 using DeliveryServer.API.Dtos;
@@ -143,7 +142,7 @@ public class DeliveryService : IDeliveryService
 	{
 		try
 		{
-			string orderServiceBaseUrl = _configuration["OrderServiceBaseUrl"];
+			string orderServiceBaseUrl = _configuration["MicroServices:OrderServiceBaseUrl"];
 			string getOrderEndpoint = $"{orderServiceBaseUrl}/api/Order/GetOrder";
 
 			// IHttpClientFactory'den HttpClient örneği alın

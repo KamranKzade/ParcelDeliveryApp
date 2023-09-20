@@ -17,18 +17,8 @@ builder.Services.AddCustomTokenAuthWithExtention(builder.Configuration);
 builder.Services.OtherAdditionWithExtention();
 builder.Services.AddHttpClientWithExtention(builder.Configuration); 
 builder.Services.AddLoggingWithExtention(builder.Configuration);
+builder.Services.AddCorsWithExtention();
 
-
-builder.Services.AddCors(opts =>
-{
-	opts.AddPolicy("corsapp",
-		builder =>
-		{
-			builder.WithOrigins("*")
-			.AllowAnyHeader()
-			.AllowAnyHeader();
-		});
-});
 
 var app = builder.Build();
 

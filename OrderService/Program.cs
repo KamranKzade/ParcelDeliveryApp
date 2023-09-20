@@ -1,6 +1,4 @@
-﻿using OrderServer.API.Models;
-using OrderServer.API.Extentions;
-using Microsoft.EntityFrameworkCore;
+﻿using OrderServer.API.Extentions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +17,7 @@ builder.Services.AddCustomTokenAuthExtention(builder.Configuration);
 builder.Services.OtherAdditions();
 builder.Services.AddHttpClientExtention(builder.Configuration);
 builder.Services.AddLoggingWithExtention(builder.Configuration);
+builder.Services.AddCorsWithExtention();
 
 var app = builder.Build();
 
@@ -39,6 +38,7 @@ app.UseSwaggerUI();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+app.UseCors("corsapp");
 app.UseAuthorization();
 
 app.MapControllers();
