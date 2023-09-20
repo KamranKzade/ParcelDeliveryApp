@@ -13,6 +13,7 @@ services:
   authserver.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - Serilog:WriteTo:0:Args:path=/app/logs/webapi-.log
     ports:
       - "5000:80"
  

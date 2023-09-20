@@ -1,4 +1,5 @@
 ﻿using AuthServer.API.Extentions;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,13 +15,18 @@ builder.Services.AddDbContextWithExtention(builder.Configuration);
 builder.Services.AddIdentityWithExtention();
 builder.Services.OtherAdditionWithExtention(builder.Configuration);
 builder.Services.AddCustomTokenAuthWithExtention(builder.Configuration);
-builder.Services.AddLoggingWithExtention(builder.Configuration);
+builder.Services.AddLoggingWithExtention(builder.Configuration, builder.Host);
+
+builder.Logging.AddSerilog();
+
 builder.Services.AddCorsWithExtention();
 
 
 var app = builder.Build();
 
 app.Services.AddMigrationWithExtention();
+
+
 
 // // Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())

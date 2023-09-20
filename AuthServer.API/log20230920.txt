@@ -1,0 +1,46 @@
+2023-09-20 13:06:30.901 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-20 13:06:30.960 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-20 13:06:34.123 +00:00 [WRN] Failed to determine the https port for redirect.
+2023-09-20 13:06:34.126 +00:00 [WRN] Failed to determine the https port for redirect.
+2023-09-20 13:06:35.119 +00:00 [INF] Claims generated successfully for user: 8adc450f-711d-47ea-ab12-2fb96e4efddb
+2023-09-20 13:06:35.120 +00:00 [INF] Claims generated successfully for user: 8adc450f-711d-47ea-ab12-2fb96e4efddb
+2023-09-20 13:06:35.259 +00:00 [INF] Refresh token created successfully: VnxIP8mXZx0kG652/bCDlhVv+KC1ygfa593F8MyIAWc=
+2023-09-20 13:06:35.260 +00:00 [INF] Refresh token created successfully: VnxIP8mXZx0kG652/bCDlhVv+KC1ygfa593F8MyIAWc=
+2023-09-20 13:06:35.262 +00:00 [INF] Generated a token for user: 8adc450f-711d-47ea-ab12-2fb96e4efddb
+2023-09-20 13:06:35.262 +00:00 [INF] Generated a token for user: 8adc450f-711d-47ea-ab12-2fb96e4efddb
+2023-09-20 13:06:35.265 +00:00 [INF] Constructing a LINQ query with predicate: x => (x.UserId == value(AuthServer.API.Services.Concrete.AuthenticationService+<>c__DisplayClass8_0).user.Id)
+2023-09-20 13:06:35.265 +00:00 [INF] Constructing a LINQ query with predicate: x => (x.UserId == value(AuthServer.API.Services.Concrete.AuthenticationService+<>c__DisplayClass8_0).user.Id)
+2023-09-20 13:06:35.284 +00:00 [INF] Token created. User: kamran
+2023-09-20 13:06:35.285 +00:00 [INF] Token created. User: kamran
+2023-09-20 13:10:07.890 +00:00 [INF] Claims generated successfully for user: 90b7fca6-9f35-4fa6-84ab-fa9a95fd83c6
+2023-09-20 13:10:07.890 +00:00 [INF] Claims generated successfully for user: 90b7fca6-9f35-4fa6-84ab-fa9a95fd83c6
+2023-09-20 13:10:07.893 +00:00 [INF] Refresh token created successfully: 6EXfrL8Wf9/jCRC4AUU2qeOCGBb9YbUC0BnJRad1Xrk=
+2023-09-20 13:10:07.893 +00:00 [INF] Refresh token created successfully: 6EXfrL8Wf9/jCRC4AUU2qeOCGBb9YbUC0BnJRad1Xrk=
+2023-09-20 13:10:07.895 +00:00 [INF] Generated a token for user: 90b7fca6-9f35-4fa6-84ab-fa9a95fd83c6
+2023-09-20 13:10:07.895 +00:00 [INF] Generated a token for user: 90b7fca6-9f35-4fa6-84ab-fa9a95fd83c6
+2023-09-20 13:10:07.897 +00:00 [INF] Constructing a LINQ query with predicate: x => (x.UserId == value(AuthServer.API.Services.Concrete.AuthenticationService+<>c__DisplayClass8_0).user.Id)
+2023-09-20 13:10:07.898 +00:00 [INF] Constructing a LINQ query with predicate: x => (x.UserId == value(AuthServer.API.Services.Concrete.AuthenticationService+<>c__DisplayClass8_0).user.Id)
+2023-09-20 13:10:07.908 +00:00 [INF] It was successfully added: AuthServer.API.Models.UserRefleshToken
+2023-09-20 13:10:07.909 +00:00 [INF] It was successfully added: AuthServer.API.Models.UserRefleshToken
+2023-09-20 13:10:07.942 +00:00 [INF] Token created. User: john
+2023-09-20 13:10:07.942 +00:00 [INF] Token created. User: john
+2023-09-20 13:11:00.431 +00:00 [INF] Password validation successful for user 1e8238f2-0421-44a8-89a4-2368711d72ac
+2023-09-20 13:11:00.432 +00:00 [INF] Password validation successful for user 1e8238f2-0421-44a8-89a4-2368711d72ac
+2023-09-20 13:11:00.489 +00:00 [INF] User validation successful for user 1e8238f2-0421-44a8-89a4-2368711d72ac
+2023-09-20 13:11:00.489 +00:00 [INF] User validation successful for user 1e8238f2-0421-44a8-89a4-2368711d72ac
+2023-09-20 13:11:00.693 +00:00 [INF] User created successfully: fernando@gmail.com
+2023-09-20 13:11:00.693 +00:00 [INF] User created successfully: fernando@gmail.com
+2023-09-20 13:11:20.421 +00:00 [INF] Claims generated successfully for user: 8adc450f-711d-47ea-ab12-2fb96e4efddb
+2023-09-20 13:11:20.421 +00:00 [INF] Claims generated successfully for user: 8adc450f-711d-47ea-ab12-2fb96e4efddb
+2023-09-20 13:11:20.423 +00:00 [INF] Refresh token created successfully: ioSZPiJnj1oKkkt5iDBha+z6HoPp4bQhyZXozWQTQl8=
+2023-09-20 13:11:20.424 +00:00 [INF] Refresh token created successfully: ioSZPiJnj1oKkkt5iDBha+z6HoPp4bQhyZXozWQTQl8=
+2023-09-20 13:11:20.425 +00:00 [INF] Generated a token for user: 8adc450f-711d-47ea-ab12-2fb96e4efddb
+2023-09-20 13:11:20.426 +00:00 [INF] Generated a token for user: 8adc450f-711d-47ea-ab12-2fb96e4efddb
+2023-09-20 13:11:20.428 +00:00 [INF] Constructing a LINQ query with predicate: x => (x.UserId == value(AuthServer.API.Services.Concrete.AuthenticationService+<>c__DisplayClass8_0).user.Id)
+2023-09-20 13:11:20.428 +00:00 [INF] Constructing a LINQ query with predicate: x => (x.UserId == value(AuthServer.API.Services.Concrete.AuthenticationService+<>c__DisplayClass8_0).user.Id)
+2023-09-20 13:11:20.436 +00:00 [INF] Token created. User: kamran
+2023-09-20 13:11:20.437 +00:00 [INF] Token created. User: kamran
+2023-09-20 13:11:29.269 +00:00 [INF] User validation successful for user 1e8238f2-0421-44a8-89a4-2368711d72ac
+2023-09-20 13:11:29.269 +00:00 [INF] User validation successful for user 1e8238f2-0421-44a8-89a4-2368711d72ac
+2023-09-20 13:11:29.335 +00:00 [INF] User 'fernando' assigned to role 'User' successfully.
+2023-09-20 13:11:29.336 +00:00 [INF] User 'fernando' assigned to role 'User' successfully.

@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Identity;
 using AuthServer.API.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
+using SharedLibrary.Models;
+using Serilog.Events;
 
 namespace AuthServer.API.Services.Concrete;
 
@@ -19,10 +21,11 @@ public class AuthenticationService : IAuthenticationService
 	private readonly UserManager<UserApp> _userManager;
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IGenericRepository<AppDbContext, UserRefleshToken> _userRefleshTokenService;
+	private readonly IGenericRepository<AppDbContext, LogEntry> _logs;
 	private readonly ILogger<AuthenticationService> _logger;
 
 	public AuthenticationService(IOptions<List<Client>> client, ITokenService tokenService, UserManager<UserApp> userManager,
-		IUnitOfWork unitOfWork, IGenericRepository<AppDbContext, UserRefleshToken> userRefleshTokenService, ILogger<AuthenticationService> logger)
+		IUnitOfWork unitOfWork, IGenericRepository<AppDbContext, UserRefleshToken> userRefleshTokenService, ILogger<AuthenticationService> logger, IGenericRepository<AppDbContext, LogEntry> logs)
 	{
 		_client = client.Value;
 		_tokenService = tokenService;
@@ -30,6 +33,7 @@ public class AuthenticationService : IAuthenticationService
 		_unitOfWork = unitOfWork;
 		_userRefleshTokenService = userRefleshTokenService;
 		_logger = logger;
+		_logs = logs;
 	}
 
 	public async Task<Response<TokenDto>> CreateTokenAsync(LogInDto logIn)
@@ -75,9 +79,21 @@ public class AuthenticationService : IAuthenticationService
 				userRefleshToken.Expiration = token.RefleshTokenExpiration;
 			}
 
-			await _unitOfWork.CommitAsync();
 
 			_logger.LogInformation($"Token created. User: {user.Name}");
+
+			// var log = new LogEntry
+			// {
+			// 	Level = LogLevel.Information.ToString(),
+			// 	MessageTemplate = $"Token created. User: {user.Name}",
+			// 	Exception = null,
+			// 	Timestamp = DateTime.UtcNow,
+			// 	Properties = $"Token created. User: {user.Name}"
+			// };
+			// 
+			// _logs.AddAsync(log);
+			// await _unitOfWork.CommitAsync();
+
 			return Response<TokenDto>.Success(token, StatusCodes.Status200OK);
 
 		}
