@@ -1,0 +1,20 @@
+2023-09-20 13:30:42.910 +00:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'OrderDelivery'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2023-09-20 13:30:43.748 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-20 13:31:26.237 +00:00 [WRN] Failed to determine the https port for redirect.
+2023-09-20 13:31:37.507 +00:00 [INF] Order bilgileri başarıyla alındı.
+2023-09-20 13:31:38.096 +00:00 [INF] It was successfully added: SharedLibrary.Models.OrderDelivery
+2023-09-20 13:31:38.417 +00:00 [INF] Changes to the database were successfully saved.
+2023-09-20 13:31:40.431 +00:00 [INF] RabbitMQ ile elaqe kuruldu...
+2023-09-20 13:31:40.470 +00:00 [INF] Order statusu deyisdirildi.
+2023-09-20 13:31:49.332 +00:00 [INF] Order bilgileri başarıyla alındı.
+2023-09-20 13:31:49.334 +00:00 [WRN] Order tapilmadi
+2023-09-20 13:32:06.277 +00:00 [INF] Order bilgileri başarıyla alındı.
+2023-09-20 13:32:06.287 +00:00 [INF] It was successfully added: SharedLibrary.Models.OrderDelivery
+2023-09-20 13:32:06.304 +00:00 [INF] Changes to the database were successfully saved.
+2023-09-20 13:32:10.334 +00:00 [INF] Order statusu deyisdirildi.
+2023-09-20 13:32:48.556 +00:00 [INF] Order bilgileri başarıyla alındı.
+2023-09-20 13:32:48.569 +00:00 [INF] It was successfully added: SharedLibrary.Models.OrderDelivery
+2023-09-20 13:32:48.628 +00:00 [INF] Changes to the database were successfully saved.
+2023-09-20 13:32:49.919 +00:00 [INF] Order statusu deyisdirildi.
+2023-09-20 13:33:43.701 +00:00 [INF] Successfully retrieved orders from the database.
+2023-09-20 13:34:09.351 +00:00 [INF] Successfully retrieved orders from the database.
