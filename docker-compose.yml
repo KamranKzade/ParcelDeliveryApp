@@ -10,6 +10,8 @@ services:
   authserver.api:
     image: ${DOCKER_REGISTRY-}authserverapi
     container_name: authserverapi-container
+    volumes:
+      - authserver_logs:/app/Logs
     build:
       context: .
       dockerfile: AuthServer.API/Dockerfile
@@ -19,6 +21,8 @@ services:
   deliveryserver.api:
     image: ${DOCKER_REGISTRY-}deliveryserverapi
     container_name: deliveryserverapi-container
+    volumes:
+      - deliveryserver_logs:/app/Logs
     build:
       context: .
       dockerfile: DeliveryService.API/Dockerfile
@@ -29,6 +33,8 @@ services:
   orderserver.api:
     image: ${DOCKER_REGISTRY-}orderserverapi
     container_name: orderserverapi-container
+    volumes:
+      - orderserver_logs:/app/Logs
     build:
       context: .
       dockerfile: OrderService/Dockerfile
@@ -38,6 +44,9 @@ services:
 
 volumes:
   sqlserver_volume :
-  
+  authserver_logs : 
+  orderserver_logs : 
+  deliveryserver_logs :
+
 networks:
   parceldelivery:

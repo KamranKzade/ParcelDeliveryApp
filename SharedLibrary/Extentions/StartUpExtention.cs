@@ -33,13 +33,13 @@ public static class StartUpExtention
 	{
 		Log.Logger = new LoggerConfiguration()
 					.ReadFrom.Configuration(config)
-					.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
 					.WriteTo.Logger(lc => lc
 					.WriteTo.File(
 						path: "Logs/log.txt",
 						restrictedToMinimumLevel: LogEventLevel.Information,
 						rollingInterval: RollingInterval.Day
 					))
+					.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
 					.CreateLogger();
 
 		services.AddLogging(loggingBuilder =>

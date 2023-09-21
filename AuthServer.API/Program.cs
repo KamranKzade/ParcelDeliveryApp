@@ -17,7 +17,6 @@ builder.Services.OtherAdditionWithExtention(builder.Configuration);
 builder.Services.AddCustomTokenAuthWithExtentionShared(builder.Configuration);
 builder.Services.AddLoggingWithExtentionShared(builder.Configuration);
 builder.Services.AddCorsWithExtentionShared();
-//builder.Logging.AddSerilog();
 
 
 var app = builder.Build();
