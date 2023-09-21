@@ -32,15 +32,15 @@ public static class StartUpExtention
 	public static void AddLoggingWithExtentionShared(this IServiceCollection services, IConfiguration config)
 	{
 		Log.Logger = new LoggerConfiguration()
-				.ReadFrom.Configuration(config)
-				//.WriteTo.MSSqlServer(
-				//			connectionString: config.GetConnectionString("SqlServer"),
-				//			tableName: "LogEntries",
-				//			autoCreateSqlTable: true,
-				//			restrictedToMinimumLevel: LogEventLevel.Information
-				//	)
-				.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
-				.CreateLogger();
+					.ReadFrom.Configuration(config)
+					.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
+					.WriteTo.Logger(lc => lc
+					.WriteTo.File(
+						path: "Logs/log.txt",
+						restrictedToMinimumLevel: LogEventLevel.Information,
+						rollingInterval: RollingInterval.Day
+					))
+					.CreateLogger();
 
 		services.AddLogging(loggingBuilder =>
 		{
