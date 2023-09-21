@@ -1,9 +1,7 @@
 ﻿using Serilog;
-using Serilog.Events;
 using System.Reflection;
 using AuthServer.API.Models;
 using SharedLibrary.Extentions;
-using SharedLibrary.Configuration;
 using FluentValidation.AspNetCore;
 using AuthServer.API.Localizations;
 using Microsoft.AspNetCore.Identity;
@@ -70,7 +68,6 @@ public static class StartUpExtention
 		services.AddScoped<IUnitOfWork, UnitOfWork<AppDbContext>>();
 	}
 
-
 	public static void AddDbContextWithExtention(this IServiceCollection services, IConfiguration configuration)
 	{
 		// Connectioni veririk
@@ -78,15 +75,6 @@ public static class StartUpExtention
 		{
 			options.UseSqlServer(configuration.GetConnectionString("SqlServer"), opt => opt.EnableRetryOnFailure());
 		});
-	}
-
-	public static void AddCustomTokenAuthWithExtention(this IServiceCollection services, IConfiguration configuration)
-	{
-		// TokenOption elave edirik Configure-a 
-		// Option pattern --> DI uzerinden appsetting-deki datalari elde etmeye deyilir.
-		services.Configure<CustomTokenOption>(configuration.GetSection("TokenOptions"));
-		var tokenOptions = configuration.GetSection("TokenOptions").Get<CustomTokenOption>();
-		services.AddCustomTokenAuth(tokenOptions);
 	}
 
 	public static void AddControllersWithExtention(this IServiceCollection services)
@@ -103,25 +91,6 @@ public static class StartUpExtention
 		services.Configure<List<Client>>(configuration.GetSection("Clients"));
 		// Validationlari 1 yere yigib qaytaririq
 		services.UseCustomValidationResponse();
-	}
-
-	public static void AddLoggingWithExtention(this IServiceCollection services, IConfiguration config, IHostBuilder host)
-	{
-		Log.Logger = new LoggerConfiguration()
-					.ReadFrom.Configuration(config)
-					//.WriteTo.MSSqlServer(
-					//			connectionString: config.GetConnectionString("SqlServer"),
-					//			tableName: "LogEntries",
-					//			autoCreateSqlTable: true,
-					//			restrictedToMinimumLevel: LogEventLevel.Information
-					//	)
-					.Filter.ByExcluding(e => e.Level < LogEventLevel.Information) // Sadece Information ve daha yüksek seviyedeki logları kaydet
-					.CreateLogger();
-
-		services.AddLogging(loggingBuilder =>
-		{
-			loggingBuilder.AddSerilog();
-		});
 	}
 
 	public static async void AddMigrationWithExtention(this IServiceProvider provider)
@@ -141,17 +110,4 @@ public static class StartUpExtention
 		}
 	}
 
-	public static void AddCorsWithExtention(this IServiceCollection services)
-	{
-		services.AddCors(opts =>
-		{
-			opts.AddPolicy("corsapp",
-				builder =>
-				{
-					builder.WithOrigins("*")
-					.AllowAnyHeader()
-					.AllowAnyHeader();
-				});
-		});
-	}
 }

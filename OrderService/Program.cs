@@ -1,4 +1,5 @@
-﻿using OrderServer.API.Extentions;
+﻿using SharedLibrary.Extentions;
+using OrderServer.API.Extentions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,12 +13,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContextExtentions(builder.Configuration);
 builder.Services.AddScopeExtention();
-builder.Services.AddSingletonExtention(builder.Configuration);
-builder.Services.AddCustomTokenAuthExtention(builder.Configuration);
+builder.Services.AddSingletonWithExtentionShared(builder.Configuration);
+builder.Services.AddCustomTokenAuthWithExtentionShared(builder.Configuration);
 builder.Services.OtherAdditions();
 builder.Services.AddHttpClientExtention(builder.Configuration);
-builder.Services.AddLoggingWithExtention(builder.Configuration);
-builder.Services.AddCorsWithExtention();
+builder.Services.AddLoggingWithExtentionShared(builder.Configuration);
+builder.Services.AddCorsWithExtentionShared();
 
 var app = builder.Build();
 

@@ -1,6 +1,19 @@
-2023-09-21 06:55:13.227 +00:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'OrderDelivery'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
-2023-09-21 06:55:14.470 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
-2023-09-21 06:55:14.523 +00:00 [WRN] No XML encryptor configured. Key {09ae4225-0a27-45f0-8887-a8619785d4ae} may be persisted to storage in unencrypted form.
-2023-09-21 06:55:16.809 +00:00 [INF] RabbitMQ ile elaqe kuruldu...
-2023-09-21 06:55:17.060 +00:00 [INF] DeliveryOrderBackgroundService started.
-2023-09-21 06:55:17.247 +00:00 [INF] Message consumption has started.
+2023-09-21 07:15:00.391 +00:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'OrderDelivery'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2023-09-21 07:15:01.594 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-21 07:15:01.649 +00:00 [WRN] No XML encryptor configured. Key {fb3db48f-ee4c-4be7-ab2e-f00f67563796} may be persisted to storage in unencrypted form.
+2023-09-21 07:15:04.042 +00:00 [INF] RabbitMQ ile elaqe kuruldu...
+2023-09-21 07:15:04.243 +00:00 [INF] DeliveryOrderBackgroundService started.
+2023-09-21 07:15:04.496 +00:00 [INF] Message consumption has started.
+2023-09-21 07:15:34.760 +00:00 [WRN] Failed to determine the https port for redirect.
+2023-09-21 07:15:35.786 +00:00 [INF] Successfully retrieved orders for user: 90b7fca6-9f35-4fa6-84ab-fa9a95fd83c6
+2023-09-21 07:20:34.181 +00:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'OrderDelivery'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2023-09-21 07:20:35.019 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-21 07:20:37.751 +00:00 [INF] RabbitMQ ile elaqe kuruldu...
+2023-09-21 07:20:37.942 +00:00 [INF] DeliveryOrderBackgroundService started.
+2023-09-21 07:20:38.142 +00:00 [INF] Message consumption has started.
+2023-09-21 07:21:01.755 +00:00 [WRN] Failed to determine the https port for redirect.
+2023-09-21 07:21:02.778 +00:00 [INF] Successfully retrieved orders for user: 1e8238f2-0421-44a8-89a4-2368711d72ac
+2023-09-21 07:22:21.773 +00:00 [INF] Successfully retrieved orders from the database.
+2023-09-21 07:22:26.512 +00:00 [INF] Updating entity of type OrderDelivery with ID SharedLibrary.Models.OrderDelivery
+2023-09-21 07:22:26.661 +00:00 [INF] Changes to the database were successfully saved.
+2023-09-21 07:22:26.663 +00:00 [INF] Order updated successfully. OrderId: 9eb3aae5-b658-47b1-869e-e602a1331197

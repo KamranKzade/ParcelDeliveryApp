@@ -1,3 +1,14 @@
-2023-09-21 06:55:13.189 +00:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'OrderDelivery'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
-2023-09-21 06:55:14.380 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
-2023-09-21 06:55:14.434 +00:00 [WRN] No XML encryptor configured. Key {2b26fa52-561b-49e2-9764-73ae435f6bf3} may be persisted to storage in unencrypted form.
+2023-09-21 07:15:00.241 +00:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'OrderDelivery'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2023-09-21 07:15:01.396 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-21 07:15:01.435 +00:00 [WRN] No XML encryptor configured. Key {ce5f76e5-250d-4565-aff4-25805fc41e34} may be persisted to storage in unencrypted form.
+2023-09-21 07:16:04.127 +00:00 [WRN] Failed to determine the https port for redirect.
+2023-09-21 07:16:04.987 +00:00 [INF] Successfully retrieved orders from the database.
+2023-09-21 07:20:34.100 +00:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'OrderDelivery'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2023-09-21 07:20:34.879 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-21 07:21:11.386 +00:00 [WRN] Failed to determine the https port for redirect.
+2023-09-21 07:21:12.178 +00:00 [INF] Successfully retrieved orders from the database.
+2023-09-21 07:22:21.930 +00:00 [INF] Order bilgileri başarıyla alındı.
+2023-09-21 07:22:22.190 +00:00 [INF] It was successfully added: SharedLibrary.Models.OrderDelivery
+2023-09-21 07:22:22.398 +00:00 [INF] Changes to the database were successfully saved.
+2023-09-21 07:22:26.071 +00:00 [INF] RabbitMQ ile elaqe kuruldu...
+2023-09-21 07:22:26.093 +00:00 [INF] Order statusu deyisdirildi.

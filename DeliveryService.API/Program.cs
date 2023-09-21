@@ -1,4 +1,5 @@
-﻿using DeliveryServer.API.Extentions;
+﻿using SharedLibrary.Extentions;
+using DeliveryServer.API.Extentions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,12 +13,12 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContextWithExtention(builder.Configuration);
 builder.Services.AddScopeWithExtention();
-builder.Services.AddSingletonWithExtention(builder.Configuration);
-builder.Services.AddCustomTokenAuthWithExtention(builder.Configuration);
+builder.Services.AddSingletonWithExtentionShared(builder.Configuration);
+builder.Services.AddCustomTokenAuthWithExtentionShared(builder.Configuration);
 builder.Services.OtherAdditionWithExtention();
 builder.Services.AddHttpClientWithExtention(builder.Configuration); 
-builder.Services.AddLoggingWithExtention(builder.Configuration);
-builder.Services.AddCorsWithExtention();
+builder.Services.AddLoggingWithExtentionShared(builder.Configuration);
+builder.Services.AddCorsWithExtentionShared();
 
 
 var app = builder.Build();

@@ -1,5 +1,5 @@
-﻿using AuthServer.API.Extentions;
-using Serilog;
+﻿using SharedLibrary.Extentions;
+using AuthServer.API.Extentions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,12 +14,10 @@ builder.Services.AddScopeWithExtention();
 builder.Services.AddDbContextWithExtention(builder.Configuration);
 builder.Services.AddIdentityWithExtention();
 builder.Services.OtherAdditionWithExtention(builder.Configuration);
-builder.Services.AddCustomTokenAuthWithExtention(builder.Configuration);
-builder.Services.AddLoggingWithExtention(builder.Configuration, builder.Host);
-
-builder.Logging.AddSerilog();
-
-builder.Services.AddCorsWithExtention();
+builder.Services.AddCustomTokenAuthWithExtentionShared(builder.Configuration);
+builder.Services.AddLoggingWithExtentionShared(builder.Configuration);
+builder.Services.AddCorsWithExtentionShared();
+//builder.Logging.AddSerilog();
 
 
 var app = builder.Build();
