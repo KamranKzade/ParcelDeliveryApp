@@ -10,7 +10,6 @@ public class AppDbContext : IdentityDbContext<UserApp, IdentityRole, string>
 {
 	public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-	public DbSet<LogEntry> LogEntries { get; set; }
 	public DbSet<UserRefleshToken> UserRefleshTokens { get; set; }
 
 

@@ -1,0 +1,6 @@
+2023-09-21 06:55:13.227 +00:00 [WRN] No store type was specified for the decimal property 'TotalAmount' on entity type 'OrderDelivery'. This will cause values to be silently truncated if they do not fit in the default precision and scale. Explicitly specify the SQL server column type that can accommodate all the values in 'OnModelCreating' using 'HasColumnType', specify precision and scale using 'HasPrecision', or configure a value converter using 'HasConversion'.
+2023-09-21 06:55:14.470 +00:00 [WRN] Storing keys in a directory '/root/.aspnet/DataProtection-Keys' that may not be persisted outside of the container. Protected data will be unavailable when container is destroyed.
+2023-09-21 06:55:14.523 +00:00 [WRN] No XML encryptor configured. Key {09ae4225-0a27-45f0-8887-a8619785d4ae} may be persisted to storage in unencrypted form.
+2023-09-21 06:55:16.809 +00:00 [INF] RabbitMQ ile elaqe kuruldu...
+2023-09-21 06:55:17.060 +00:00 [INF] DeliveryOrderBackgroundService started.
+2023-09-21 06:55:17.247 +00:00 [INF] Message consumption has started.
