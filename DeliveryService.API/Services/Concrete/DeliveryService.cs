@@ -10,6 +10,7 @@ using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using DeliveryServer.API.Services.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
+using SharedLibrary.ResourceFile;
 
 namespace DeliveryServer.API.Services.Concrete;
 
@@ -77,7 +78,7 @@ public class DeliveryService : IDeliveryService
 						await _unitOfWork.CommitAsync();
 
 						// RabbitMq ile elaqe
-						_rabbitMQPublisher.Publish(isLocalDb);
+						_rabbitMQPublisher.Publish(isLocalDb, DeliveryDirect.ExchangeName, DeliveryDirect.QueueName, DeliveryDirect.RoutingWaterMark);
 						_logger.LogInformation("Order statusu deyisdirildi.");
 						return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 					}
@@ -92,7 +93,7 @@ public class DeliveryService : IDeliveryService
 						await _unitOfWork.CommitAsync();
 
 						// RabbitMq ile elaqe
-						_rabbitMQPublisher.Publish(order);
+						_rabbitMQPublisher.Publish(order, DeliveryDirect.ExchangeName, DeliveryDirect.QueueName, DeliveryDirect.RoutingWaterMark);
 						_logger.LogInformation("Order statusu deyisdirildi.");
 						return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 					}
@@ -108,6 +109,7 @@ public class DeliveryService : IDeliveryService
 			throw;
 		}
 	}
+
 
 	public async Task<Response<IEnumerable<OrderDelivery>>> GetDeliveryOrder()
 	{
@@ -141,7 +143,6 @@ public class DeliveryService : IDeliveryService
 	public async Task<List<OrderDelivery>> GetOrders()
 	{
 		var policy = RetryPolicyHelper.GetRetryPolicy();
-
 
 		try
 		{

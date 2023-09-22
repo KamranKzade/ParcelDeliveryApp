@@ -1,6 +1,5 @@
 ﻿using RabbitMQ.Client;
 using SharedLibrary.Helpers;
-using SharedLibrary.ResourceFile;
 using Microsoft.Extensions.Logging;
 
 namespace SharedLibrary.Services.RabbitMqCustom;
@@ -18,49 +17,49 @@ public class RabbitMQClientService : IDisposable
 		_logger = logger;
 	}
 
-	public IModel Connect()
+	public IModel Connect(string exchange, string queue, string routingWaterMark)
 	{
 		var policy = RetryPolicyHelper.GetRetryPolicy();
 
 		IModel channel = null;
 
-		policy.Execute(() =>
-		{
-			try
-			{
-				// Elaqeni yaradiriq
-				_connection = _connectionFactory.CreateConnection();
+		policy.ExecuteAsync(async () =>
+	   {
+		   try
+		   {
+			   // Elaqeni yaradiriq
+			   _connection = _connectionFactory.CreateConnection();
 
-				if (_channel is { IsOpen: true })
-				{
-					channel = _channel;
-				}
-				else
-				{
-					// Modeli yaradiriq
-					channel = _connection.CreateModel();
+			   if (_channel is { IsOpen: true })
+			   {
+				   channel = _channel;
+			   }
+			   else
+			   {
+				   // Modeli yaradiriq
+				   channel = _connection.CreateModel();
 
-					// Exchange-i yaradiriq
-					channel.ExchangeDeclare(RabbitMqClientResource.ExchangeName, type: "direct", durable: true, autoDelete: false);
+				   // Exchange-i yaradiriq
+				   channel.ExchangeDeclare(exchange, type: "direct", durable: true, autoDelete: false);
 
-					// Queue -i yaradiriq
-					channel.QueueDeclare(RabbitMqClientResource.QueueName, durable: true, false, false, null);
+				   // Queue -i yaradiriq
+				   channel.QueueDeclare(queue, durable: true, false, false, null);
 
-					// Queue-ni bind edirik
-					channel.QueueBind(exchange: RabbitMqClientResource.ExchangeName, queue: RabbitMqClientResource.QueueName, routingKey: RabbitMqClientResource.RoutingWaterMark);
+				   // Queue-ni bind edirik
+				   channel.QueueBind(exchange: exchange, queue: queue, routingKey: routingWaterMark);
 
-					// Log-a informasiyani yaziriq
-					_logger.LogInformation("RabbitMQ ile elaqe kuruldu...");
+				   // Log-a informasiyani yaziriq
+				   _logger.LogInformation("RabbitMQ ile elaqe kuruldu...");
 
-					_channel = channel;
-				}
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError($"Error during connection attempt: {ex.Message}");
-				throw ex;
-			}
-		});
+				   _channel = channel;
+			   }
+		   }
+		   catch (Exception ex)
+		   {
+			   _logger.LogError($"Error during connection attempt: {ex.Message}");
+			   throw ex;
+		   }
+	   });
 
 		return _channel;
 	}

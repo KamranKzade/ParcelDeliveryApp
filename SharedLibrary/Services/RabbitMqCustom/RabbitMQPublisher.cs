@@ -2,7 +2,6 @@
 using RabbitMQ.Client;
 using System.Text.Json;
 using SharedLibrary.Helpers;
-using SharedLibrary.ResourceFile;
 using Microsoft.Extensions.Logging;
 
 namespace SharedLibrary.Services.RabbitMqCustom;
@@ -19,15 +18,15 @@ public class RabbitMQPublisher<TEntity> where TEntity : class
 	}
 
 
-	public void Publish(TEntity entity)
+	public void Publish(TEntity entity, string exchange, string queue, string routingWaterMark)
 	{
 		var policy = RetryPolicyHelper.GetRetryPolicy();
 
-		policy.Execute(() =>
+		policy.ExecuteAsync(async () =>
 		{
 			try
 			{
-				var channel = _rabbitmqClientService.Connect();
+				var channel = _rabbitmqClientService.Connect(exchange, queue, routingWaterMark);
 
 				var bodyString = JsonSerializer.Serialize(entity);
 				var bodyByte = Encoding.UTF8.GetBytes(bodyString);
@@ -35,7 +34,7 @@ public class RabbitMQPublisher<TEntity> where TEntity : class
 				var property = channel.CreateBasicProperties();
 				property.Persistent = true;
 
-				channel.BasicPublish(exchange: RabbitMqClientResource.ExchangeName, routingKey: RabbitMqClientResource.RoutingWaterMark, basicProperties: property, body: bodyByte);
+				channel.BasicPublish(exchange: exchange, routingKey: routingWaterMark, basicProperties: property, body: bodyByte);
 
 				_logger.LogInformation("The information was successfully published on RabbitMQ");
 			}

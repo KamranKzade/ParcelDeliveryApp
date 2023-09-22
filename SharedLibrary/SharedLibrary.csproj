@@ -21,17 +21,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="ResourceFile\RabbitMqClientResource.Designer.cs">
+	  <Compile Update="ResourceFile\DeliveryDirect.Designer.cs">
 	    <DesignTime>True</DesignTime>
 	    <AutoGen>True</AutoGen>
-	    <DependentUpon>RabbitMqClientResource.resx</DependentUpon>
+	    <DependentUpon>DeliveryDirect.resx</DependentUpon>
 	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Update="ResourceFile\RabbitMqClientResource.resx">
+	  <EmbeddedResource Update="ResourceFile\DeliveryDirect.resx">
 	    <Generator>PublicResXFileCodeGenerator</Generator>
-	    <LastGenOutput>RabbitMqClientResource.Designer.cs</LastGenOutput>
+	    <LastGenOutput>DeliveryDirect.Designer.cs</LastGenOutput>
 	  </EmbeddedResource>
 	</ItemGroup>
 

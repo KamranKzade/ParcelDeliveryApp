@@ -10,6 +10,8 @@ using SharedLibrary.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
 using OrderServer.API.Services.Abstract;
 using SharedLibrary.Repositories.Abstract;
+using SharedLibrary.Services.RabbitMqCustom;
+using SharedLibrary.ResourceFile;
 
 namespace OrderServer.API.Services.Concrete;
 
@@ -22,8 +24,9 @@ public class OrderServiceForController : IOrderService
 	private readonly IConfiguration _configuration;
 	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly ILogger<OrderServiceForController> _logger;
+	private readonly RabbitMQPublisher<OrderDelivery> _rabbitMQPublisher;
 
-	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger)
+	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher)
 	{
 		_dbContext = dbContext;
 		_genericRepository = genericRepository;
@@ -32,6 +35,7 @@ public class OrderServiceForController : IOrderService
 		_configuration = configuration;
 		_httpClientFactory = httpClientFactory;
 		_logger = logger;
+		_rabbitMQPublisher = rabbitMQPublisher;
 	}
 
 
@@ -336,6 +340,12 @@ public class OrderServiceForController : IOrderService
 
 			_genericRepository.UpdateAsync(order);
 			await _unitOfWork.CommitAsync();
+
+
+			// RabbitMQ  ile datalarin gonderilmesi Delivery Service-e
+
+			// _rabbitMQPublisher.Publish(order, DeliveryDirect.ExchangeName, DeliveryDirect.QueueName, DeliveryDirect.RoutingWaterMark);
+
 
 			_logger.LogInformation($"Courier assigned to the order successfully. OrderId: {dto.OrderId}, CourierId: {dto.CourierId}, CourierName: {dto.CourierName}");
 			return Response<NoDataDto>.Success(StatusCodes.Status201Created);

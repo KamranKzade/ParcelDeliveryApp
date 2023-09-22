@@ -27,7 +27,7 @@ public class DeliveryOrderBackgroundService : BackgroundService
 
 	public override Task StartAsync(CancellationToken cancellationToken)
 	{
-		_channel = _rabbitMqClientService.Connect();
+		_channel = _rabbitMqClientService.Connect(DeliveryDirect.ExchangeName, DeliveryDirect.QueueName, DeliveryDirect.RoutingWaterMark);
 
 		_channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
@@ -39,7 +39,7 @@ public class DeliveryOrderBackgroundService : BackgroundService
 	{
 		var consumer = new AsyncEventingBasicConsumer(_channel);
 
-		_channel.BasicConsume(RabbitMqClientResource.QueueName, false, consumer);
+		_channel.BasicConsume(DeliveryDirect.QueueName, false, consumer);
 
 		consumer.Received += Consumer_Received;
 
