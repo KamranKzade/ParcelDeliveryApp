@@ -1,5 +1,5 @@
-﻿using Polly;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
+using SharedLibrary.Helpers;
 using SharedLibrary.ResourceFile;
 using Microsoft.Extensions.Logging;
 
@@ -20,13 +20,7 @@ public class RabbitMQClientService : IDisposable
 
 	public IModel Connect()
 	{
-		var policy = Policy
-		.Handle<Exception>() // Hangi tür hataları ele alacağınızı belirtin.
-		.Retry(3, (exception, retryCount) =>
-		{
-			// Her bir yeniden deneme işlemi sırasında yapılacak işlemleri burada tanımlayabilirsiniz.
-			_logger.LogWarning($"Retry #{retryCount} after exception: {exception.Message}");
-		});
+		var policy = RetryPolicyHelper.GetRetryPolicy();
 
 		IModel channel = null;
 

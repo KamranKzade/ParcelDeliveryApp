@@ -1,9 +1,9 @@
 ﻿using System.Text;
 using RabbitMQ.Client;
 using System.Text.Json;
+using SharedLibrary.Helpers;
 using SharedLibrary.ResourceFile;
 using Microsoft.Extensions.Logging;
-using Polly;
 
 namespace SharedLibrary.Services.RabbitMqCustom;
 
@@ -21,11 +21,7 @@ public class RabbitMQPublisher<TEntity> where TEntity : class
 
 	public void Publish(TEntity entity)
 	{
-		var policy = Policy.Handle<Exception>()
-						   .Retry(3, (exception, retryCount) =>
-						   {
-						   	   _logger.LogWarning($"Retry #{retryCount} after exception: {exception.Message}");
-						   });
+		var policy = RetryPolicyHelper.GetRetryPolicy();
 
 		policy.Execute(() =>
 		{

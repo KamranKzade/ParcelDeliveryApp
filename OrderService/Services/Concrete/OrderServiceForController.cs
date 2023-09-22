@@ -2,6 +2,7 @@
 using SharedLibrary.Dtos;
 using SharedLibrary.Models;
 using OrderServer.API.Dtos;
+using SharedLibrary.Helpers;
 using OrderServer.API.Models;
 using SharedLibrary.Models.Enum;
 using Microsoft.EntityFrameworkCore;
@@ -430,6 +431,9 @@ public class OrderServiceForController : IOrderService
 	#endregion
 
 
+	#region Everyone
+
+
 	public async Task<Response<IEnumerable<OrderDto>>> GetOrders()
 	{
 		try
@@ -468,8 +472,16 @@ public class OrderServiceForController : IOrderService
 	}
 
 
+	#endregion
+
+
+	#region HelperMethod
+
+
 	public async Task<bool> CheckUserIsCourier(string userId, string userName)
 	{
+		var policy = RetryPolicyHelper.GetRetryPolicy();
+
 		try
 		{
 			string identityServiceBaseUrl = _configuration["Microservices:AuthServiceBaseUrl"];
@@ -481,7 +493,11 @@ public class OrderServiceForController : IOrderService
 			// Identity Service ile iletişim kuracak HttpClient oluşturun
 
 			// Identity Service'den kullanıcı bilgilerini alın
-			var response = await client.GetAsync(checkUserRoleEndpoint);
+			var response = await policy.ExecuteAsync(async () =>
+			{
+				return await client.GetAsync(checkUserRoleEndpoint);
+			});
+
 			if (response.IsSuccessStatusCode)
 			{
 				var responseContent = await response.Content.ReadAsStringAsync();
@@ -512,9 +528,10 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
-
 	public async Task<IEnumerable<OrderDelivery>> GetOrdersOnTheDeliveryServer()
 	{
+		var policy = RetryPolicyHelper.GetRetryPolicy();
+
 		try
 		{
 			string deliveryServiceBaseUrl = _configuration["Microservices:DeliveryServiceBaseUrl"];
@@ -524,7 +541,11 @@ public class OrderServiceForController : IOrderService
 			var client = _httpClientFactory.CreateClient();
 			using (client)
 			{
-				var response = await client.GetAsync(getDeliveryOrderEndPoint);
+				var response = await policy.ExecuteAsync(async () =>
+				{
+					// Identity Service'den kullanıcı bilgilerini alın
+					return await client.GetAsync(getDeliveryOrderEndPoint);
+				});
 
 				if (response.IsSuccessStatusCode)
 				{
@@ -555,5 +576,8 @@ public class OrderServiceForController : IOrderService
 			return null;
 		}
 	}
+
+
+	#endregion
 
 }

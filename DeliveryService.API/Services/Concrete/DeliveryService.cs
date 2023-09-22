@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SharedLibrary.Dtos;
 using SharedLibrary.Models;
+using SharedLibrary.Helpers;
 using DeliveryServer.API.Dtos;
 using SharedLibrary.Models.Enum;
 using DeliveryServer.API.Models;
@@ -139,6 +140,9 @@ public class DeliveryService : IDeliveryService
 
 	public async Task<List<OrderDelivery>> GetOrders()
 	{
+		var policy = RetryPolicyHelper.GetRetryPolicy();
+
+
 		try
 		{
 			string orderServiceBaseUrl = _configuration["MicroServices:OrderServiceBaseUrl"];
@@ -151,7 +155,12 @@ public class DeliveryService : IDeliveryService
 			using (client)
 			{
 				// Identity Service'den kullanıcı bilgilerini alın
-				var response = await client.GetAsync(getOrderEndpoint);
+				var response = await policy.ExecuteAsync(async () =>
+				{
+					// Identity Service'den kullanıcı bilgilerini alın
+					return await client.GetAsync(getOrderEndpoint);
+				});
+
 				if (response.IsSuccessStatusCode)
 				{
 					var responseContent = await response.Content.ReadAsStringAsync();
