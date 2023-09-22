@@ -5,12 +5,12 @@ using SharedLibrary.Helpers;
 using DeliveryServer.API.Dtos;
 using SharedLibrary.Models.Enum;
 using DeliveryServer.API.Models;
+using SharedLibrary.ResourceFiles;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using DeliveryServer.API.Services.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
-using SharedLibrary.ResourceFile;
 
 namespace DeliveryServer.API.Services.Concrete;
 

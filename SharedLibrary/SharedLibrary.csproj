@@ -21,7 +21,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="ResourceFile\DeliveryDirect.Designer.cs">
+	  <Compile Update="ResourceFiles\OrderDirect.Designer.cs">
+	    <DependentUpon>OrderDirect.resx</DependentUpon>
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	  </Compile>
+	  <Compile Update="ResourceFiles\DeliveryDirect.Designer.cs">
 	    <DesignTime>True</DesignTime>
 	    <AutoGen>True</AutoGen>
 	    <DependentUpon>DeliveryDirect.resx</DependentUpon>
@@ -29,7 +34,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Update="ResourceFile\DeliveryDirect.resx">
+	  <EmbeddedResource Update="ResourceFiles\OrderDirect.resx">
+	    <LastGenOutput>OrderDirect.Designer.cs</LastGenOutput>
+	    <Generator>PublicResXFileCodeGenerator</Generator>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="ResourceFiles\DeliveryDirect.resx">
 	    <Generator>PublicResXFileCodeGenerator</Generator>
 	    <LastGenOutput>DeliveryDirect.Designer.cs</LastGenOutput>
 	  </EmbeddedResource>

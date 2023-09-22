@@ -11,7 +11,7 @@ using SharedLibrary.UnitOfWork.Abstract;
 using OrderServer.API.Services.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
-using SharedLibrary.ResourceFile;
+using SharedLibrary.ResourceFiles;
 
 namespace OrderServer.API.Services.Concrete;
 
@@ -344,7 +344,7 @@ public class OrderServiceForController : IOrderService
 
 			// RabbitMQ  ile datalarin gonderilmesi Delivery Service-e
 
-			// _rabbitMQPublisher.Publish(order, DeliveryDirect.ExchangeName, DeliveryDirect.QueueName, DeliveryDirect.RoutingWaterMark);
+			 _rabbitMQPublisher.Publish(order, OrderDirect.ExchangeName, OrderDirect.QueueName, OrderDirect.RoutingWaterMark);
 
 
 			_logger.LogInformation($"Courier assigned to the order successfully. OrderId: {dto.OrderId}, CourierId: {dto.CourierId}, CourierName: {dto.CourierName}");

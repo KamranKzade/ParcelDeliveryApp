@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace SharedLibrary.ResourceFile {
+namespace SharedLibrary.ResourceFiles {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace SharedLibrary.ResourceFile {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SharedLibrary.ResourceFile.DeliveryDirect", typeof(DeliveryDirect).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SharedLibrary.ResourceFiles.DeliveryDirect", typeof(DeliveryDirect).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
