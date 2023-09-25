@@ -1,8 +1,8 @@
 ﻿using Serilog;
 using Serilog.Events;
 using RabbitMQ.Client;
-using SharedLibrary.Configuration;
 using SharedLibrary.Models;
+using SharedLibrary.Configuration;
 using Microsoft.Extensions.Configuration;
 using SharedLibrary.Services.RabbitMqCustom;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,8 +18,10 @@ public static class StartUpExtention
 			Uri = new Uri(configuration.GetConnectionString("RabbitMQ")),
 			DispatchConsumersAsync = true
 		});
-		services.AddSingleton<RabbitMQPublisher<OrderDelivery>>();
-		services.AddSingleton<RabbitMQClientService>();
+		// bura fikir ver
+
+		services.AddTransient<RabbitMQPublisher<OrderDelivery>>();
+		services.AddTransient<RabbitMQClientService>();
 	}
 
 	public static void AddCustomTokenAuthWithExtentionShared(this IServiceCollection services, IConfiguration configuration)

@@ -16,7 +16,7 @@ builder.Services.AddScopeWithExtention();
 builder.Services.AddSingletonWithExtentionShared(builder.Configuration);
 builder.Services.AddCustomTokenAuthWithExtentionShared(builder.Configuration);
 builder.Services.OtherAdditionWithExtention();
-builder.Services.AddHttpClientWithExtention(builder.Configuration); 
+builder.Services.AddHttpClientWithExtention(builder.Configuration);
 builder.Services.AddLoggingWithExtentionShared(builder.Configuration);
 builder.Services.AddCorsWithExtentionShared();
 

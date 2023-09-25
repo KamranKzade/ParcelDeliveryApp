@@ -9,6 +9,7 @@ using SharedLibrary.Repositories.Abstract;
 using DeliveryServer.API.Services.Abstract;
 using DeliveryServer.API.Services.Concrete;
 using OrderServer.API.Repositories.Concrete;
+using DeliveryServer.API.BackgroundServices;
 
 namespace DeliveryServer.API.Extentions;
 
@@ -42,6 +43,9 @@ public static class StartUpExtention
 
 	public static void OtherAdditionWithExtention(this IServiceCollection services)
 	{
+		// BackGroundService elave edirik projecte
+		services.AddHostedService<DeliveryBackgroundService>();
+
 		services.UseCustomValidationResponse();
 		services.AddAuthorization();
 	}

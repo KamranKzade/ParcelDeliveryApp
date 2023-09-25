@@ -9,21 +9,20 @@ using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
 
-namespace DeliveryServer.API.BackgroundService;
+namespace DeliveryServer.API.BackgroundServices;
 
-public class DeliveryBackgroundService : Microsoft.Extensions.Hosting.BackgroundService
+public class DeliveryBackgroundService : BackgroundService
 {
 	private IModel _channel;
 	private readonly IServiceProvider _serviceProvider;
 	private readonly RabbitMQClientService _rabbitMqClientService;
 	private readonly ILogger<DeliveryBackgroundService> _logger;
 
-	public DeliveryBackgroundService(IModel channel, IServiceProvider serviceProvider, RabbitMQClientService rabbitMqClientService, ILogger<DeliveryBackgroundService> logger)
+	public DeliveryBackgroundService(RabbitMQClientService rabbitMqClientService, ILogger<DeliveryBackgroundService> logger, IServiceProvider dbContext)
 	{
-		_channel = channel;
-		_serviceProvider = serviceProvider;
 		_rabbitMqClientService = rabbitMqClientService;
 		_logger = logger;
+		_serviceProvider = dbContext;
 	}
 
 	public override Task StartAsync(CancellationToken cancellationToken)
@@ -35,7 +34,7 @@ public class DeliveryBackgroundService : Microsoft.Extensions.Hosting.Background
 		_logger.LogInformation("DeliveryBackgroundService started.");
 		return base.StartAsync(cancellationToken);
 	}
-	
+
 	protected override Task ExecuteAsync(CancellationToken stoppingToken)
 	{
 		var consumer = new AsyncEventingBasicConsumer(_channel);
@@ -59,16 +58,14 @@ public class DeliveryBackgroundService : Microsoft.Extensions.Hosting.Background
 		try
 		{
 			var orderDelivery = JsonSerializer.Deserialize<OrderDelivery>(Encoding.UTF8.GetString(@event.Body.ToArray()));
-			
+
 
 			using var scope = _serviceProvider.CreateScope();
 			var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 			var genericRepo = scope.ServiceProvider.GetRequiredService<IGenericRepository<AppDbContext, OrderDelivery>>();
 			var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-			// var order = dbContext.OrderDeliveries.FirstOrDefault(o => o.Id == orderDelivery.Id);
-
-			genericRepo.UpdateAsync(orderDelivery);
+			genericRepo.AddAsync(orderDelivery);
 			unitOfWork.Commit();
 
 			_logger.LogInformation($"Order added successfully. OrderId: {orderDelivery.Id}");
