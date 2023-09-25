@@ -66,6 +66,12 @@ public class DeliveryOrderBackgroundService : BackgroundService
 
 			var order = dbContext.Orders.FirstOrDefault(o => o.Id == orderDelivery.Id);
 
+			if (order == null)
+			{
+				_logger.LogWarning("No such order was found in OrderServer");
+				return Task.CompletedTask;
+			}
+
 			order.Status = orderDelivery.Status;
 			order.DeliveryDate = orderDelivery.DeliveryDate;
 			genericRepo.UpdateAsync(order);

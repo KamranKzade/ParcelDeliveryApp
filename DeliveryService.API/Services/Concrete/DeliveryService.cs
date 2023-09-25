@@ -40,15 +40,15 @@ public class DeliveryService : IDeliveryService
 		try
 		{
 			// OrderService-de olan datalarimizdi
-			var orders = await GetOrders();
+			var OrderServerDb = await GetOrders();
 
-			if (orders.Count == 0)
+			if (OrderServerDb.Count == 0)
 			{
 				_logger.LogWarning("Database-da order yoxdur");
 				return Response<NoDataDto>.Fail("Database-da order yoxdur", StatusCodes.Status404NotFound, true);
 			}
 
-			foreach (var order in orders)
+			foreach (var order in OrderServerDb)
 			{
 				if (order.Id.ToString().ToLower() == dto.OrderId.ToLower() && order.CourierId == courierId)
 				{
@@ -84,18 +84,8 @@ public class DeliveryService : IDeliveryService
 					}
 					else
 					{
-						order.Status = dto.OrderStatus;
-						if (dto.OrderStatus == OrderStatus.Delivered)
-						{
-							order.DeliveryDate = DateTime.Now;
-						}
-						await _genericRepository.AddAsync(order);
-						await _unitOfWork.CommitAsync();
-
-						// RabbitMq ile elaqe
-						_rabbitMQPublisher.Publish(order, DeliveryDirect.ExchangeName, DeliveryDirect.QueueName, DeliveryDirect.RoutingWaterMark);
-						_logger.LogInformation("Order statusu deyisdirildi.");
-						return Response<NoDataDto>.Success(StatusCodes.Status200OK);
+						_logger.LogInformation("Delivery Serverde bu order yoxdur.");
+						return Response<NoDataDto>.Fail("Delivery Serverde bu order yoxdur.", StatusCodes.Status404NotFound, true);
 					}
 				}
 			}
