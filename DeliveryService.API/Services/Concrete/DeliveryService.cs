@@ -90,7 +90,7 @@ public class DeliveryService : IDeliveryService
 				}
 			}
 
-			_logger.LogWarning("Order tapilmadi");
+			_logger.LogWarning("OrderServerDb-da bu order tapilmadi");
 			return Response<NoDataDto>.Fail("Order tapilmadi", StatusCodes.Status404NotFound, true);
 		}
 		catch (Exception ex)
