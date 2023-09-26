@@ -15,7 +15,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       #- Serilog:WriteTo:0:Args:path=/app/logs/webapi-.log
     ports:
-      - "5000:80"
+      - "5030:80"
  
   deliveryserver.api:
     environment:

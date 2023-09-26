@@ -33,7 +33,7 @@ public class UserController : CustomBaseController
 
 
 
-	[HttpGet]
+	[HttpGet()]
 	[Authorize]
 	public async Task<IActionResult> GetUser()
 	{
