@@ -30,3 +30,10 @@ services:
     ports:
       - "5010:80"
   
+
+  parceldeliverygateway:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    ports:
+      - "5000:80"
+

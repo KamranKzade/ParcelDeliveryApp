@@ -5,8 +5,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5030
+          "Host": "authserver.api",
+          "Port": 80
         }
       ],
       "UpstreamPathTemplate": "/services/authservice/{everything}",
@@ -18,8 +18,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5010
+          "Host": "orderserver.api",
+          "Port": 80
         }
       ],
       "UpstreamPathTemplate": "/services/orderservice/{everything}",
@@ -31,8 +31,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5020
+          "Host": "deliveryserver.api",
+          "Port": 80
         }
       ],
       "UpstreamPathTemplate": "/services/deliveryservice/{everything}",

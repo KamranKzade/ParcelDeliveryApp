@@ -7,7 +7,8 @@
         "authserver.api": "StartDebugging",
         "orderservice.api": "StartDebugging",
         "deliveryserver.api": "StartDebugging",
-        "orderserver.api": "StartDebugging"
+        "orderserver.api": "StartDebugging",
+        "parceldeliverygateway": "StartDebugging"
       }
     }
   }

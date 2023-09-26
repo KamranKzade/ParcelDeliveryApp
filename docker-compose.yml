@@ -42,6 +42,20 @@ services:
       - parceldelivery
         
 
+  parceldeliverygateway:
+    image: ${DOCKER_REGISTRY-}parceldeliverygateway
+    container_name: parceldeliverygateway-container
+    build:
+      context: .
+      dockerfile: ParcelDeliveryGateway/Dockerfile
+    networks:
+     - parceldelivery
+    depends_on:
+     - authserver.api
+     - orderserver.api
+     - deliveryserver.api
+    # command: ["dotnet", "ParcelDeliveryGateway.dll"]
+
 volumes:
   sqlserver_volume :
   authserver_logs : 
