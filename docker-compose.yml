@@ -8,7 +8,7 @@ services:
       - parceldelivery
 
   authserver.api:
-    image: ${DOCKER_REGISTRY-}authserverapi
+    image: kamrankzade/authserver:${version}
     container_name: authserverapi-container
     volumes:
       - authserver_logs:/app/Logs
@@ -19,7 +19,7 @@ services:
       - parceldelivery
 
   deliveryserver.api:
-    image: ${DOCKER_REGISTRY-}deliveryserverapi
+    image: kamrankzade/deliveryserver:${version}
     container_name: deliveryserverapi-container
     volumes:
       - deliveryserver_logs:/app/Logs
@@ -31,7 +31,7 @@ services:
 
 
   orderserver.api:
-    image: ${DOCKER_REGISTRY-}orderserverapi
+    image: kamrankzade/orderserver:${version}
     container_name: orderserverapi-container
     volumes:
       - orderserver_logs:/app/Logs
@@ -43,7 +43,7 @@ services:
         
 
   parceldeliverygateway:
-    image: ${DOCKER_REGISTRY-}parceldeliverygateway
+    image: kamrankzade/parceldeliverygateway:${version}
     container_name: parceldeliverygateway-container
     build:
       context: .
@@ -54,7 +54,6 @@ services:
      - authserver.api
      - orderserver.api
      - deliveryserver.api
-    # command: ["dotnet", "ParcelDeliveryGateway.dll"]
 
 volumes:
   sqlserver_volume :
