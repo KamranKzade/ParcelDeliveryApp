@@ -89,7 +89,7 @@ public class UserService : IUserService
 			var userdto = user.Select(o => new UserAppDto
 			{
 				Id = o.Id,
-				UserName = o.Name,
+				UserName = o.Name!,
 				Email = o.Email
 			}).AsQueryable();
 
@@ -109,7 +109,7 @@ public class UserService : IUserService
 		{
 			if (!await _roleManager.RoleExistsAsync(dto.RoleName))
 			{
-				await _roleManager.CreateAsync(new IdentityRole { Name = dto.RoleName.ToLower() });
+				await _roleManager.CreateAsync(new IdentityRole { Name = dto.RoleName!.ToLower() });
 				_logger.LogInformation($"Role '{dto.RoleName}' created successfully.");
 			}
 
@@ -121,7 +121,7 @@ public class UserService : IUserService
 				return Response<NoDataDto>.Fail("UserName not found", StatusCodes.Status404NotFound, true);
 			}
 
-			await _userManager.AddToRoleAsync(user, dto.RoleName.ToLower());
+			await _userManager.AddToRoleAsync(user, dto.RoleName!.ToLower());
 			_logger.LogInformation($"User '{user.UserName}' assigned to role '{dto.RoleName}' successfully.");
 
 			return Response<NoDataDto>.Success(StatusCodes.Status201Created);

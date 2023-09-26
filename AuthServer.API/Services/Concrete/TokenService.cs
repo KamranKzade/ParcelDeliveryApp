@@ -65,7 +65,7 @@ public class TokenService : ITokenService
 				new Claim(JwtRegisteredClaimNames.Email, userApp.Email),
 				new Claim(ClaimTypes.Name, userApp.UserName),
 				new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-				new Claim("Address", userApp.Address),
+				new Claim("Address", userApp.Address!),
 				new Claim("birth-date", userApp.Birhtdate.ToShortDateString()),
 			};
 			userList.AddRange(audiences.Select(x => new Claim(JwtRegisteredClaimNames.Aud, x)));
@@ -86,9 +86,9 @@ public class TokenService : ITokenService
 		try
 		{
 			var claims = new List<Claim>();
-			claims.AddRange(client.Audiences.Select(x => new Claim(JwtRegisteredClaimNames.Aud, x)));
+			claims.AddRange(client.Audiences!.Select(x => new Claim(JwtRegisteredClaimNames.Aud, x)));
 			new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString());
-			new Claim(JwtRegisteredClaimNames.Sub, client.Id.ToString());
+			new Claim(JwtRegisteredClaimNames.Sub, client.Id!.ToString());
 
 			_logger.LogInformation($"Generated claims for client: {client.Id}");
 			return claims;
@@ -108,7 +108,7 @@ public class TokenService : ITokenService
 			// Tokenle bagli olan melumatlar
 			var accessTokenExpiration = DateTime.Now.AddMinutes(_tokenOption.AccessTokenExpiration);
 			var refleshTokenExpiration = DateTime.Now.AddMinutes(_tokenOption.RefleshTokenExpiration);
-			var securityKey = SignService.GetSymmetricSecurityKey(_tokenOption.SecurityKey);
+			var securityKey = SignService.GetSymmetricSecurityKey(_tokenOption.SecurityKey!);
 
 			// credentiallari yaradiriq
 			var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);
@@ -119,7 +119,7 @@ public class TokenService : ITokenService
 					issuer: _tokenOption.Issuer,
 					expires: accessTokenExpiration,
 					notBefore: DateTime.MinValue,
-					claims: GetClaims(userApp, _tokenOption.Audience).Result,
+					claims: GetClaims(userApp, _tokenOption.Audience!).Result,
 					signingCredentials: credentials
 				);
 
@@ -153,7 +153,7 @@ public class TokenService : ITokenService
 		{
 			// Tokenle bagli olan melumatlar
 			var accessTokenExpiration = DateTime.Now.AddMinutes(_tokenOption.AccessTokenExpiration);
-			var securityKey = SignService.GetSymmetricSecurityKey(_tokenOption.SecurityKey);
+			var securityKey = SignService.GetSymmetricSecurityKey(_tokenOption.SecurityKey!);
 
 			// credentiallari yaradiriq
 			var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature);

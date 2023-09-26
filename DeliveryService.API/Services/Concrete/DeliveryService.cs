@@ -50,7 +50,7 @@ public class DeliveryService : IDeliveryService
 
 			foreach (var order in OrderServerDb)
 			{
-				if (order.Id.ToString().ToLower() == dto.OrderId.ToLower() && order.CourierId == courierId)
+				if (order.Id.ToString().ToLower() == dto.OrderId!.ToLower() && order.CourierId == courierId)
 				{
 					// DeliveryService-e yazilib ona baxiriq
 					var isLocalDb = await _dbContext.OrderDeliveries.FirstOrDefaultAsync(d => d.Id == order.Id);
@@ -164,20 +164,20 @@ public class DeliveryService : IDeliveryService
 					else
 					{
 						_logger.LogWarning("Hiçbir sipariş bulunamadı.");
-						return null;
+						return null!;
 					}
 				}
 				else
 				{
 					_logger.LogWarning($"HTTP isteği sırasında bir hata oluştu. StatusCode: {response.StatusCode}");
-					return null;
+					return null	!;
 				}
 			}
 		}
 		catch (HttpRequestException ex)
 		{
 			_logger.LogError(ex, "HTTP isteği sırasında bir hata oluştu: {Message}", ex.Message);
-			return null;
+			return null!;
 		}
 	}
 

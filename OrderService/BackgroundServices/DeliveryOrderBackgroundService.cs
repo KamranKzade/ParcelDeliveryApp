@@ -64,9 +64,9 @@ public class DeliveryOrderBackgroundService : BackgroundService
 			var genericRepo = scope.ServiceProvider.GetRequiredService<IGenericRepository<AppDbContext, OrderDelivery>>();
 			var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-			var order = dbContext.Orders.FirstOrDefault(o => o.Id == orderDelivery.Id);
+			var order = dbContext.Orders.FirstOrDefault(o => o.Id == orderDelivery!.Id);
 
-			order.Status = orderDelivery.Status;
+			order!.Status = orderDelivery!.Status;
 			order.DeliveryDate = orderDelivery.DeliveryDate;
 			genericRepo.UpdateAsync(order);
 			unitOfWork.Commit();

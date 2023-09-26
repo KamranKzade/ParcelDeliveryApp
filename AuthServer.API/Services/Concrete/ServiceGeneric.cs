@@ -38,7 +38,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 		}
 		catch (Exception ex)
 		{
-			_logger.LogError(ex, "An error occurred while adding the entity: {Entity}");
+			_logger.LogError(ex, $"An error occurred while adding the entity: {ex.Message}");
 			var error = new ErrorDto("An error occurred while adding the entity", true);
 			return Response<TDto>.Fail(error, StatusCodes.Status500InternalServerError);
 		}

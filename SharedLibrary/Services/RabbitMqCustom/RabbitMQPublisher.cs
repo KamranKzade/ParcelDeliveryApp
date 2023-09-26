@@ -41,7 +41,7 @@ public class RabbitMQPublisher<TEntity> where TEntity : class
 			catch (Exception ex)
 			{
 				_logger.LogError($"Error during publish: {ex.Message}", ex);
-				throw ex;
+				throw ex!;
 			}
 		});
 	}

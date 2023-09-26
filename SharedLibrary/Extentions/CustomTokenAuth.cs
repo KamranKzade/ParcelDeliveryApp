@@ -23,8 +23,8 @@ public static class CustomTokenAuth
 			opts.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
 			{
 				ValidIssuer = tokenOptions.Issuer,
-				ValidAudience = tokenOptions.Audience[0],
-				IssuerSigningKey = SignService.GetSymmetricSecurityKey(tokenOptions.SecurityKey),
+				ValidAudience = tokenOptions.Audience![0],
+				IssuerSigningKey = SignService.GetSymmetricSecurityKey(tokenOptions.SecurityKey!),
 
 				ValidateIssuerSigningKey = true, // imzani kontrol edirik
 				ValidateAudience = true, // bizim audience di, yeni oz name-i var audience-ler icerisinde

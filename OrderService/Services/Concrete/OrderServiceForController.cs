@@ -290,7 +290,7 @@ public class OrderServiceForController : IOrderService
 				.Where(o => o.CourierId == courierId)
 				.Select(order => new CourierWithOrderStatusDto
 				{
-					CourierName = order.CourierName,
+					CourierName = order.CourierName!,
 					OrderName = order.Name,
 					OrderStatus = order.Status
 				});
@@ -329,7 +329,7 @@ public class OrderServiceForController : IOrderService
 				return Response<NoDataDto>.Fail("A courier has already been appointed for the order", StatusCodes.Status400BadRequest, true);
 			}
 
-			if (!await CheckUserIsCourier(dto.CourierId, dto.CourierName))
+			if (!await CheckUserIsCourier(dto.CourierId!, dto.CourierName!))
 			{
 				_logger.LogWarning($"Courier not found. CourierId: {dto.CourierId}, CourierName: {dto.CourierName}");
 				return Response<NoDataDto>.Fail("Courier not found", StatusCodes.Status404NotFound, true);
@@ -371,7 +371,7 @@ public class OrderServiceForController : IOrderService
 			var orders = await _dbContext.Orders.Where(o => o.CourierId == courierId)
 												 .Select(order => new OrderDetailDto
 												 {
-													 CourierName = order.CourierName,
+													 CourierName = order.CourierName!,
 													 OrderName = order.Name,
 													 OrderStatus = order.Status,
 													 CreatedDate = order.CreatedDate,
@@ -421,7 +421,7 @@ public class OrderServiceForController : IOrderService
 				OrderName = o.Name,
 				CreateDate = o.CreatedDate,
 				OrderStatus = o.Status,
-				CourierName = o.CourierName,
+				CourierName = o.CourierName!,
 				DeliveryDate = o.DeliveryDate,
 				DestinationAddress = o.DestinationAddress
 			}).AsQueryable();
@@ -566,7 +566,7 @@ public class OrderServiceForController : IOrderService
 					if (orderDeliveryDto.Data.ToList().Count == 0)
 					{
 						_logger.LogWarning($"No orders found in the database.");
-						return null;
+						return null!;
 					}
 
 					_logger.LogInformation($"Successfully retrieved orders from the database.");
@@ -575,7 +575,7 @@ public class OrderServiceForController : IOrderService
 				else
 				{
 					_logger.LogWarning($"Failed to fetch user data from Identity Service. StatusCode: {response.StatusCode}");
-					return null;
+					return null!;
 				}
 			}
 
@@ -583,7 +583,7 @@ public class OrderServiceForController : IOrderService
 		catch (Exception ex)
 		{
 			_logger.LogError(ex, $"Error: {ex.Message}");
-			return null;
+			return null!;
 		}
 	}
 

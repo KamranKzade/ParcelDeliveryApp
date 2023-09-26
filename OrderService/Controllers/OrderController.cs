@@ -30,11 +30,11 @@ public class OrderController : CustomBaseController
 	[HttpPost("CreateOrder")]
 	public async Task<IActionResult> CreateOrder(CreateOrderDto dto)
 	{
-		var userName = HttpContext.User.Identity.Name;
+		var userName = HttpContext.User.Identity!.Name;
 		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
 		var address = User.Claims.FirstOrDefault(x => x.Type == "Address");
 
-		return ActionResultInstance(await _orderService.CreateOrderAsync(dto, userName, userId.Value, address.Value));
+		return ActionResultInstance(await _orderService.CreateOrderAsync(dto, userName!, userId!.Value, address!.Value));
 	}
 
 	[Authorize(Roles = "User")]
@@ -43,7 +43,7 @@ public class OrderController : CustomBaseController
 	{
 		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
 
-		return ActionResultInstance(await _orderService.GetOrderAsyncForUser(userId.Value));
+		return ActionResultInstance(await _orderService.GetOrderAsyncForUser(userId!.Value));
 	}
 
 	[Authorize(Roles = "User")]
@@ -55,7 +55,7 @@ public class OrderController : CustomBaseController
 		var addressOld = User.Claims.FirstOrDefault(x => x.Type == "Address");
 
 
-		return ActionResultInstance(await _orderService.UpdateAddressAsync(userId!.Value, dto.OrderId, dto.Address));
+		return ActionResultInstance(await _orderService.UpdateAddressAsync(userId!.Value, dto.OrderId!, dto.Address!));
 	}
 
 	[Authorize(Roles = "User")]

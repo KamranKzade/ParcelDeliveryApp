@@ -35,14 +35,14 @@ public class AuthController : CustomBaseController
 	[HttpPost]
 	public async Task<IActionResult> RevokeRefleshToken(RefleshTokenDto refleshTokenDto)
 	{
-		var result = await _authService.RevokeRefleshTokenAsync(refleshTokenDto.Token);
+		var result = await _authService.RevokeRefleshTokenAsync(refleshTokenDto.Token!);
 		return ActionResultInstance(result);
 	}
 
 	[HttpPost]
 	public async Task<IActionResult> CreateTokenByRefleshToken(RefleshTokenDto refleshTokenDto)
 	{
-		var result = await _authService.CreateTokenByRefleshTokenAsync(refleshTokenDto.Token);
+		var result = await _authService.CreateTokenByRefleshTokenAsync(refleshTokenDto.Token!);
 
 		return ActionResultInstance(result);
 	}

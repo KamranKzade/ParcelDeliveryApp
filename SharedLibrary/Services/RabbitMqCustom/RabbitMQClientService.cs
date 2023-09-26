@@ -21,7 +21,7 @@ public class RabbitMQClientService : IDisposable
 	{
 		var policy = RetryPolicyHelper.GetRetryPolicy();
 
-		IModel channel = null;
+		IModel? channel = null;
 
 		policy.ExecuteAsync(async () =>
 	   {

@@ -59,7 +59,7 @@ public class GenericRepository<TContext, Tentity> : IGenericRepository<TContext,
 			}
 
 			_logger.LogInformation($"{entity} returned successfully");
-			return entity;
+			return entity!;
 		}
 		catch (Exception ex)
 		{

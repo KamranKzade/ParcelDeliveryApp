@@ -65,10 +65,10 @@ public class DeliveryBackgroundService : BackgroundService
 			var genericRepo = scope.ServiceProvider.GetRequiredService<IGenericRepository<AppDbContext, OrderDelivery>>();
 			var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-			genericRepo.AddAsync(orderDelivery);
+			genericRepo.AddAsync(orderDelivery!);
 			unitOfWork.Commit();
 
-			_logger.LogInformation($"Order added successfully. OrderId: {orderDelivery.Id}");
+			_logger.LogInformation($"Order added successfully. OrderId: {orderDelivery!.Id}");
 			_channel.BasicAck(@event.DeliveryTag, false);
 		}
 		catch (Exception ex)

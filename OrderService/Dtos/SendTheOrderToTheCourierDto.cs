@@ -2,7 +2,7 @@
 
 public class SendTheOrderToTheCourierDto
 {
-	public string OrderId { get; set; }
-	public string CourierId { get; set; }
-	public string CourierName { get; set; }
+	public string? OrderId { get; set; }
+	public string? CourierId { get; set; }
+	public string? CourierName { get; set; }
 }
