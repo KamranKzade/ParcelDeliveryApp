@@ -5,13 +5,13 @@ using OrderServer.API.Dtos;
 using SharedLibrary.Helpers;
 using OrderServer.API.Models;
 using SharedLibrary.Models.Enum;
+using SharedLibrary.ResourceFiles;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Services.Abstract;
 using SharedLibrary.UnitOfWork.Abstract;
 using OrderServer.API.Services.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
-using SharedLibrary.ResourceFiles;
 
 namespace OrderServer.API.Services.Concrete;
 
@@ -19,23 +19,25 @@ public class OrderServiceForController : IOrderService
 {
 	private readonly AppDbContext _dbContext;
 	private readonly IUnitOfWork _unitOfWork;
-	private readonly IGenericRepository<AppDbContext, OrderDelivery> _genericRepository;
+	private readonly IGenericRepository<AppDbContext, OrderDelivery> _genericRepositoryForOrder;
+	private readonly IGenericRepository<AppDbContext, OutBox> _genericRepositoryForOutBox;
 	private readonly IServiceGeneric<OrderDelivery, OrderDto> _serviceGeneric;
 	private readonly IConfiguration _configuration;
 	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly ILogger<OrderServiceForController> _logger;
 	private readonly RabbitMQPublisher<OrderDelivery> _rabbitMQPublisher;
 
-	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher)
+	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, IGenericRepository<AppDbContext, OutBox> genericRepositoryForOutBox)
 	{
 		_dbContext = dbContext;
-		_genericRepository = genericRepository;
+		_genericRepositoryForOrder = genericRepository;
 		_unitOfWork = unitOfWork;
 		_serviceGeneric = serviceGeneric;
 		_configuration = configuration;
 		_httpClientFactory = httpClientFactory;
 		_logger = logger;
 		_rabbitMQPublisher = rabbitMQPublisher;
+		_genericRepositoryForOutBox = genericRepositoryForOutBox;
 	}
 
 
@@ -149,7 +151,7 @@ public class OrderServiceForController : IOrderService
 			}
 
 			order.DestinationAddress = address;
-			_genericRepository.UpdateAsync(order);
+			_genericRepositoryForOrder.UpdateAsync(order);
 			await _unitOfWork.CommitAsync();
 
 			_logger.LogInformation($"Order address updated successfully. OrderId: {orderId}");
@@ -188,7 +190,7 @@ public class OrderServiceForController : IOrderService
 				return Response<NoDataDto>.Fail("The order can only be deleted in the initial status", StatusCodes.Status400BadRequest, true);
 			}
 
-			_genericRepository.Remove(order);
+			_genericRepositoryForOrder.Remove(order);
 			await _unitOfWork.CommitAsync();
 
 			_logger.LogWarning($"Order deleted successfully. OrderId: {orderId}");
@@ -231,7 +233,7 @@ public class OrderServiceForController : IOrderService
 
 			order.Status = orderDto.OrderStatus;
 
-			_genericRepository.UpdateAsync(order);
+			_genericRepositoryForOrder.UpdateAsync(order);
 			await _unitOfWork.CommitAsync();
 
 
@@ -338,13 +340,30 @@ public class OrderServiceForController : IOrderService
 			order.CourierId = dto.CourierId;
 			order.CourierName = dto.CourierName;
 
-			_genericRepository.UpdateAsync(order);
+
+			var outbox = new OutBox
+			{
+				Id = order.Id,
+				Name = order.Name,
+				UserId = order.UserId,
+				UserName = order.UserName,
+				DestinationAddress = order.DestinationAddress,
+				Status = order.Status,
+				CourierName = order.CourierName,
+				CourierId = order.CourierId,
+				CreatedDate = order.CreatedDate,
+				DeliveryDate = order.DeliveryDate,
+				TotalAmount = order.TotalAmount
+			};
+
+			_genericRepositoryForOrder.UpdateAsync(order);
+			await _genericRepositoryForOutBox.AddAsync(outbox);
 			await _unitOfWork.CommitAsync();
 
 
 			// RabbitMQ  ile datalarin gonderilmesi Delivery Service-e
 
-			 _rabbitMQPublisher.Publish(order, OrderDirect.ExchangeName, OrderDirect.QueueName, OrderDirect.RoutingWaterMark);
+			_rabbitMQPublisher.Publish(order, OrderDirect.ExchangeName, OrderDirect.QueueName, OrderDirect.RoutingWaterMark);
 
 
 			_logger.LogInformation($"Courier assigned to the order successfully. OrderId: {dto.OrderId}, CourierId: {dto.CourierId}, CourierName: {dto.CourierName}");

@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
 	public AppDbContext(DbContextOptions<AppDbContext> dbContext) : base(dbContext) { }
 
 	public DbSet<OrderDelivery> Orders { get; set; }
+	public DbSet<OutBox> OutBoxes { get; set; }
 }
 
 public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>

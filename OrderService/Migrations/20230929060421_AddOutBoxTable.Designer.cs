@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OrderServer.API.Models;
 
@@ -11,9 +12,10 @@ using OrderServer.API.Models;
 namespace OrderServer.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230929060421_AddOutBoxTable")]
+    partial class AddOutBoxTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,54 +23,6 @@ namespace OrderServer.API.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
-
-            modelBuilder.Entity("OrderServer.API.Models.OutBox", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CourierId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CourierName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("DeliveryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("DestinationAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsSend")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("OutBoxes");
-                });
 
             modelBuilder.Entity("SharedLibrary.Models.OrderDelivery", b =>
                 {
@@ -89,6 +43,10 @@ namespace OrderServer.API.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DestinationAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Discriminator")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -113,6 +71,18 @@ namespace OrderServer.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Orders");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("OrderDelivery");
+                });
+
+            modelBuilder.Entity("OrderServer.API.Models.OutBox", b =>
+                {
+                    b.HasBaseType("SharedLibrary.Models.OrderDelivery");
+
+                    b.Property<bool>("IsSend")
+                        .HasColumnType("bit");
+
+                    b.HasDiscriminator().HasValue("OutBox");
                 });
 #pragma warning restore 612, 618
         }
