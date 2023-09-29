@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using SharedLibrary.Models;
 using OrderServer.API.Models;
 using SharedLibrary.Extentions;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ using SharedLibrary.UnitOfWork.Concrete;
 using OrderServer.API.BackgroundServices;
 using SharedLibrary.Repositories.Abstract;
 using OrderServer.API.Repositories.Concrete;
+using SharedLibrary.Services.RabbitMqCustom;
 
 namespace OrderServer.API.Extentions;
 
@@ -21,12 +23,19 @@ public static class StartUpExtention
 		services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
 		services.AddScoped(typeof(IServiceGeneric<,>), typeof(ServiceGeneric<,>));
 		services.AddScoped<IOrderService, OrderServiceForController>();
+		services.AddScoped(typeof(RabbitMQPublisher<>));
+	}
+
+	public static void AddTransientWithExtention(this IServiceCollection services)
+	{
+		services.AddTransient<RabbitMQPublisher<OutBox>>();
 	}
 
 	public static void OtherAdditions(this IServiceCollection services)
 	{
 		// BackGroundService elave edirik projecte
 		services.AddHostedService<DeliveryOrderBackgroundService>();
+		services.AddHostedService<OutBoxBackground>();
 
 		services.UseCustomValidationResponse();
 		services.AddAuthorization();

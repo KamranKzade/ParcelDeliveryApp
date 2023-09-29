@@ -18,11 +18,14 @@ public static class StartUpExtention
 			Uri = new Uri(configuration.GetConnectionString("RabbitMQ")),
 			DispatchConsumersAsync = true
 		});
-		// bura fikir ver
+	}
 
+	public static void AddTransientWithExtentionShared(this IServiceCollection services)
+	{
 		services.AddTransient<RabbitMQPublisher<OrderDelivery>>();
 		services.AddTransient<RabbitMQClientService>();
 	}
+
 
 	public static void AddCustomTokenAuthWithExtentionShared(this IServiceCollection services, IConfiguration configuration)
 	{

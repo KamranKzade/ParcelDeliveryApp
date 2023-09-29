@@ -1,8 +1,8 @@
 ﻿using SharedLibrary.Models.Enum;
 
-namespace OrderServer.API.Models;
+namespace SharedLibrary.Models;
 
-public class OutBox 
+public class OutBox
 {
 	public Guid Id { get; set; }
 	public string Name { get; set; } = null!;
@@ -22,4 +22,5 @@ public class OutBox
 	public string? CourierId { get; set; }
 	public string? CourierName { get; set; }
 	public bool IsSend { get; set; } = false;
+	public bool IsDelete { get; set; } = false;
 }

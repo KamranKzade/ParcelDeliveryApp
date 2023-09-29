@@ -45,6 +45,7 @@ public static class StartUpExtention
 	{
 		// BackGroundService elave edirik projecte
 		services.AddHostedService<DeliveryBackgroundService>();
+		services.AddHostedService<OutBoxDeliveryBackgroundService>();
 
 		services.UseCustomValidationResponse();
 		services.AddAuthorization();

@@ -14,6 +14,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContextWithExtention(builder.Configuration);
 builder.Services.AddScopeWithExtention();
 builder.Services.AddSingletonWithExtentionShared(builder.Configuration);
+builder.Services.AddTransientWithExtentionShared();	
 builder.Services.AddCustomTokenAuthWithExtentionShared(builder.Configuration);
 builder.Services.OtherAdditionWithExtention();
 builder.Services.AddHttpClientWithExtention(builder.Configuration);

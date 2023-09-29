@@ -86,8 +86,8 @@ public class GenericRepository<TContext, Tentity> : IGenericRepository<TContext,
 	{
 		try
 		{
-			_logger.LogInformation($"Updating entity of type {entity.GetType().Name} with ID {entity}");
 			_dbContext.Entry(entity).State = EntityState.Modified;
+			_logger.LogInformation($"Updating entity of type  with ID {entity}");
 			return entity;
 		}
 		catch (Exception ex)

@@ -152,6 +152,37 @@ public class OrderServiceForController : IOrderService
 
 			order.DestinationAddress = address;
 			_genericRepositoryForOrder.UpdateAsync(order);
+
+			if (order.CourierId != null)
+			{
+				// Outbox Table-a yazmaq
+				var outbox = new OutBox
+				{
+					Id = order.Id,
+					Name = order.Name,
+					UserId = order.UserId,
+					UserName = order.UserName,
+					DestinationAddress = order.DestinationAddress,
+					Status = order.Status,
+					CourierName = order.CourierName,
+					CourierId = order.CourierId,
+					CreatedDate = order.CreatedDate,
+					DeliveryDate = order.DeliveryDate,
+					TotalAmount = order.TotalAmount,
+					IsDelete = false,
+					IsSend = false
+				};
+
+				foreach (var item in _dbContext.OutBoxes)
+				{
+					if (item.Id == outbox.Id)
+					{
+						_dbContext.Entry(item).State = EntityState.Detached;
+						_genericRepositoryForOutBox.UpdateAsync(outbox);
+					}
+					await _genericRepositoryForOutBox.AddAsync(outbox);
+				}
+			}
 			await _unitOfWork.CommitAsync();
 
 			_logger.LogInformation($"Order address updated successfully. OrderId: {orderId}");
@@ -192,6 +223,31 @@ public class OrderServiceForController : IOrderService
 
 			_genericRepositoryForOrder.Remove(order);
 			await _unitOfWork.CommitAsync();
+
+			if (order.CourierId != null)
+			{
+				// Outbox Table-a yazmaq
+				var outbox = new OutBox
+				{
+					Id = order.Id,
+					Name = order.Name,
+					UserId = order.UserId,
+					UserName = order.UserName,
+					DestinationAddress = order.DestinationAddress,
+					Status = order.Status,
+					CourierName = order.CourierName,
+					CourierId = order.CourierId,
+					CreatedDate = order.CreatedDate,
+					DeliveryDate = order.DeliveryDate,
+					TotalAmount = order.TotalAmount,
+					IsDelete = false
+				};
+
+				_genericRepositoryForOrder.UpdateAsync(order);
+
+				await _genericRepositoryForOutBox.AddAsync(outbox);
+				await _unitOfWork.CommitAsync();
+			}
 
 			_logger.LogWarning($"Order deleted successfully. OrderId: {orderId}");
 			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
@@ -236,6 +292,11 @@ public class OrderServiceForController : IOrderService
 			_genericRepositoryForOrder.UpdateAsync(order);
 			await _unitOfWork.CommitAsync();
 
+			if (order.CourierId != null)
+			{
+				// Outbox Table-a yazmaq
+				await OrderToOutBoxAndSaveDatabaseAsync(order, false);
+			}
 
 			_logger.LogInformation($"Order status updated successfully. OrderId: {orderDto.OrderId}, NewStatus: {orderDto.OrderStatus}");
 			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
@@ -340,7 +401,7 @@ public class OrderServiceForController : IOrderService
 			order.CourierId = dto.CourierId;
 			order.CourierName = dto.CourierName;
 
-
+			// Outbox Table-a yazmaq
 			var outbox = new OutBox
 			{
 				Id = order.Id,
@@ -353,18 +414,20 @@ public class OrderServiceForController : IOrderService
 				CourierId = order.CourierId,
 				CreatedDate = order.CreatedDate,
 				DeliveryDate = order.DeliveryDate,
-				TotalAmount = order.TotalAmount
+				TotalAmount = order.TotalAmount,
+				IsDelete = false
 			};
 
 			_genericRepositoryForOrder.UpdateAsync(order);
+
 			await _genericRepositoryForOutBox.AddAsync(outbox);
 			await _unitOfWork.CommitAsync();
-
 
 			// RabbitMQ  ile datalarin gonderilmesi Delivery Service-e
 
 			_rabbitMQPublisher.Publish(order, OrderDirect.ExchangeName, OrderDirect.QueueName, OrderDirect.RoutingWaterMark);
 
+			_logger.LogInformation($"Order sent to RabbitMQ --> {order.Name}");
 
 			_logger.LogInformation($"Courier assigned to the order successfully. OrderId: {dto.OrderId}, CourierId: {dto.CourierId}, CourierName: {dto.CourierName}");
 			return Response<NoDataDto>.Success(StatusCodes.Status201Created);
@@ -606,6 +669,31 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
+	private async Task OrderToOutBoxAndSaveDatabaseAsync(OrderDelivery? order, bool isDelete)
+	{
+		// Outbox Table-a yazmaq
+		var outbox = new OutBox
+		{
+			Id = order.Id,
+			Name = order.Name,
+			UserId = order.UserId,
+			UserName = order.UserName,
+			DestinationAddress = order.DestinationAddress,
+			Status = order.Status,
+			CourierName = order.CourierName,
+			CourierId = order.CourierId,
+			CreatedDate = order.CreatedDate,
+			DeliveryDate = order.DeliveryDate,
+			TotalAmount = order.TotalAmount,
+			IsDelete = isDelete
+		};
+
+		_genericRepositoryForOrder.UpdateAsync(order);
+
+		await _genericRepositoryForOutBox.AddAsync(outbox);
+		await _unitOfWork.CommitAsync();
+
+	}
 
 	#endregion
 
