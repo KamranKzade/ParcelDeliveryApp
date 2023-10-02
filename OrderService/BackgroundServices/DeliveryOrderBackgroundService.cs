@@ -8,6 +8,7 @@ using SharedLibrary.ResourceFiles;
 using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
+using Microsoft.EntityFrameworkCore;
 
 namespace OrderServer.API.BackgroundServices;
 
@@ -62,13 +63,23 @@ public class DeliveryOrderBackgroundService : BackgroundService
 			using var scope = _serviceProvider.CreateScope();
 			var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 			var genericRepo = scope.ServiceProvider.GetRequiredService<IGenericRepository<AppDbContext, OrderDelivery>>();
+			var genericRepoForOutbox = scope.ServiceProvider.GetRequiredService<IGenericRepository<AppDbContext, OutBox>>();
+
 			var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
 			var order = dbContext.Orders.FirstOrDefault(o => o.Id == orderDelivery!.Id);
+			var outbox = dbContext.OutBoxes.FirstOrDefault(o => o.Id == orderDelivery!.Id);
 
 			order!.Status = orderDelivery!.Status;
 			order.DeliveryDate = orderDelivery.DeliveryDate;
+
+			outbox!.Status = orderDelivery.Status;
+			outbox!.DeliveryDate = orderDelivery.DeliveryDate;
+
 			genericRepo.UpdateAsync(order);
+			genericRepoForOutbox.UpdateAsync(outbox);
+			_logger.LogInformation($"Order updated successfully In Outbox Table. OrderId: {order.Id}");
+			
 			unitOfWork.Commit();
 
 			_logger.LogInformation($"Order updated successfully. OrderId: {order.Id}");
