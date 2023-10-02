@@ -67,38 +67,42 @@ public class OutBoxDeliveryBackgroundService : BackgroundService
 
 			var orderInDeliveryService = dbContext.OrderDeliveries.FirstOrDefault(x => x.Id == outboxInOrderService!.Id);
 
-			var order = new OrderDelivery
-			{
-				Id = outboxInOrderService!.Id,
-				CourierId = outboxInOrderService.CourierId,
-				CourierName = outboxInOrderService.CourierName,
-				CreatedDate = outboxInOrderService.CreatedDate,
-				DestinationAddress = outboxInOrderService.DestinationAddress,
-				DeliveryDate = outboxInOrderService.DeliveryDate,
-				Name = outboxInOrderService.Name,
-				Status = outboxInOrderService.Status,
-				TotalAmount = outboxInOrderService.TotalAmount,
-				UserId = outboxInOrderService.UserId,
-				UserName = outboxInOrderService.UserName,
-			};
-
 			if (orderInDeliveryService is null)
 			{
-				await genericRepo.AddAsync(order!);
+				await genericRepo.AddAsync(new OrderDelivery
+				{
+					Id = outboxInOrderService!.Id,
+					CourierId = outboxInOrderService.CourierId,
+					CourierName = outboxInOrderService.CourierName,
+					CreatedDate = outboxInOrderService.CreatedDate,
+					DestinationAddress = outboxInOrderService.DestinationAddress,
+					DeliveryDate = outboxInOrderService.DeliveryDate,
+					Name = outboxInOrderService.Name,
+					Status = outboxInOrderService.Status,
+					TotalAmount = outboxInOrderService.TotalAmount,
+					UserId = outboxInOrderService.UserId,
+					UserName = outboxInOrderService.UserName
+				});
 				_logger.LogInformation($"Order added successfully. OrderId: {outboxInOrderService!.Id}");
 			}
 			else
 			{
-				if (outboxInOrderService.IsDelete)
+				if (outboxInOrderService!.IsDelete is true)
 				{
-					genericRepo.Remove(order);
-					_logger.LogInformation($"Order remove successfully. OrderId: {outboxInOrderService!.Id}");
+					genericRepo.Remove(orderInDeliveryService);
+					_logger.LogInformation($"Order remove successfully. OrderId: {orderInDeliveryService!.Id}");
 				}
-				genericRepo.UpdateAsync(order);
-				_logger.LogInformation($"Order update successfully. OrderId: {outboxInOrderService!.Id}");
+				else
+				{
+					orderInDeliveryService.DestinationAddress = outboxInOrderService.DestinationAddress;
+					genericRepo.UpdateAsync(orderInDeliveryService);
+					_logger.LogInformation($"Order update successfully. OrderId: {orderInDeliveryService!.Id}");
+
+				}
+
+				await unitOfWork.CommitAsync();
 			}
 
-			await unitOfWork.CommitAsync();
 			_channel.BasicAck(@event.DeliveryTag, false);
 		}
 		catch (Exception ex)

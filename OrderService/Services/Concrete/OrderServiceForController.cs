@@ -155,33 +155,17 @@ public class OrderServiceForController : IOrderService
 
 			if (order.CourierId != null)
 			{
-				// Outbox Table-a yazmaq
-				var outbox = new OutBox
-				{
-					Id = order.Id,
-					Name = order.Name,
-					UserId = order.UserId,
-					UserName = order.UserName,
-					DestinationAddress = order.DestinationAddress,
-					Status = order.Status,
-					CourierName = order.CourierName,
-					CourierId = order.CourierId,
-					CreatedDate = order.CreatedDate,
-					DeliveryDate = order.DeliveryDate,
-					TotalAmount = order.TotalAmount,
-					IsDelete = false,
-					IsSend = false
-				};
+				var orderInOutbox = _dbContext.OutBoxes.FirstOrDefault(x => x.Id == order.Id);
 
-				foreach (var item in _dbContext.OutBoxes)
+				if (orderInOutbox == null)
 				{
-					if (item.Id == outbox.Id)
-					{
-						_dbContext.Entry(item).State = EntityState.Detached;
-						_genericRepositoryForOutBox.UpdateAsync(outbox);
-					}
-					await _genericRepositoryForOutBox.AddAsync(outbox);
+					_logger.LogInformation("No matching order found in Outbox table");
+					return Response<NoDataDto>.Fail("No matching order found in Outbox table", StatusCodes.Status406NotAcceptable, true);
 				}
+				orderInOutbox.IsSend = false;
+				orderInOutbox.DestinationAddress = order.DestinationAddress;
+				_genericRepositoryForOutBox.UpdateAsync(orderInOutbox);
+				_logger.LogInformation("Successfully replaced the corresponding order in the Outbox table");
 			}
 			await _unitOfWork.CommitAsync();
 
@@ -222,32 +206,24 @@ public class OrderServiceForController : IOrderService
 			}
 
 			_genericRepositoryForOrder.Remove(order);
-			await _unitOfWork.CommitAsync();
 
 			if (order.CourierId != null)
 			{
-				// Outbox Table-a yazmaq
-				var outbox = new OutBox
+				var orderInOutbox = _dbContext.OutBoxes.FirstOrDefault(x => x.Id == order.Id);
+
+				if (orderInOutbox == null)
 				{
-					Id = order.Id,
-					Name = order.Name,
-					UserId = order.UserId,
-					UserName = order.UserName,
-					DestinationAddress = order.DestinationAddress,
-					Status = order.Status,
-					CourierName = order.CourierName,
-					CourierId = order.CourierId,
-					CreatedDate = order.CreatedDate,
-					DeliveryDate = order.DeliveryDate,
-					TotalAmount = order.TotalAmount,
-					IsDelete = false
-				};
+					_logger.LogInformation("No matching order found in Outbox table");
+					return Response<NoDataDto>.Fail("No matching order found in Outbox table", StatusCodes.Status406NotAcceptable, true);
+				}
 
-				_genericRepositoryForOrder.UpdateAsync(order);
-
-				await _genericRepositoryForOutBox.AddAsync(outbox);
-				await _unitOfWork.CommitAsync();
+				orderInOutbox.IsSend = false;
+				orderInOutbox.IsDelete = true;
+				_genericRepositoryForOutBox.UpdateAsync(orderInOutbox);
+				_logger.LogInformation("Successfully replaced the corresponding order in the Outbox table For Delete");
 			}
+
+			await _unitOfWork.CommitAsync();
 
 			_logger.LogWarning($"Order deleted successfully. OrderId: {orderId}");
 			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
