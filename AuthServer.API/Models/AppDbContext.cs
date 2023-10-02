@@ -1,8 +1,7 @@
-﻿using SharedLibrary.Models;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace AuthServer.API.Models;
 

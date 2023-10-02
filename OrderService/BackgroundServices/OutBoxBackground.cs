@@ -30,37 +30,43 @@ public class OutBoxBackground : BackgroundService
 	{
 		while (!stoppingToken.IsCancellationRequested)
 		{
-			using var scope = _serviceProvider.CreateScope();
-			var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-			var genericRepo = scope.ServiceProvider.GetRequiredService<IGenericRepository<AppDbContext, OutBox>>();
-			var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-
-			var OutboxOrders = dbContext.OutBoxes.Where(x => x.IsSend == false);
-
-			foreach (var order in OutboxOrders)
+			try
 			{
-				if (order.IsDelete)
+				using var scope = _serviceProvider.CreateScope();
+				var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+				var genericRepo = scope.ServiceProvider.GetRequiredService<IGenericRepository<AppDbContext, OutBox>>();
+				var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+				var OutboxOrders = dbContext.OutBoxes.Where(x => x.IsSend == false);
+
+				foreach (var order in OutboxOrders)
 				{
+					if (order.IsDelete)
+					{
+						_rabbitMQPublisher.Publish(order, OutBoxDirect.ExchangeName, OutBoxDirect.QueueName, OutBoxDirect.RoutingWaterMark);
+						_logger.LogInformation($"OutBox sent to RabbitMQ --> {order.Name}");
+
+						genericRepo.Remove(order);
+						_logger.LogInformation($"Outbox order successfully removed --> {order.Name}");
+					}
+					else
+					{
+						order.IsSend = true;
+						genericRepo.UpdateAsync(order);
+						_logger.LogInformation($"Outbox order successfully updated --> {order.Name}");
+					}
+
+					await unitOfWork.CommitAsync();
+
 					_rabbitMQPublisher.Publish(order, OutBoxDirect.ExchangeName, OutBoxDirect.QueueName, OutBoxDirect.RoutingWaterMark);
 					_logger.LogInformation($"OutBox sent to RabbitMQ --> {order.Name}");
-
-					genericRepo.Remove(order);
-					_logger.LogInformation($"Outbox order successfully removed --> {order.Name}");
 				}
-				else
-				{
-					order.IsSend = true;
-					genericRepo.UpdateAsync(order);
-					_logger.LogInformation($"Outbox order successfully updated --> {order.Name}");
-				}
-
-				await unitOfWork.CommitAsync();
-
-				_rabbitMQPublisher.Publish(order, OutBoxDirect.ExchangeName, OutBoxDirect.QueueName, OutBoxDirect.RoutingWaterMark);
-				_logger.LogInformation($"OutBox sent to RabbitMQ --> {order.Name}");
+				await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
 			}
-
-			await Task.Delay(TimeSpan.FromSeconds(3), stoppingToken);
+			catch (Exception ex)
+			{
+				_logger.LogError($"An error occurred: {ex.Message}");
+			}
 		}
 	}
 

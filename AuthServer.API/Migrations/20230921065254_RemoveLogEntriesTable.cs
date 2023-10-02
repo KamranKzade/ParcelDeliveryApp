@@ -1,11 +1,10 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace AuthServer.API.Migrations
 {
-    public partial class RemoveLogEntriesTable : Migration
+	public partial class RemoveLogEntriesTable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

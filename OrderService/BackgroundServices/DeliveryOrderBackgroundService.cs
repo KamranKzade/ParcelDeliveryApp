@@ -8,7 +8,6 @@ using SharedLibrary.ResourceFiles;
 using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
-using Microsoft.EntityFrameworkCore;
 
 namespace OrderServer.API.BackgroundServices;
 
