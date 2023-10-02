@@ -1,6 +1,6 @@
 ﻿using SharedLibrary.Dtos;
-using DeliveryServer.API.Dtos;
 using SharedLibrary.Models;
+using DeliveryServer.API.Dtos;
 
 namespace DeliveryServer.API.Services.Abstract;
 
