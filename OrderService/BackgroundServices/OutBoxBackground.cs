@@ -45,15 +45,16 @@ public class OutBoxBackground : BackgroundService
 					_logger.LogInformation($"OutBox sent to RabbitMQ --> {order.Name}");
 
 					genericRepo.Remove(order);
-					await unitOfWork.CommitAsync();
 					_logger.LogInformation($"Outbox order successfully removed --> {order.Name}");
 				}
+				else
+				{
+					order.IsSend = true;
+					genericRepo.UpdateAsync(order);
+					_logger.LogInformation($"Outbox order successfully updated --> {order.Name}");
+				}
 
-				order.IsSend = true;
-				genericRepo.UpdateAsync(order);
 				await unitOfWork.CommitAsync();
-
-				_logger.LogInformation($"Outbox order successfully updated --> {order.Name}");
 
 				_rabbitMQPublisher.Publish(order, OutBoxDirect.ExchangeName, OutBoxDirect.QueueName, OutBoxDirect.RoutingWaterMark);
 				_logger.LogInformation($"OutBox sent to RabbitMQ --> {order.Name}");
