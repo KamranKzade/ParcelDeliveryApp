@@ -20,6 +20,7 @@ public class OrderController : CustomBaseController
 	}
 
 
+	[Authorize(Roles = "Courier")]
 	[HttpGet("GetOrder")]
 	public async Task<IActionResult> GetOrder() => ActionResultInstance(await _orderService.GetOrders());
 
@@ -53,9 +54,10 @@ public class OrderController : CustomBaseController
 	{
 		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
 		var addressOld = User.Claims.FirstOrDefault(x => x.Type == "Address");
+		string authorizationToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
 
-		return ActionResultInstance(await _orderService.UpdateAddressAsync(userId!.Value, dto.OrderId!, dto.Address!));
+		return ActionResultInstance(await _orderService.UpdateAddressAsync(userId!.Value, dto.OrderId!, dto.Address!, authorizationToken));
 	}
 
 	[Authorize(Roles = "User")]
@@ -63,8 +65,9 @@ public class OrderController : CustomBaseController
 	public async Task<IActionResult> DeleteOrder(string id)
 	{
 		var userId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+		string authorizationToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-		return ActionResultInstance(await _orderService.DeleteOrderAsync(userId!.Value, id));
+		return ActionResultInstance(await _orderService.DeleteOrderAsync(userId!.Value, id, authorizationToken));
 	}
 
 	#endregion
@@ -74,7 +77,7 @@ public class OrderController : CustomBaseController
 
 	[Authorize(Roles = "Admin")]
 	[HttpPut("UpdateOrderStatus")]
-	public async Task<IActionResult> UpdateOrderStatus(UpdateStatusDto dto) => ActionResultInstance(await _orderService.ChangeStatusOrder(dto));
+	public async Task<IActionResult> UpdateOrderStatus(UpdateStatusDto dto) => ActionResultInstance(await _orderService.ChangeStatusOrder(dto, HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "")));
 
 	[Authorize(Roles = "Admin")]
 	[HttpGet("GetOrderForAdmin")]

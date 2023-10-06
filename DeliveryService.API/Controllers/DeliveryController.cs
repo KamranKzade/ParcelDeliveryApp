@@ -11,7 +11,7 @@ namespace DeliveryServer.API.Controllers;
 [ApiController]
 public class DeliveryController : CustomBaseController
 {
-	public readonly IDeliveryService _service ;
+	public readonly IDeliveryService _service;
 
 	public DeliveryController(IDeliveryService service)
 	{
@@ -23,11 +23,12 @@ public class DeliveryController : CustomBaseController
 	public async Task<IActionResult> ChangeOrderStatus(ChangeOrderStatusDto dto)
 	{
 		var courierId = User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
+		string authorizationToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
-		return ActionResultInstance(await _service.ChangeOrderStatus(dto, courierId!.Value));
+		return ActionResultInstance(await _service.ChangeOrderStatus(dto, courierId!.Value, authorizationToken));
 	}
 
-
+	[Authorize(Roles = "User,Admin")]
 	[HttpGet("GetDeliveryOrder")]
 	public async Task<IActionResult> GetDeliveryOrder()
 	{

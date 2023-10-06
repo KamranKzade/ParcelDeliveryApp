@@ -4,6 +4,7 @@ using SharedLibrary.Models;
 using OrderServer.API.Dtos;
 using SharedLibrary.Helpers;
 using OrderServer.API.Models;
+using System.Net.Http.Headers;
 using SharedLibrary.Models.Enum;
 using SharedLibrary.ResourceFiles;
 using Microsoft.EntityFrameworkCore;
@@ -120,7 +121,7 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
-	public async Task<Response<NoDataDto>> UpdateAddressAsync(string userId, string orderId, string address)
+	public async Task<Response<NoDataDto>> UpdateAddressAsync(string userId, string orderId, string address, string authorizationToken)
 	{
 		try
 		{
@@ -135,7 +136,7 @@ public class OrderServiceForController : IOrderService
 			// rabbitMq ile yoxlama
 
 
-			var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer();
+			var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer(authorizationToken);
 
 			var updatedOrder = ordersOnTheDeliveryServer.FirstOrDefault(item => item.Id.ToString() == orderId && item.Status != order.Status);
 
@@ -179,7 +180,7 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
-	public async Task<Response<NoDataDto>> DeleteOrderAsync(string userId, string orderId)
+	public async Task<Response<NoDataDto>> DeleteOrderAsync(string userId, string orderId, string authorizationToken)
 	{
 		try
 		{
@@ -191,7 +192,7 @@ public class OrderServiceForController : IOrderService
 				return Response<NoDataDto>.Fail("Order not found or does not belong to the user", StatusCodes.Status404NotFound, true);
 			}
 
-			var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer();
+			var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer(authorizationToken);
 			var updatedOrder = ordersOnTheDeliveryServer.FirstOrDefault(item => item.Id.ToString() == orderId && item.Status != order.Status);
 
 			if (updatedOrder != null)
@@ -242,7 +243,7 @@ public class OrderServiceForController : IOrderService
 	#region Admin
 
 
-	public async Task<Response<NoDataDto>> ChangeStatusOrder(UpdateStatusDto orderDto)
+	public async Task<Response<NoDataDto>> ChangeStatusOrder(UpdateStatusDto orderDto, string authorizationToken)
 	{
 		try
 		{
@@ -255,8 +256,8 @@ public class OrderServiceForController : IOrderService
 			}
 
 
-			var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer();
-			var updatedOrder = ordersOnTheDeliveryServer.FirstOrDefault(item => item.Id.ToString() == orderDto.OrderId && item.Status != order.Status);
+			var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer(authorizationToken);
+			var updatedOrder = ordersOnTheDeliveryServer.FirstOrDefault(item => item.Id.ToString().ToLower() == orderDto.OrderId.ToLower() && item.Status != order.Status);
 
 			if (updatedOrder != null)
 			{
@@ -264,15 +265,25 @@ public class OrderServiceForController : IOrderService
 			}
 
 			order.Status = orderDto.OrderStatus;
-
 			_genericRepositoryForOrder.UpdateAsync(order);
-			await _unitOfWork.CommitAsync();
 
 			if (order.CourierId != null)
 			{
-				// Outbox Table-a yazmaq
-				await OrderToOutBoxAndSaveDatabaseAsync(order, false);
+				var orderInOutbox = _dbContext.OutBoxes.FirstOrDefault(x => x.Id == order.Id);
+
+				if (orderInOutbox == null)
+				{
+					_logger.LogInformation("No matching order found in Outbox table");
+					return Response<NoDataDto>.Fail("No matching order found in Outbox table", StatusCodes.Status406NotAcceptable, true);
+				}
+				orderInOutbox.IsSend = false;
+				orderInOutbox.Status = order.Status;
+
+				_genericRepositoryForOutBox.UpdateAsync(orderInOutbox);
+				_logger.LogInformation("Successfully replaced the corresponding order in the Outbox table");
 			}
+
+			await _unitOfWork.CommitAsync();
 
 			_logger.LogInformation($"Order status updated successfully. OrderId: {orderDto.OrderId}, NewStatus: {orderDto.OrderStatus}");
 			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
@@ -596,7 +607,7 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
-	public async Task<IEnumerable<OrderDelivery>> GetOrdersOnTheDeliveryServer()
+	public async Task<IEnumerable<OrderDelivery>> GetOrdersOnTheDeliveryServer(string authorizationToken)
 	{
 		var policy = RetryPolicyHelper.GetRetryPolicy();
 
@@ -609,6 +620,9 @@ public class OrderServiceForController : IOrderService
 			var client = _httpClientFactory.CreateClient();
 			using (client)
 			{
+				client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authorizationToken);
+
+
 				var response = await policy.ExecuteAsync(async () =>
 				{
 					// Identity Service'den kullanıcı bilgilerini alın
@@ -643,32 +657,6 @@ public class OrderServiceForController : IOrderService
 			_logger.LogError(ex, $"Error: {ex.Message}");
 			return null!;
 		}
-	}
-
-	private async Task OrderToOutBoxAndSaveDatabaseAsync(OrderDelivery? order, bool isDelete)
-	{
-		// Outbox Table-a yazmaq
-		var outbox = new OutBox
-		{
-			Id = order.Id,
-			Name = order.Name,
-			UserId = order.UserId,
-			UserName = order.UserName,
-			DestinationAddress = order.DestinationAddress,
-			Status = order.Status,
-			CourierName = order.CourierName,
-			CourierId = order.CourierId,
-			CreatedDate = order.CreatedDate,
-			DeliveryDate = order.DeliveryDate,
-			TotalAmount = order.TotalAmount,
-			IsDelete = isDelete
-		};
-
-		_genericRepositoryForOrder.UpdateAsync(order);
-
-		await _genericRepositoryForOutBox.AddAsync(outbox);
-		await _unitOfWork.CommitAsync();
-
 	}
 
 	#endregion

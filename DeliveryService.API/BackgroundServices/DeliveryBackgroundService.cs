@@ -29,7 +29,8 @@ public class DeliveryBackgroundService : BackgroundService
 	{
 		_channel = _rabbitMqClientService.Connect(OrderDirect.ExchangeName, OrderDirect.QueueName, OrderDirect.RoutingWaterMark);
 
-		_channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+		if (_channel != null)
+			_channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
 		_logger.LogInformation("DeliveryBackgroundService started.");
 		return base.StartAsync(cancellationToken);
@@ -39,7 +40,8 @@ public class DeliveryBackgroundService : BackgroundService
 	{
 		var consumer = new AsyncEventingBasicConsumer(_channel);
 
-		_channel.BasicConsume(OrderDirect.QueueName, false, consumer);
+		if (_channel != null)
+			_channel.BasicConsume(OrderDirect.QueueName, false, consumer);
 
 		consumer.Received += Consumer_Received; ;
 

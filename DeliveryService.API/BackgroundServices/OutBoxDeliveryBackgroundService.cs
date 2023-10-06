@@ -48,7 +48,7 @@ public class OutBoxDeliveryBackgroundService : BackgroundService
 
 		_channel.BasicConsume(OutBoxDirect.QueueName, false, consumer);
 
-		consumer.Received += Consumer_Received; ; ;
+		consumer.Received += Consumer_Received;
 
 		_logger.LogInformation("Message consumption has started.");
 		return Task.CompletedTask;
@@ -95,6 +95,7 @@ public class OutBoxDeliveryBackgroundService : BackgroundService
 				else
 				{
 					orderInDeliveryService.DestinationAddress = outboxInOrderService.DestinationAddress;
+					orderInDeliveryService.Status = outboxInOrderService.Status;
 					genericRepo.UpdateAsync(orderInDeliveryService);
 					_logger.LogInformation($"Order update successfully. OrderId: {orderInDeliveryService!.Id}");
 

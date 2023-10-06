@@ -29,7 +29,8 @@ public class DeliveryOrderBackgroundService : BackgroundService
 	{
 		_channel = _rabbitMqClientService.Connect(DeliveryDirect.ExchangeName, DeliveryDirect.QueueName, DeliveryDirect.RoutingWaterMark);
 
-		_channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+		if (_channel != null)
+			_channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
 		_logger.LogInformation("DeliveryOrderBackgroundService started.");
 		return base.StartAsync(cancellationToken);
@@ -39,7 +40,8 @@ public class DeliveryOrderBackgroundService : BackgroundService
 	{
 		var consumer = new AsyncEventingBasicConsumer(_channel);
 
-		_channel.BasicConsume(DeliveryDirect.QueueName, false, consumer);
+		if (_channel != null)
+			_channel.BasicConsume(DeliveryDirect.QueueName, false, consumer);
 
 		consumer.Received += Consumer_Received;
 
@@ -78,7 +80,7 @@ public class DeliveryOrderBackgroundService : BackgroundService
 			genericRepo.UpdateAsync(order);
 			genericRepoForOutbox.UpdateAsync(outbox);
 			_logger.LogInformation($"Order updated successfully In Outbox Table. OrderId: {order.Id}");
-			
+
 			unitOfWork.Commit();
 
 			_logger.LogInformation($"Order updated successfully. OrderId: {order.Id}");

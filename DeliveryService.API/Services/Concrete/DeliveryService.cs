@@ -2,6 +2,7 @@
 using SharedLibrary.Dtos;
 using SharedLibrary.Models;
 using SharedLibrary.Helpers;
+using System.Net.Http.Headers;
 using DeliveryServer.API.Dtos;
 using SharedLibrary.Models.Enum;
 using DeliveryServer.API.Models;
@@ -35,12 +36,12 @@ public class DeliveryService : IDeliveryService
 		_logger = logger;
 	}
 
-	public async Task<Response<NoDataDto>> ChangeOrderStatus(ChangeOrderStatusDto dto, string courierId)
+	public async Task<Response<NoDataDto>> ChangeOrderStatus(ChangeOrderStatusDto dto, string courierId, string authorizationToken)
 	{
 		try
 		{
 			// OrderService-de olan datalarimizdi
-			var OrderServerDb = await GetOrders();
+			var OrderServerDb = await GetOrders(authorizationToken);
 
 			if (OrderServerDb.Count == 0)
 			{
@@ -130,7 +131,7 @@ public class DeliveryService : IDeliveryService
 		return Response<IEnumerable<OrderDelivery>>.Success(orderDtos, StatusCodes.Status200OK);
 	}
 
-	public async Task<List<OrderDelivery>> GetOrders()
+	public async Task<List<OrderDelivery>> GetOrders(string authorizationToken)
 	{
 		var policy = RetryPolicyHelper.GetRetryPolicy();
 
@@ -145,6 +146,8 @@ public class DeliveryService : IDeliveryService
 			// Identity Service ile iletişim kuracak HttpClient oluşturun
 			using (client)
 			{
+				client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authorizationToken);
+
 				// Identity Service'den kullanıcı bilgilerini alın
 				var response = await policy.ExecuteAsync(async () =>
 				{
@@ -170,7 +173,7 @@ public class DeliveryService : IDeliveryService
 				else
 				{
 					_logger.LogWarning($"HTTP isteği sırasında bir hata oluştu. StatusCode: {response.StatusCode}");
-					return null	!;
+					return null!;
 				}
 			}
 		}
