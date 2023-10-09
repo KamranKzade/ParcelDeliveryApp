@@ -86,7 +86,7 @@ public class OrderController : CustomBaseController
 
 	[Authorize(Roles = "Admin")]
 	[HttpGet("GetCourierWithOrderStatus/{courierId}")]
-	public IActionResult GetCourierWithOrderStatus(string courierId) => ActionResultInstance(_orderService.GetCourierWithOrderStatus(courierId));
+	public async Task<IActionResult> GetCourierWithOrderStatus(string courierId) => ActionResultInstance(await _orderService.GetCourierWithOrderStatus(courierId));
 
 
 

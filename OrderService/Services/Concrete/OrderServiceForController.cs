@@ -283,7 +283,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var orders = await _genericRepositoryForOrder.GetAllAsync();
+			var orders = await _serviceGenericForOrder.GetAllAsync();
 
 			if (orders == null)
 			{
@@ -291,23 +291,8 @@ public class OrderServiceForController : IOrderService
 				return Response<IEnumerable<OrderDto>>.Fail("No order information found in the database", StatusCodes.Status404NotFound, true);
 			}
 
-			var orderDtos = orders.Select(o => new OrderDto
-			{
-				Id = o.Id,
-				Name = o.Name,
-
-				Status = o.Status,
-				CreatedDate = o.CreatedDate,
-				DestinationAddress = o.DestinationAddress,
-				TotalAmount = o.TotalAmount,
-				UserId = o.UserId,
-				UserName = o.UserName,
-				CourierId = o.CourierId,
-				CourierName = o.CourierName
-			}).AsQueryable();
-
 			_logger.LogInformation("Successfully retrieved orders from the database");
-			return Response<IEnumerable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
+			return Response<IEnumerable<OrderDto>>.Success(orders.Data, StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
@@ -316,18 +301,16 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
-	public Response<IEnumerable<CourierWithOrderStatusDto>> GetCourierWithOrderStatus(string courierId)
+	public async Task<Response<IEnumerable<CourierWithOrderStatusDto>>> GetCourierWithOrderStatus(string courierId)
 	{
 		try
 		{
-			var orders = _genericRepositoryForOrder
-				.Where(o => o.CourierId == courierId)
-				.Select(order => new CourierWithOrderStatusDto
-				{
-					CourierName = order.CourierName!,
-					OrderName = order.Name,
-					OrderStatus = order.Status
-				}).ToList();
+			var orders = ((await _serviceGenericForOrder.GetAllAsync()).Data).Where(c => c.CourierId == courierId).Select(order => new CourierWithOrderStatusDto
+			{
+				CourierName = order.CourierName!,
+				OrderName = order.Name,
+				OrderStatus = order.Status
+			}).ToList();
 
 			if (orders == null)
 			{
@@ -349,7 +332,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var order = await _genericRepositoryForOrder.Where(x => x.Id.ToString() == dto.OrderId).SingleOrDefaultAsync();
+			var order = (await _serviceGenericForOrder.Where(o => o.Id.ToString() == dto.OrderId)).Data.FirstOrDefault();
 
 			if (order == null)
 			{
@@ -372,31 +355,17 @@ public class OrderServiceForController : IOrderService
 			order.CourierId = dto.CourierId;
 			order.CourierName = dto.CourierName;
 
-			// Outbox Table-a yazmaq
-			var outbox = new OutBox
-			{
-				Id = order.Id,
-				Name = order.Name,
-				UserId = order.UserId,
-				UserName = order.UserName,
-				DestinationAddress = order.DestinationAddress,
-				Status = order.Status,
-				CourierName = order.CourierName,
-				CourierId = order.CourierId,
-				CreatedDate = order.CreatedDate,
-				DeliveryDate = order.DeliveryDate,
-				TotalAmount = order.TotalAmount,
-				IsDelete = false
-			};
 
-			_genericRepositoryForOrder.UpdateAsync(order);
+			var outbox = ObjectMapper.Mapper.Map<OutBoxDto>(order);
+			var publishOrder = ObjectMapper.Mapper.Map<OrderDelivery>(order);
 
-			await _genericRepositoryForOutBox.AddAsync(outbox);
-			await _unitOfWork.CommitAsync();
+			await _serviceGenericForOrder.UpdateAsync(order, order.Id.ToString());
+
+			await _serviceGenericForOutBox.AddAsync(outbox);
 
 			// RabbitMQ  ile datalarin gonderilmesi Delivery Service-e
 
-			_rabbitMQPublisher.Publish(order, OrderDirect.ExchangeName, OrderDirect.QueueName, OrderDirect.RoutingWaterMark);
+			_rabbitMQPublisher.Publish(publishOrder, OrderDirect.ExchangeName, OrderDirect.QueueName, OrderDirect.RoutingWaterMark);
 
 			_logger.LogInformation($"Order sent to RabbitMQ --> {order.Name}");
 
