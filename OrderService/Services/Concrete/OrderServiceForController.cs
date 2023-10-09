@@ -361,7 +361,7 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
-	public async Task<Response<NoDataDto>> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto)
+	public async Task<Response<NoDataDto>> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto, string authorizationToken)
 	{
 		try
 		{
@@ -379,7 +379,7 @@ public class OrderServiceForController : IOrderService
 				return Response<NoDataDto>.Fail("A courier has already been appointed for the order", StatusCodes.Status400BadRequest, true);
 			}
 
-			if (!await CheckUserIsCourier(dto.CourierId!, dto.CourierName!))
+			if (!await CheckUserIsCourier(dto.CourierId!, dto.CourierName!, authorizationToken))
 			{
 				_logger.LogWarning($"Courier not found. CourierId: {dto.CourierId}, CourierName: {dto.CourierName}");
 				return Response<NoDataDto>.Fail("Courier not found", StatusCodes.Status404NotFound, true);
@@ -557,7 +557,7 @@ public class OrderServiceForController : IOrderService
 	#region HelperMethod
 
 
-	public async Task<bool> CheckUserIsCourier(string userId, string userName)
+	public async Task<bool> CheckUserIsCourier(string userId, string userName, string authorizationToken)
 	{
 		var policy = RetryPolicyHelper.GetRetryPolicy();
 
@@ -570,34 +570,38 @@ public class OrderServiceForController : IOrderService
 			var client = _httpClientFactory.CreateClient();
 
 			// Identity Service ile iletişim kuracak HttpClient oluşturun
-
-			// Identity Service'den kullanıcı bilgilerini alın
-			var response = await policy.ExecuteAsync(async () =>
+			using (client)
 			{
-				return await client.GetAsync(checkUserRoleEndpoint);
-			});
+				client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authorizationToken);
 
-			if (response.IsSuccessStatusCode)
-			{
-				var responseContent = await response.Content.ReadAsStringAsync();
-
-				var userDto = (JsonConvert.DeserializeObject<Response<IEnumerable<ResponseUserDto>>>(responseContent)!);
-
-				var isCourier = userDto.Data.FirstOrDefault(x => x.id == userId && x.userName == userName);
-
-				if (isCourier == null)
+				// Identity Service'den kullanıcı bilgilerini alın
+				var response = await policy.ExecuteAsync(async () =>
 				{
-					_logger.LogWarning($"User is not a courier. UserId: {userId}, UserName: {userName}");
+					return await client.GetAsync(checkUserRoleEndpoint);
+				});
+
+				if (response.IsSuccessStatusCode)
+				{
+					var responseContent = await response.Content.ReadAsStringAsync();
+
+					var userDto = (JsonConvert.DeserializeObject<Response<IEnumerable<ResponseUserDto>>>(responseContent)!);
+
+					var isCourier = userDto.Data.FirstOrDefault(x => x.id == userId && x.userName == userName);
+
+					if (isCourier == null)
+					{
+						_logger.LogWarning($"User is not a courier. UserId: {userId}, UserName: {userName}");
+						return false;
+					}
+
+					_logger.LogInformation($"User is a courier. UserId: {userId}, UserName: {userName}");
+					return true;
+				}
+				else
+				{
+					_logger.LogWarning($"Failed to fetch user data from Identity Service. StatusCode: {response.StatusCode}");
 					return false;
 				}
-
-				_logger.LogInformation($"User is a courier. UserId: {userId}, UserName: {userName}");
-				return true;
-			}
-			else
-			{
-				_logger.LogWarning($"Failed to fetch user data from Identity Service. StatusCode: {response.StatusCode}");
-				return false;
 			}
 		}
 		catch (Exception ex)

@@ -24,7 +24,7 @@ public class UserController : CustomBaseController
 	}
 
 
-	[Authorize(Roles ="Admin")]
+	[Authorize(Roles = "Admin")]
 	[HttpPost("CreateCourier")]
 	public async Task<IActionResult> CreateCourier(CreateUserDto createUserDto)
 	{
@@ -41,12 +41,13 @@ public class UserController : CustomBaseController
 	}
 
 
+	[Authorize(Roles = "Admin")]
 	[HttpGet("GetCourierList")]
 	public async Task<IActionResult> GetCourierList()
 	{
 		return ActionResultInstance(await _userService.GetCourierList());
 	}
-	
+
 	[Authorize(Roles = "Admin")]
 	[HttpPost("CreateUserRoles")]
 	public async Task<IActionResult> CreateUserRoles(CreateUserRoleDto dto)

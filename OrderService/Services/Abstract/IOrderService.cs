@@ -17,7 +17,7 @@ public interface IOrderService
 	Task<Response<IEnumerable<OrderDto>>> GetOrderAsyncForAdmin();
 	Response<IEnumerable<CourierWithOrderStatusDto>> GetCourierWithOrderStatus(string courierId);
 	//Task<Response<IEnumerable<OrderDto>>> ShowDeliveredOrder(); 
-	Task<Response<NoDataDto>> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto);
+	Task<Response<NoDataDto>> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto, string authorizationToken);
 
 
 	// Courier

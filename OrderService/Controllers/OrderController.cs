@@ -92,8 +92,11 @@ public class OrderController : CustomBaseController
 
 	[Authorize(Roles = "Admin")]
 	[HttpPost("SendTheOrderToTheCourier")]
-	public async Task<IActionResult> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto) => ActionResultInstance(await _orderService.SendTheOrderToTheCourier(dto));
-
+	public async Task<IActionResult> SendTheOrderToTheCourier(SendTheOrderToTheCourierDto dto)
+	{
+		string authorizationToken = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+		return ActionResultInstance(await _orderService.SendTheOrderToTheCourier(dto, authorizationToken));
+	}
 
 	#endregion
 
