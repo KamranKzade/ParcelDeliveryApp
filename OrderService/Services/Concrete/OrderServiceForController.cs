@@ -13,6 +13,8 @@ using SharedLibrary.UnitOfWork.Abstract;
 using OrderServer.API.Services.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
+using AutoMapper.Internal.Mappers;
+using OrderServer.API.Mapper;
 
 namespace OrderServer.API.Services.Concrete;
 
@@ -169,7 +171,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var order = await _genericRepositoryForOrder.Where(o => o.UserId == userId && o.Id.ToString() == orderId).SingleOrDefaultAsync();
+			var order = (await _serviceGenericForOrder.Where(o => o.UserId == userId && o.Id.ToString() == orderId)).Data.FirstOrDefault();
 
 			if (order == null)
 			{
@@ -182,7 +184,7 @@ public class OrderServiceForController : IOrderService
 
 			if (updatedOrder != null)
 			{
-				order = updatedOrder;
+				order = ObjectMapper.Mapper.Map<OrderDto>(updatedOrder);
 			}
 
 			if (order.Status != OrderStatus.Initial)
@@ -191,11 +193,11 @@ public class OrderServiceForController : IOrderService
 				return Response<NoDataDto>.Fail("The order can only be deleted in the initial status", StatusCodes.Status400BadRequest, true);
 			}
 
-			_genericRepositoryForOrder.Remove(order);
+			await _serviceGenericForOrder.RemoveAsync(orderId);
 
 			if (order.CourierId != null)
 			{
-				var orderInOutbox = await _genericRepositoryForOutBox.Where(x => x.Id == order.Id).SingleOrDefaultAsync();
+				var orderInOutbox = (await _serviceGenericForOutBox.GetByIdAsync(order.Id.ToString())).Data;
 
 				if (orderInOutbox == null)
 				{
@@ -205,11 +207,9 @@ public class OrderServiceForController : IOrderService
 
 				orderInOutbox.IsSend = false;
 				orderInOutbox.IsDelete = true;
-				_genericRepositoryForOutBox.UpdateAsync(orderInOutbox);
+				await _serviceGenericForOutBox.UpdateAsync(orderInOutbox, orderInOutbox.Id.ToString());
 				_logger.LogInformation("Successfully replaced the corresponding order in the Outbox table For Delete");
 			}
-
-			await _unitOfWork.CommitAsync();
 
 			_logger.LogWarning($"Order deleted successfully. OrderId: {orderId}");
 			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
@@ -232,7 +232,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var order = await _genericRepositoryForOrder.Where(o => o.Id.ToString() == orderDto.OrderId).SingleOrDefaultAsync();
+			var order = (await _serviceGenericForOrder.Where(o => o.Id.ToString() == orderDto.OrderId)).Data.FirstOrDefault();
 
 			if (order == null)
 			{
@@ -240,35 +240,34 @@ public class OrderServiceForController : IOrderService
 				return Response<NoDataDto>.Fail("The specified order was not found", StatusCodes.Status404NotFound, true);
 			}
 
-
 			var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer(authorizationToken);
 			var updatedOrder = ordersOnTheDeliveryServer.FirstOrDefault(item => item.Id.ToString().ToLower() == orderDto.OrderId.ToLower() && item.Status != order.Status);
 
 			if (updatedOrder != null)
 			{
-				order = updatedOrder;
+				order = ObjectMapper.Mapper.Map<OrderDto>(updatedOrder);
 			}
 
 			order.Status = orderDto.OrderStatus;
-			_genericRepositoryForOrder.UpdateAsync(order);
+			await _serviceGenericForOrder.UpdateAsync(order, orderDto.OrderId);
 
 			if (order.CourierId != null)
 			{
-				var orderInOutbox = await _genericRepositoryForOutBox.Where(x => x.Id == order.Id).SingleOrDefaultAsync();
+				var orderInOutbox = (await _serviceGenericForOutBox.GetByIdAsync(order.Id.ToString())).Data;
 
 				if (orderInOutbox == null)
 				{
 					_logger.LogInformation("No matching order found in Outbox table");
 					return Response<NoDataDto>.Fail("No matching order found in Outbox table", StatusCodes.Status406NotAcceptable, true);
 				}
+
 				orderInOutbox.IsSend = false;
 				orderInOutbox.Status = order.Status;
 
-				_genericRepositoryForOutBox.UpdateAsync(orderInOutbox);
+				await _serviceGenericForOutBox.UpdateAsync(orderInOutbox, orderDto.OrderId);
+
 				_logger.LogInformation("Successfully replaced the corresponding order in the Outbox table");
 			}
-
-			await _unitOfWork.CommitAsync();
 
 			_logger.LogInformation($"Order status updated successfully. OrderId: {orderDto.OrderId}, NewStatus: {orderDto.OrderStatus}");
 			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
