@@ -18,22 +18,20 @@ namespace OrderServer.API.Services.Concrete;
 
 public class OrderServiceForController : IOrderService
 {
-	private readonly AppDbContext _dbContext;
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IGenericRepository<AppDbContext, OrderDelivery> _genericRepositoryForOrder;
 	private readonly IGenericRepository<AppDbContext, OutBox> _genericRepositoryForOutBox;
-	private readonly IServiceGeneric<OrderDelivery, OrderDto> _serviceGeneric;
+	private readonly IServiceGeneric<OrderDelivery, OrderDto> _serviceGenericForOrder;
 	private readonly IConfiguration _configuration;
 	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly ILogger<OrderServiceForController> _logger;
 	private readonly RabbitMQPublisher<OrderDelivery> _rabbitMQPublisher;
 
-	public OrderServiceForController(AppDbContext dbContext, IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, IGenericRepository<AppDbContext, OutBox> genericRepositoryForOutBox)
+	public OrderServiceForController(IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, IGenericRepository<AppDbContext, OutBox> genericRepositoryForOutBox)
 	{
-		_dbContext = dbContext;
 		_genericRepositoryForOrder = genericRepository;
 		_unitOfWork = unitOfWork;
-		_serviceGeneric = serviceGeneric;
+		_serviceGenericForOrder = serviceGeneric;
 		_configuration = configuration;
 		_httpClientFactory = httpClientFactory;
 		_logger = logger;
@@ -66,7 +64,7 @@ public class OrderServiceForController : IOrderService
 				DestinationAddress = address
 			};
 
-			var result = await _serviceGeneric.AddAsync(order);
+			var result = await _serviceGenericForOrder.AddAsync(order);
 
 			if (result == null)
 			{
@@ -88,7 +86,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var orders = await _dbContext.Orders.Where(o => o.UserId == userId).ToListAsync();
+			var orders = await _genericRepositoryForOrder.Where(o => o.UserId == userId).ToListAsync();
 
 			if (orders.Count == 0)
 			{
@@ -125,7 +123,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.UserId == userId && o.Id.ToString() == orderId);
+			var order = await _genericRepositoryForOrder.Where(o => o.UserId == userId && o.Id.ToString() == orderId).SingleOrDefaultAsync();
 
 			if (order == null)
 			{
@@ -156,7 +154,7 @@ public class OrderServiceForController : IOrderService
 
 			if (order.CourierId != null)
 			{
-				var orderInOutbox = _dbContext.OutBoxes.FirstOrDefault(x => x.Id == order.Id);
+				var orderInOutbox = await _genericRepositoryForOutBox.Where(x => x.Id == order.Id).SingleOrDefaultAsync();
 
 				if (orderInOutbox == null)
 				{
@@ -184,7 +182,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.UserId == userId && o.Id.ToString() == orderId);
+			var order = await _genericRepositoryForOrder.Where(o => o.UserId == userId && o.Id.ToString() == orderId).SingleOrDefaultAsync();
 
 			if (order == null)
 			{
@@ -210,7 +208,7 @@ public class OrderServiceForController : IOrderService
 
 			if (order.CourierId != null)
 			{
-				var orderInOutbox = _dbContext.OutBoxes.FirstOrDefault(x => x.Id == order.Id);
+				var orderInOutbox = await _genericRepositoryForOutBox.Where(x => x.Id == order.Id).SingleOrDefaultAsync();
 
 				if (orderInOutbox == null)
 				{
@@ -247,7 +245,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var order = await _dbContext.Orders.FirstOrDefaultAsync(o => o.Id.ToString() == orderDto.OrderId);
+			var order = await _genericRepositoryForOrder.Where(o => o.Id.ToString() == orderDto.OrderId).SingleOrDefaultAsync();
 
 			if (order == null)
 			{
@@ -269,7 +267,7 @@ public class OrderServiceForController : IOrderService
 
 			if (order.CourierId != null)
 			{
-				var orderInOutbox = _dbContext.OutBoxes.FirstOrDefault(x => x.Id == order.Id);
+				var orderInOutbox = await _genericRepositoryForOutBox.Where(x => x.Id == order.Id).SingleOrDefaultAsync();
 
 				if (orderInOutbox == null)
 				{
@@ -299,7 +297,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var orders = await _dbContext.Orders.ToListAsync();
+			var orders = await _genericRepositoryForOrder.GetAllAsync();
 
 			if (orders == null)
 			{
@@ -336,14 +334,14 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var orders = _dbContext.Orders
+			var orders = _genericRepositoryForOrder
 				.Where(o => o.CourierId == courierId)
 				.Select(order => new CourierWithOrderStatusDto
 				{
 					CourierName = order.CourierName!,
 					OrderName = order.Name,
 					OrderStatus = order.Status
-				});
+				}).ToList();
 
 			if (orders == null)
 			{
@@ -365,7 +363,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var order = await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id.ToString() == dto.OrderId);
+			var order = await _genericRepositoryForOrder.Where(x => x.Id.ToString() == dto.OrderId).SingleOrDefaultAsync();
 
 			if (order == null)
 			{
@@ -437,7 +435,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var orders = await _dbContext.Orders.Where(o => o.CourierId == courierId)
+			var orders = await _genericRepositoryForOrder.Where(o => o.CourierId == courierId)
 												 .Select(order => new OrderDetailDto
 												 {
 													 CourierName = order.CourierName!,
@@ -477,7 +475,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var orders = await _dbContext.Orders.Where(o => (o.UserId == userId || o.CourierId == userId) && o.Id.ToString() == orderId).ToListAsync();
+			var orders = await _genericRepositoryForOrder.Where(o => (o.UserId == userId || o.CourierId == userId) && o.Id.ToString() == orderId).ToListAsync();
 
 			if (orders.Count == 0)
 			{
@@ -517,9 +515,9 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var orders = await _dbContext.Orders.ToListAsync();
+			var orders = await _genericRepositoryForOrder.GetAllAsync();
 
-			if (orders.Count == 0)
+			if (orders.Count() == 0)
 			{
 				_logger.LogWarning("No orders found in the database.");
 				return Response<IEnumerable<OrderDto>>.Fail("There are no orders in the database", StatusCodes.Status404NotFound, true);

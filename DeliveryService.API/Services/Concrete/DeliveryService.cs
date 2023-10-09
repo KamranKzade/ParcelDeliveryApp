@@ -12,12 +12,12 @@ using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using DeliveryServer.API.Services.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
+using SharedLibrary.Services.Abstract;
 
 namespace DeliveryServer.API.Services.Concrete;
 
 public class DeliveryService : IDeliveryService
 {
-	private readonly AppDbContext _dbContext;
 	private readonly IUnitOfWork _unitOfWork;
 	private readonly IConfiguration _configuration;
 	private readonly ILogger<DeliveryService> _logger;
@@ -25,9 +25,8 @@ public class DeliveryService : IDeliveryService
 	private readonly RabbitMQPublisher<OrderDelivery> _rabbitMQPublisher;
 	private readonly IGenericRepository<AppDbContext, OrderDelivery> _genericRepository;
 
-	public DeliveryService(AppDbContext dbContext, IUnitOfWork unitOfWork, IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IConfiguration configuration, IHttpClientFactory httpClientFactory, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, ILogger<DeliveryService> logger)
+	public DeliveryService(IUnitOfWork unitOfWork, IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IConfiguration configuration, IHttpClientFactory httpClientFactory, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, ILogger<DeliveryService> logger)
 	{
-		_dbContext = dbContext;
 		_unitOfWork = unitOfWork;
 		_genericRepository = genericRepository;
 		_configuration = configuration;
@@ -54,7 +53,7 @@ public class DeliveryService : IDeliveryService
 				if (order.Id.ToString().ToLower() == dto.OrderId!.ToLower() && order.CourierId == courierId)
 				{
 					// DeliveryService-e yazilib ona baxiriq
-					var isLocalDb = await _dbContext.OrderDeliveries.FirstOrDefaultAsync(d => d.Id == order.Id);
+					var isLocalDb = await _genericRepository.Where(d => d.Id == order.Id).SingleOrDefaultAsync();
 
 					if (order.Status == OrderStatus.Delivered)
 					{
@@ -104,9 +103,9 @@ public class DeliveryService : IDeliveryService
 
 	public async Task<Response<IEnumerable<OrderDelivery>>> GetDeliveryOrder()
 	{
-		var deliveyOrder = await _dbContext.OrderDeliveries.ToListAsync();
+		var deliveyOrder = await _genericRepository.GetAllAsync();
 
-		if (deliveyOrder.Count == 0)
+		if (deliveyOrder.Count() == 0)
 		{
 			_logger.LogWarning("No orders found in the database.");
 			return Response<IEnumerable<OrderDelivery>>.Fail("There are no orders in the database", StatusCodes.Status404NotFound, true);
