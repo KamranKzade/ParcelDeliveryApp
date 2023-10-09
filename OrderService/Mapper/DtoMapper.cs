@@ -11,6 +11,7 @@ public class DtoMapper : Profile
 	{
 		CreateMap<OrderDto, OrderDelivery>().ReverseMap();
 		CreateMap<OrderDto, OutBoxDto>().ReverseMap();
+		CreateMap<IEnumerable<OrderDto>, IEnumerable<DeliveryDetailDto>>().ReverseMap();
 		CreateMap<OutBox, OutBoxDto>().ReverseMap();
 		CreateMap<NoDataDto, OrderDto>().ReverseMap();
 		CreateMap<CourierWithOrderStatusDto, OrderDto>().ReverseMap();

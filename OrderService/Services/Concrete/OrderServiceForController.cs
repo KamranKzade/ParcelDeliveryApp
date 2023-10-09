@@ -3,43 +3,33 @@ using SharedLibrary.Dtos;
 using SharedLibrary.Models;
 using OrderServer.API.Dtos;
 using SharedLibrary.Helpers;
-using OrderServer.API.Models;
+using OrderServer.API.Mapper;
 using System.Net.Http.Headers;
 using SharedLibrary.Models.Enum;
 using SharedLibrary.ResourceFiles;
-using Microsoft.EntityFrameworkCore;
 using SharedLibrary.Services.Abstract;
-using SharedLibrary.UnitOfWork.Abstract;
 using OrderServer.API.Services.Abstract;
-using SharedLibrary.Repositories.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
-using AutoMapper.Internal.Mappers;
-using OrderServer.API.Mapper;
 
 namespace OrderServer.API.Services.Concrete;
 
 public class OrderServiceForController : IOrderService
 {
-	private readonly IUnitOfWork _unitOfWork;
-	private readonly IGenericRepository<AppDbContext, OrderDelivery> _genericRepositoryForOrder;
-	private readonly IGenericRepository<AppDbContext, OutBox> _genericRepositoryForOutBox;
-	private readonly IServiceGeneric<OrderDelivery, OrderDto> _serviceGenericForOrder;
-	private readonly IServiceGeneric<OutBox, OutBoxDto> _serviceGenericForOutBox;
+
 	private readonly IConfiguration _configuration;
 	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly ILogger<OrderServiceForController> _logger;
 	private readonly RabbitMQPublisher<OrderDelivery> _rabbitMQPublisher;
+	private readonly IServiceGeneric<OutBox, OutBoxDto> _serviceGenericForOutBox;
+	private readonly IServiceGeneric<OrderDelivery, OrderDto> _serviceGenericForOrder;
 
-	public OrderServiceForController(IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, IGenericRepository<AppDbContext, OutBox> genericRepositoryForOutBox, IServiceGeneric<OutBox, OutBoxDto> serviceGenericForOutBox)
+	public OrderServiceForController(IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, IServiceGeneric<OutBox, OutBoxDto> serviceGenericForOutBox)
 	{
-		_genericRepositoryForOrder = genericRepository;
-		_unitOfWork = unitOfWork;
 		_serviceGenericForOrder = serviceGeneric;
 		_configuration = configuration;
 		_httpClientFactory = httpClientFactory;
 		_logger = logger;
 		_rabbitMQPublisher = rabbitMQPublisher;
-		_genericRepositoryForOutBox = genericRepositoryForOutBox;
 		_serviceGenericForOutBox = serviceGenericForOutBox;
 	}
 
@@ -221,6 +211,38 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
+	public async Task<Response<IEnumerable<DeliveryDetailDto>>> ShowDetailDelivery(string userId, string orderId)
+	{
+		try
+		{
+			var orders = (await _serviceGenericForOrder.GetAllAsync()).Data
+			 .Where(o => (o.UserId.ToLower() == userId.ToLower()) && o.Id.ToString().ToLower() == orderId.ToLower())
+			 .Select(order => new DeliveryDetailDto
+			 {
+				 OrderName = order.Name,
+				 CreateDate = order.CreatedDate,
+				 OrderStatus = order.Status,
+				 CourierName = order.CourierName!,
+				 DeliveryDate = order.DeliveryDate,
+				 DestinationAddress = order.DestinationAddress
+			 });
+
+			if (orders.Count() == 0)
+			{
+				_logger.LogWarning($"No orders found for orderId: {orderId} and userId/courierId: {userId}");
+				return Response<IEnumerable<DeliveryDetailDto>>.Fail(new ErrorDto("Belirtilen sipariş bulunamadı", true), StatusCodes.Status404NotFound);
+			}
+
+			_logger.LogInformation($"Successfully retrieved orders for orderId: {orderId} and userId/courierId: {userId}");
+			return Response<IEnumerable<DeliveryDetailDto>>.Success(orders, StatusCodes.Status200OK);
+		}
+		catch (Exception ex)
+		{
+			_logger.LogError(ex, $"An error occurred while retrieving orders: {ex.Message}");
+			return Response<IEnumerable<DeliveryDetailDto>>.Fail($"Siparişleri alırken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
+		}
+	}
+
 
 	#endregion
 
@@ -390,7 +412,9 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var orders = await _genericRepositoryForOrder.Where(o => o.CourierId == courierId)
+			var orders = (await _serviceGenericForOrder.GetAllAsync()).Data;
+
+			var delivery = orders.Where(o => o.CourierId == courierId)
 												 .Select(order => new OrderDetailDto
 												 {
 													 CourierName = order.CourierName!,
@@ -400,8 +424,8 @@ public class OrderServiceForController : IOrderService
 													 DestinationAddress = order.DestinationAddress,
 													 TotalAmount = order.TotalAmount
 
-												 })
-												 .ToListAsync();
+												 });
+
 
 			if (orders == null)
 			{
@@ -409,8 +433,8 @@ public class OrderServiceForController : IOrderService
 				return Response<IEnumerable<OrderDetailDto>>.Fail("No orders found for the specified courier", StatusCodes.Status404NotFound, true);
 			}
 
-			_logger.BeginScope($"Successfully retrieved orders for courier: {courierId}");
-			return Response<IEnumerable<OrderDetailDto>>.Success(orders, StatusCodes.Status200OK);
+			_logger.LogInformation($"Successfully retrieved orders for courier: {courierId}");
+			return Response<IEnumerable<OrderDetailDto>>.Success(null, StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
@@ -419,82 +443,20 @@ public class OrderServiceForController : IOrderService
 		}
 	}
 
-
-	#endregion
-
-
-	#region UserAndCourier
-
-
-	public async Task<Response<IEnumerable<DeliveryDetailDto>>> ShowDetailDelivery(string userId, string orderId)
-	{
-		try
-		{
-			var orders = await _genericRepositoryForOrder.Where(o => (o.UserId == userId || o.CourierId == userId) && o.Id.ToString() == orderId).ToListAsync();
-
-			if (orders.Count == 0)
-			{
-				_logger.LogWarning($"No orders found for orderId: {orderId} and userId/courierId: {userId}");
-				return Response<IEnumerable<DeliveryDetailDto>>.Fail(new ErrorDto("Belirtilen sipariş bulunamadı", true), StatusCodes.Status404NotFound);
-			}
-
-			var orderDtos = orders.Select(o => new DeliveryDetailDto
-			{
-				OrderName = o.Name,
-				CreateDate = o.CreatedDate,
-				OrderStatus = o.Status,
-				CourierName = o.CourierName!,
-				DeliveryDate = o.DeliveryDate,
-				DestinationAddress = o.DestinationAddress
-			}).AsQueryable();
-
-			_logger.LogInformation($"Successfully retrieved orders for orderId: {orderId} and userId/courierId: {userId}");
-			return Response<IEnumerable<DeliveryDetailDto>>.Success(orderDtos, StatusCodes.Status200OK);
-		}
-		catch (Exception ex)
-		{
-			_logger.LogError(ex, $"An error occurred while retrieving orders: {ex.Message}");
-			return Response<IEnumerable<DeliveryDetailDto>>.Fail($"Siparişleri alırken bir hata oluştu: {ex.Message}", StatusCodes.Status500InternalServerError, true);
-		}
-	}
-
-
-
-	#endregion
-
-
-	#region Everyone
-
-
 	public async Task<Response<IEnumerable<OrderDto>>> GetOrders()
 	{
 		try
 		{
-			var orders = await _genericRepositoryForOrder.GetAllAsync();
+			var orders = await _serviceGenericForOrder.GetAllAsync();
 
-			if (orders.Count() == 0)
+			if (orders.Data.Count() == 0)
 			{
 				_logger.LogWarning("No orders found in the database.");
 				return Response<IEnumerable<OrderDto>>.Fail("There are no orders in the database", StatusCodes.Status404NotFound, true);
 			}
 
-			var orderDtos = orders.Select(o => new OrderDto
-			{
-				Id = o.Id,
-				Name = o.Name,
-
-				Status = o.Status,
-				CreatedDate = o.CreatedDate,
-				DestinationAddress = o.DestinationAddress,
-				TotalAmount = o.TotalAmount,
-				UserId = o.UserId,
-				UserName = o.UserName,
-				CourierId = o.CourierId,
-				CourierName = o.CourierName
-			}).AsQueryable();
-
 			_logger.LogInformation("Successfully retrieved orders from the database.");
-			return Response<IEnumerable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
+			return Response<IEnumerable<OrderDto>>.Success(orders.Data, StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
@@ -615,6 +577,7 @@ public class OrderServiceForController : IOrderService
 			return null!;
 		}
 	}
+
 
 	#endregion
 
