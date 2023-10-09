@@ -12,7 +12,6 @@ using SharedLibrary.UnitOfWork.Abstract;
 using SharedLibrary.Repositories.Abstract;
 using DeliveryServer.API.Services.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
-using SharedLibrary.Services.Abstract;
 
 namespace DeliveryServer.API.Services.Concrete;
 

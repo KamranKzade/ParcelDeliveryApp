@@ -51,7 +51,7 @@ public class GenericRepository<TContext, Tentity> : IGenericRepository<TContext,
 	{
 		try
 		{
-			var entity = await _dbSet.FindAsync(id);
+			var entity = await _dbSet.FindAsync(Guid.Parse(id));
 
 			if (entity != null)
 			{

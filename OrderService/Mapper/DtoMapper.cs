@@ -10,6 +10,7 @@ public class DtoMapper : Profile
 	public DtoMapper()
 	{
 		CreateMap<OrderDto, OrderDelivery>().ReverseMap();
+		CreateMap<OutBox, OutBoxDto>().ReverseMap();
 		CreateMap<NoDataDto, OrderDto>().ReverseMap();
 	}
 }

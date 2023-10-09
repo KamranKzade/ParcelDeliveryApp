@@ -73,7 +73,7 @@ public class ServiceGeneric<TEntity, TDto> : IServiceGeneric<TEntity, TDto> wher
 				return Response<TDto>.Fail("Id not found", StatusCodes.Status404NotFound, true);
 			}
 
-			_logger.LogInformation($"Entity with ID {id} retrieved successfully"); ;
+			_logger.LogInformation($"Entity with ID {id} retrieved successfully");
 			return Response<TDto>.Success(ObjectMapper.Mapper.Map<TDto>(product), StatusCodes.Status200OK);
 		}
 		catch (Exception ex)

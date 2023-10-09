@@ -22,12 +22,13 @@ public class OrderServiceForController : IOrderService
 	private readonly IGenericRepository<AppDbContext, OrderDelivery> _genericRepositoryForOrder;
 	private readonly IGenericRepository<AppDbContext, OutBox> _genericRepositoryForOutBox;
 	private readonly IServiceGeneric<OrderDelivery, OrderDto> _serviceGenericForOrder;
+	private readonly IServiceGeneric<OutBox, OutBoxDto> _serviceGenericForOutBox;
 	private readonly IConfiguration _configuration;
 	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly ILogger<OrderServiceForController> _logger;
 	private readonly RabbitMQPublisher<OrderDelivery> _rabbitMQPublisher;
 
-	public OrderServiceForController(IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, IGenericRepository<AppDbContext, OutBox> genericRepositoryForOutBox)
+	public OrderServiceForController(IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IUnitOfWork unitOfWork, IServiceGeneric<OrderDelivery, OrderDto> serviceGeneric, IConfiguration configuration, IHttpClientFactory httpClientFactory, ILogger<OrderServiceForController> logger, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, IGenericRepository<AppDbContext, OutBox> genericRepositoryForOutBox, IServiceGeneric<OutBox, OutBoxDto> serviceGenericForOutBox)
 	{
 		_genericRepositoryForOrder = genericRepository;
 		_unitOfWork = unitOfWork;
@@ -37,6 +38,7 @@ public class OrderServiceForController : IOrderService
 		_logger = logger;
 		_rabbitMQPublisher = rabbitMQPublisher;
 		_genericRepositoryForOutBox = genericRepositoryForOutBox;
+		_serviceGenericForOutBox = serviceGenericForOutBox;
 	}
 
 
@@ -86,31 +88,16 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var orders = await _genericRepositoryForOrder.Where(o => o.UserId == userId).ToListAsync();
+			var orders = await _serviceGenericForOrder.Where(o => o.UserId == userId);
 
-			if (orders.Count == 0)
+			if (orders.Data.Count() == 0)
 			{
 				_logger.LogWarning($"No data found for the provided username: {userId}");
 				return Response<IEnumerable<OrderDto>>.Fail("No data found for the provided username", StatusCodes.Status404NotFound, true);
 			}
 
-			var orderDtos = orders.Select(o => new OrderDto
-			{
-				Id = o.Id,
-				Name = o.Name,
-
-				Status = o.Status,
-				CreatedDate = o.CreatedDate,
-				DestinationAddress = o.DestinationAddress,
-				TotalAmount = o.TotalAmount,
-				UserId = o.UserId,
-				UserName = o.UserName,
-				CourierId = o.CourierId,
-				CourierName = o.CourierName
-			}).AsQueryable();
-
 			_logger.LogInformation($"Successfully retrieved orders for user: {userId}");
-			return Response<IEnumerable<OrderDto>>.Success(orderDtos, StatusCodes.Status200OK);
+			return Response<IEnumerable<OrderDto>>.Success(orders.Data, StatusCodes.Status200OK);
 		}
 		catch (Exception ex)
 		{
@@ -123,7 +110,7 @@ public class OrderServiceForController : IOrderService
 	{
 		try
 		{
-			var order = await _genericRepositoryForOrder.Where(o => o.UserId == userId && o.Id.ToString() == orderId).SingleOrDefaultAsync();
+			var order = (await _serviceGenericForOrder.Where(o => o.UserId == userId && o.Id.ToString() == orderId)).Data.FirstOrDefault();
 
 			if (order == null)
 			{
@@ -132,7 +119,6 @@ public class OrderServiceForController : IOrderService
 			}
 
 			// rabbitMq ile yoxlama
-
 
 			var ordersOnTheDeliveryServer = await GetOrdersOnTheDeliveryServer(authorizationToken);
 
@@ -150,11 +136,11 @@ public class OrderServiceForController : IOrderService
 			}
 
 			order.DestinationAddress = address;
-			_genericRepositoryForOrder.UpdateAsync(order);
+			await _serviceGenericForOrder.UpdateAsync(order, orderId);
 
 			if (order.CourierId != null)
 			{
-				var orderInOutbox = await _genericRepositoryForOutBox.Where(x => x.Id == order.Id).SingleOrDefaultAsync();
+				var orderInOutbox = (await _serviceGenericForOutBox.GetByIdAsync(order.Id.ToString())).Data;
 
 				if (orderInOutbox == null)
 				{
@@ -163,10 +149,11 @@ public class OrderServiceForController : IOrderService
 				}
 				orderInOutbox.IsSend = false;
 				orderInOutbox.DestinationAddress = order.DestinationAddress;
-				_genericRepositoryForOutBox.UpdateAsync(orderInOutbox);
+
+				await _serviceGenericForOutBox.UpdateAsync(orderInOutbox, orderInOutbox.Id.ToString());
+
 				_logger.LogInformation("Successfully replaced the corresponding order in the Outbox table");
 			}
-			await _unitOfWork.CommitAsync();
 
 			_logger.LogInformation($"Order address updated successfully. OrderId: {orderId}");
 			return Response<NoDataDto>.Success(StatusCodes.Status200OK);
