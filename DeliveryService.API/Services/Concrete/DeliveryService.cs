@@ -5,11 +5,9 @@ using SharedLibrary.Helpers;
 using System.Net.Http.Headers;
 using DeliveryServer.API.Dtos;
 using SharedLibrary.Models.Enum;
-using DeliveryServer.API.Models;
+using DeliveryServer.API.Mapper;
 using SharedLibrary.ResourceFiles;
-using Microsoft.EntityFrameworkCore;
-using SharedLibrary.UnitOfWork.Abstract;
-using SharedLibrary.Repositories.Abstract;
+using SharedLibrary.Services.Abstract;
 using DeliveryServer.API.Services.Abstract;
 using SharedLibrary.Services.RabbitMqCustom;
 
@@ -17,21 +15,19 @@ namespace DeliveryServer.API.Services.Concrete;
 
 public class DeliveryService : IDeliveryService
 {
-	private readonly IUnitOfWork _unitOfWork;
 	private readonly IConfiguration _configuration;
 	private readonly ILogger<DeliveryService> _logger;
 	private readonly IHttpClientFactory _httpClientFactory;
 	private readonly RabbitMQPublisher<OrderDelivery> _rabbitMQPublisher;
-	private readonly IGenericRepository<AppDbContext, OrderDelivery> _genericRepository;
+	private readonly IServiceGeneric<OrderDelivery, GetDeliveryDto> _serviceGeneric;
 
-	public DeliveryService(IUnitOfWork unitOfWork, IGenericRepository<AppDbContext, OrderDelivery> genericRepository, IConfiguration configuration, IHttpClientFactory httpClientFactory, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, ILogger<DeliveryService> logger)
+	public DeliveryService(IConfiguration configuration, IHttpClientFactory httpClientFactory, RabbitMQPublisher<OrderDelivery> rabbitMQPublisher, ILogger<DeliveryService> logger, IServiceGeneric<OrderDelivery, GetDeliveryDto> serviceGeneric)
 	{
-		_unitOfWork = unitOfWork;
-		_genericRepository = genericRepository;
 		_configuration = configuration;
 		_httpClientFactory = httpClientFactory;
 		_rabbitMQPublisher = rabbitMQPublisher;
 		_logger = logger;
+		_serviceGeneric = serviceGeneric;
 	}
 
 	public async Task<Response<NoDataDto>> ChangeOrderStatus(ChangeOrderStatusDto dto, string courierId, string authorizationToken)
@@ -51,8 +47,7 @@ public class DeliveryService : IDeliveryService
 			{
 				if (order.Id.ToString().ToLower() == dto.OrderId!.ToLower() && order.CourierId == courierId)
 				{
-					// DeliveryService-e yazilib ona baxiriq
-					var isLocalDb = await _genericRepository.Where(d => d.Id == order.Id).SingleOrDefaultAsync();
+					var isLocalDb = (await _serviceGeneric.Where(d => d.Id == order.Id)).Data.SingleOrDefault();
 
 					if (order.Status == OrderStatus.Delivered)
 					{
@@ -73,11 +68,12 @@ public class DeliveryService : IDeliveryService
 						{
 							isLocalDb.DeliveryDate = DateTime.Now;
 						}
-						_genericRepository.UpdateAsync(isLocalDb);
-						await _unitOfWork.CommitAsync();
+						await _serviceGeneric.UpdateAsync(isLocalDb, dto.OrderId);
+
+						var publishData = ObjectMapper.Mapper.Map<OrderDelivery>(isLocalDb);
 
 						// RabbitMq ile elaqe
-						_rabbitMQPublisher.Publish(isLocalDb, DeliveryDirect.ExchangeName, DeliveryDirect.QueueName, DeliveryDirect.RoutingWaterMark);
+						_rabbitMQPublisher.Publish(publishData, DeliveryDirect.ExchangeName, DeliveryDirect.QueueName, DeliveryDirect.RoutingWaterMark);
 						_logger.LogInformation("Order statusu deyisdirildi.");
 						return Response<NoDataDto>.Success(StatusCodes.Status200OK);
 					}
@@ -102,31 +98,31 @@ public class DeliveryService : IDeliveryService
 
 	public async Task<Response<IEnumerable<OrderDelivery>>> GetDeliveryOrder()
 	{
-		var deliveyOrder = await _genericRepository.GetAllAsync();
+		// var deliveyOrder = await _genericRepository.GetAllAsync();
+		var deliveryOrder = (await _serviceGeneric.GetAllAsync()).Data
+												  .Select(o => new OrderDelivery
+												  {
+													  Id = Guid.Parse(o.Id),
+													  DeliveryDate = o.DeliveryDate,
+													  Status = o.Status,
+													  DestinationAddress = o.DestinationAddress,
+													  UserId = o.UserId,
+													  UserName = o.UserName,
+													  Name = o.Name,
+													  CreatedDate = o.CreatedDate,
+													  TotalAmount = o.TotalAmount,
+													  CourierId = o.CourierId,
+													  CourierName = o.CourierName
+												  });
 
-		if (deliveyOrder.Count() == 0)
+		if (deliveryOrder is null)
 		{
 			_logger.LogWarning("No orders found in the database.");
 			return Response<IEnumerable<OrderDelivery>>.Fail("There are no orders in the database", StatusCodes.Status404NotFound, true);
 		}
 
-		var orderDtos = deliveyOrder.Select(o => new OrderDelivery
-		{
-			Id = o.Id,
-			Name = o.Name,
-
-			Status = o.Status,
-			CreatedDate = o.CreatedDate,
-			DestinationAddress = o.DestinationAddress,
-			TotalAmount = o.TotalAmount,
-			UserId = o.UserId,
-			UserName = o.UserName,
-			CourierId = o.CourierId,
-			CourierName = o.CourierName
-		}).AsQueryable();
-
 		_logger.LogInformation("Successfully retrieved orders from the database.");
-		return Response<IEnumerable<OrderDelivery>>.Success(orderDtos, StatusCodes.Status200OK);
+		return Response<IEnumerable<OrderDelivery>>.Success(deliveryOrder, StatusCodes.Status200OK);
 	}
 
 	public async Task<List<OrderDelivery>> GetOrders(string authorizationToken)

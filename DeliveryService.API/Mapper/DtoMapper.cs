@@ -8,6 +8,7 @@ public class DtoMapper : Profile
 {
 	public DtoMapper()
 	{
-		CreateMap<ChangeOrderStatusDto, OrderDelivery>().ReverseMap();
+		CreateMap<GetDeliveryDto, OrderDelivery>().ReverseMap();
+		CreateMap<OrderDelivery, ChangeOrderStatusDto>().ReverseMap();
 	}
 }
